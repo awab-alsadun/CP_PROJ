@@ -11,7 +11,7 @@ If you cannot find the answer in the context, say so. Do not make up information
 
 class ResponseGenerator(BaseResponseGenerator):
     def generate_response(self, query: str, context: List[str]) -> str:
-        """Generate a response using OpenAI's chat completion."""
+        """Generate a response using Qwen 3 LLM via Ollama."""
         # Combine context into a single string
         context_text = "\n".join(context)
         user_message = (

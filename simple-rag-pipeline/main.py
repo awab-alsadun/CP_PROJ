@@ -48,7 +48,12 @@ def main():
         print(f"📊 Evaluating using questions from: {eval_path}")
         with open(eval_path, "r") as file:
             sample_questions = json.load(file)
-        pipeline.evaluate(sample_questions)
+        results = pipeline.evaluate(sample_questions)
+        
+        # Save to JSON if output flag is provided
+        if hasattr(args, 'output') and args.output:
+            save_results_to_json(results, args.output)
+            print(f"💾 Results saved to: {args.output}")
 
     if args.command == "query":
         print(f"✨ Response: {pipeline.process_query(args.prompt)}")
@@ -58,6 +63,29 @@ def get_files_in_directory(source_path: str) -> List[str]:
     if os.path.isfile(source_path):
         return [source_path]
     return glob.glob(os.path.join(source_path, "*"))
+
+
+def save_results_to_json(results, output_path: str) -> None:
+    """Save evaluation results to a JSON file."""
+    json_results = {
+        "total": len(results),
+        "correct": sum(1 for r in results if r.is_correct),
+        "accuracy": sum(1 for r in results if r.is_correct) / len(results) if results else 0,
+        "results": [
+            {
+                "question": r.question,
+                "response": r.response,
+                "expected_answer": r.expected_answer,
+                "is_correct": r.is_correct,
+                "reasoning": r.reasoning,
+            }
+            for r in results
+        ]
+    }
+    
+    with open(output_path, "w") as f:
+        json.dump(json_results, f, indent=2)
+
 
 
 if __name__ == "__main__":

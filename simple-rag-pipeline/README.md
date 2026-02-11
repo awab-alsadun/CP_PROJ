@@ -10,14 +10,13 @@ The RAG Framework lets you:
 
 - **Index Documents:** Process and break documents (e.g., PDFs) into smaller, manageable chunks.
 - **Store & Retrieve Information:** Save document embeddings in a vector database (using LanceDB) and search using similarity.
-- **Generate Responses:** Use an AI model (via the OpenAI API) to provide concise answers based on the retrieved context.
+- **Generate Responses:** Use Qwen 3 LLM (via Ollama) to provide concise answers based on the retrieved context.
 - **Evaluate Responses:** Compare the generated response against expected answers and view the reasoning behind the evaluation.
 
 ## Architecture
 
 - **Pipeline (src/rag_pipeline.py):**  
   Orchestrates the process using:
-
   - **Datastore:** Manages embeddings and vector storage.
   - **Indexer:** Processes documents and creates data chunks. Two versions are available—a basic PDF indexer and one using the Docling package.
   - **Retriever:** Searches the datastore to pull relevant document segments.
@@ -42,18 +41,23 @@ source venv/bin/activate   # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-#### Configure Environment Variables
+#### Configure Local LLM and Embeddings
 
-We use OpenAI for the LLM (you can modify/replace it in `src/util/invoke_ai.py`). Make sure to set your OpenAI API key. For example:
+This project uses **Qwen 3** (via Ollama) for the LLM and **mxbai-embed-large** for embeddings. Make sure you have Ollama running locally:
 
-```sh
-export OPENAI_API_KEY='your_openai_api_key'
+```bash
+# Download and start Ollama from https://ollama.ai
+ollama pull qwen3:4b
+ollama pull mxbai-embed-large
+ollama serve  # Runs on http://localhost:11434
 ```
 
-You will also need a Cohere key for the re-ranking feature used in `src/impl/retriever.py`. You can create an account and create an API key at https://cohere.com/
+#### Configure Environment Variables
+
+You will need a Cohere key for the re-ranking feature used in `src/impl/retriever.py`. You can create an account and create an API key at https://cohere.com/
 
 ```sh
-set -x CO_API_KEY "xxx"
+set CO_API_KEY "xxx"
 ```
 
 ## Usage

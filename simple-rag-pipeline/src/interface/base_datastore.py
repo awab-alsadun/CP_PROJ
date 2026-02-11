@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List
-from pydantic import BaseModel
+from typing import List, Dict, Any
+from pydantic import BaseModel, Field
 
 
 class DataItem(BaseModel):
-    content: str = ""
-    source: str = ""
+    content: str
+    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 class BaseDatastore(ABC):
@@ -18,5 +18,5 @@ class BaseDatastore(ABC):
         pass
 
     @abstractmethod
-    def search(self, query: str, top_k: int = 5) -> List[str]:
+    def search(self, query: str, top_k: int = 5) -> List[DataItem]:
         pass

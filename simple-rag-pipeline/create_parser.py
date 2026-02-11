@@ -27,6 +27,15 @@ def create_parser():
         help="Path to a .json file with question/expected_answer pairs.",
     )
 
+    output_arg_parent = argparse.ArgumentParser(add_help=False)
+    output_arg_parent.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        required=False,
+        help="Path to save evaluation results as JSON.",
+    )
+
     # Add global arguments to the main parser.
     # These definitions must match those in the parent parsers for consistent behavior.
     parser.add_argument(
@@ -45,20 +54,28 @@ def create_parser():
         help="Path to a .json file with question/expected_answer pairs.",
     )
 
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=str,
+        required=False,
+        help="Path to save evaluation results as JSON.",
+    )
+
     # Then create subparsers
     subparsers = parser.add_subparsers(dest="command", help="Commands", required=True)
 
     subparsers.add_parser(
         "run",
         help="Run the full pipeline: reset, add, evaluate.",
-        parents=[path_arg_parent, eval_file_arg_parent],
+        parents=[path_arg_parent, eval_file_arg_parent, output_arg_parent],
     )
     subparsers.add_parser("reset", help="Reset the database")
     subparsers.add_parser(
         "add", help="Add (index) documents to the database.", parents=[path_arg_parent]
     )
     subparsers.add_parser(
-        "evaluate", help="Evaluate the model", parents=[eval_file_arg_parent]
+        "evaluate", help="Evaluate the model", parents=[eval_file_arg_parent, output_arg_parent]
     )
 
     # "Query" command

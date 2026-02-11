@@ -1,33 +1,65 @@
-import os
 from typing import List
-from src.interface.base_datastore import DataItem
+import os
+import re
+
+from llama_index.core import SimpleDirectoryReader
+from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.schema import Document
+
 from src.interface.base_indexer import BaseIndexer
-from docling.document_converter import DocumentConverter
-from docling.chunking import HybridChunker, DocChunk
+from src.interface.base_datastore import DataItem
 
 
 class Indexer(BaseIndexer):
+
     def __init__(self):
-        self.converter = DocumentConverter()
-        self.chunker = HybridChunker()
-        # Disable tokenizers parallelism to avoid OOM errors.
-        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        self.node_parser = SentenceSplitter(
+            chunk_size=300,
+            chunk_overlap=50,
+        )
 
     def index(self, document_paths: List[str]) -> List[DataItem]:
-        items = []
-        for document_path in document_paths:
-            document = self.converter.convert(document_path).document
-            chunks: List[DocChunk] = self.chunker.chunk(document)
-            items.extend(self._items_from_chunks(chunks))
+        items: List[DataItem] = []
+
+        for path in document_paths:
+            source_id = os.path.basename(path)
+
+            raw_docs = SimpleDirectoryReader(
+                input_files=[path]
+            ).load_data()
+
+            documents = [
+                Document(
+                    text=self._normalize_text(doc.text),
+                    metadata={
+                        **doc.metadata,
+                        "source_id": source_id,
+                        "source_type": self._infer_source_type(path),
+                    },
+                )
+                for doc in raw_docs
+            ]
+
+            nodes = self.node_parser.get_nodes_from_documents(documents)
+
+            for idx, node in enumerate(nodes):
+                items.append(
+                    DataItem(
+                        content=node.text,
+                        metadata={
+                            **node.metadata,
+                            "chunk_id": f"{source_id}_chunk_{idx}",
+                        },
+                    )
+                )
+
         return items
 
-    def _items_from_chunks(self, chunks: List[DocChunk]) -> List[DataItem]:
-        items = []
-        for i, chunk in enumerate(chunks):
-            content_headings = "## " + ", ".join(chunk.meta.headings)
-            content_text = f"{content_headings}\n{chunk.text}"
-            source = f"{chunk.meta.origin.filename}:{i}"
-            item = DataItem(content=content_text, source=source)
-            items.append(item)
+    def _normalize_text(self, text: str) -> str:
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        text = re.sub(r"(?<!\n)\n(?!\n)", " ", text)
+        text = re.sub(r"[ \t]+", " ", text)
+        return text.strip()
 
-        return items
+    def _infer_source_type(self, path: str) -> str:
+        return os.path.splitext(path)[1].lstrip(".").lower()

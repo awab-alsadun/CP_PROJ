@@ -1,22 +1,12 @@
-import requests
+from sentence_transformers import SentenceTransformer
 
-OLLAMA_EMBEDDINGS_URL = "http://localhost:11434/api/embeddings"
-EMBEDDING_MODEL = "all-minilm"
-MAX_CHARS = 384  # Conservative limit to stay under 512 tokens
+# Using sentence-transformers for local embeddings
+# all-MiniLM-L6-v2: 384-dimensional embeddings, lightweight and fast
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 
 def get_embeddings(text: str) -> list:
-    """Get embeddings from local Ollama all-minilm model."""
-    # Truncate text to stay safe within model's 512 token limit
-    if len(text) > MAX_CHARS:
-        text = text[:MAX_CHARS]
-    
-    payload = {
-        "model": EMBEDDING_MODEL,
-        "prompt": text,
-    }
-    
-    response = requests.post(OLLAMA_EMBEDDINGS_URL, json=payload)
-    response.raise_for_status()
-    
-    return response.json()["embedding"]
+    """Get embeddings using sentence-transformers."""
+    # Generate embeddings using the model
+    embedding = model.encode(text, convert_to_tensor=False)
+    return embedding.tolist()
