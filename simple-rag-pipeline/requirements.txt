@@ -1,8 +1,7 @@
 # Default Dependencies
-pydantic>=2.0.0  # For data validation
+pydantic>=2.12.5  # For data validation
 lancedb==0.22.0
-docling==2.31.0
-cohere==5.15.0
 requests>=2.31.0
 sentence-transformers==5.2.2
-pip
+llama-index==0.14.13
+numpy==2.4.2
