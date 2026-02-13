@@ -14,7 +14,7 @@ class Indexer(BaseIndexer):
 
     def __init__(self):
         self.node_parser = SentenceSplitter(
-            chunk_size=300,
+            chunk_size= 300,
             chunk_overlap=50,
         )
 
