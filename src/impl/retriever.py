@@ -10,7 +10,7 @@ class Retriever(BaseRetriever):
 
     def __init__(self, datastore: BaseDatastore):
         self.datastore = datastore
-        self.reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+        self.reranker = CrossEncoder("BAAI/bge-reranker-base")
 
     def search(self, query: str, top_k: int = 3) -> List[str]:
         """Search and return top-k content strings enriched with metadata context."""
