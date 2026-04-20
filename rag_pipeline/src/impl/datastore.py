@@ -43,7 +43,7 @@ class Datastore(BaseDatastore):
         return get_embeddings(content)
 
     def add_items(self, items: List[DataItem]) -> None:
-        with ThreadPoolExecutor(max_workers=2) as executor:
+        with ThreadPoolExecutor(max_workers=8) as executor:
             entries = list(executor.map(self._convert_item_to_entry, items))
 
         self.table.merge_insert("content") \

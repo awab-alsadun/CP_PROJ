@@ -1,0 +1,13 @@
+    # Existing RAG pipeline dependencies
+    sentence-transformers
+    docling
+    cohere
+    
+    # Ingestion pipeline dependencies
+    img2pdf
+    PyMuPDF
+    pytesseract
+    Pillow
+    openai
+    supabase
+    python-dotenv

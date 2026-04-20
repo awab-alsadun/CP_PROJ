@@ -4,11 +4,12 @@ from src.util.invoke_ai import invoke_ai
 
 
 SYSTEM_PROMPT = """
-dont speak too much,
+Use the provided context to provide a concise answer to the user's question.
+If you cannot find the answer in the context, say so. Do not make up information. dont speak too much,
 be concise and to the point. Always use the provided context to answer the question. 
 If the answer is not in the context, say "I don't know". 
-Do not provide any information that is not in the context and dont type any extra info just PROVIDE THE ANSWER.
-
+Do not provide any information that is not in the context.
+only answer in 2 sentences.
 """
 
 
