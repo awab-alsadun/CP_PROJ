@@ -29,6 +29,7 @@ from app.services.embedding_service import generate_and_store_embeddings
 from app.services.vendor_service import get_or_create_vendor
 from app.services.client_service import get_or_create_client
 from app.services.address_service import get_or_create_address
+from app.services.storage_service import upload_to_storage
 
 log = logging.getLogger(__name__)
 
@@ -71,6 +72,18 @@ def process_invoice(
 
     log.info(f"OCR complete: {len(raw_text)} chars from {filename}")
 
+    # ------------------------------------------------------------------
+    # Step 1b: Store original file in Supabase Storage as PDF
+    # ------------------------------------------------------------------
+    try:
+        storage_path = upload_to_storage(
+            db, company_id, file_bytes, filename,
+            invoice_number=None,
+        )
+        print(f"STORAGE SUCCESS: {storage_path}")
+    except Exception as e:
+        print(f"STORAGE FAILED: {e}")
+        storage_path = None
     # ------------------------------------------------------------------
     # Step 2: LLM extraction - raw text -> structured JSON
     # ------------------------------------------------------------------
@@ -216,6 +229,8 @@ def process_invoice(
         "raw_text":        raw_text,
         "extraction_json": extraction,
         "schema_version":  "1.0",
+        "storage_path":    storage_path,
+
     }).execute()
 
     log.info(f"Invoice stored: {invoice_id} ({invoice_number})")

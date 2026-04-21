@@ -1,13 +1,15 @@
-# Existing RAG pipeline dependencies
-sentence-transformers
-docling
-cohere
- 
-# Ingestion pipeline dependencies
-img2pdf
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+supabase
+python-dotenv
+openai
 PyMuPDF
 pytesseract
 Pillow
-openai
-supabase
-python-dotenv
+img2pdf
+sentence-transformers
+docling
+cohere
