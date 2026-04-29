@@ -24,12 +24,12 @@ export default function Invoices() {
     setLoading(true)
     setError(null)
     try {
-      const params = { page, limit: PAGE_SIZE }
-      if (status !== 'all') params.status = status
-      if (search.trim()) params.search = search.trim()
-      params.sort = sortField
-      params.order = sortDir
-      const res = await invoicesApi.list(params)
+      
+      
+      
+      
+      
+      const res = await invoicesApi.list({ page, limit: PAGE_SIZE, status, search })
       const list = Array.isArray(res) ? res : (res?.invoices || res?.data || [])
       setInvoices(list)
       setTotal(res?.total || list.length)

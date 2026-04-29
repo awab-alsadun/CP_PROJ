@@ -16,10 +16,15 @@ export default function Login() {
 
     try {
       // For demo: store company_id and proceed. In production: call auth endpoint.
-      if (!form.company_id.trim()) {
+      const cid = form.company_id.trim()
+      if (!cid) {
         throw new Error('Company ID is required.')
       }
-      localStorage.setItem('company_id', form.company_id.trim())
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (!uuidPattern.test(cid)) {
+        throw new Error('Company ID must be a valid UUID (xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).')
+      }
+      localStorage.setItem('company_id', cid)
       localStorage.setItem('user_email', form.email)
       // Simulate auth delay
       await new Promise(r => setTimeout(r, 500))

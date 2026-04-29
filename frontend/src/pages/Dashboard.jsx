@@ -50,7 +50,7 @@ export default function Dashboard() {
       try {
         // Try analytics endpoint first; fall back to raw invoice list
         const [invoicesRes] = await Promise.allSettled([
-          invoicesApi.list({ limit: 10, page: 1 }),
+          invoicesApi.list({ page: 1, limit: 50 }),
         ])
         if (invoicesRes.status === 'fulfilled') {
           const data = invoicesRes.value

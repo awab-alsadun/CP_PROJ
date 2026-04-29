@@ -5,70 +5,36 @@ Generates vector embeddings for invoice text and stores them
 in the invoice_embeddings table (Supabase pgvector).
 
 Chunking strategy:
-  - Split invoice text into semantic chunks (header, line items, payment info)
-  - Each chunk gets its own embedding
-  - chunk_type field enables filtered retrieval later
+  - 'header'     : structured summary — vendor, client, dates, totals
+  - 'line_items' : concatenated line item descriptions with quantities/prices
+  - 'full_text'  : complete raw OCR text
 
-This replaces ChromaDB entirely. Vectors live alongside relational data
-in the same Supabase database.
+Provider-agnostic: calls get_embedding_provider() — never imports OpenAI directly.
+Switching LLM_PROVIDER in .env is the only change needed to use a different backend.
 """
 
 import logging
-from typing import Optional
-
-from openai import OpenAI
 from supabase import Client
 
-from app.core.config import get_settings
+from app.providers import get_embedding_provider
 
 log = logging.getLogger(__name__)
-
-
-def _get_openai_client() -> OpenAI:
-    settings = get_settings()
-    return OpenAI(api_key=settings.OPENAI_API_KEY)
-
-
-def _generate_embedding(text: str) -> list[float]:
-    """
-    Generate a 1536-dimension embedding vector using OpenAI.
-
-    Args:
-        text: The text to embed.
-
-    Returns:
-        List of floats (1536 dimensions for text-embedding-3-small).
-    """
-    settings = get_settings()
-    client = _get_openai_client()
-
-    response = client.embeddings.create(
-        input=text,
-        model=settings.OPENAI_EMBEDDING_MODEL,
-    )
-
-    return response.data[0].embedding
 
 
 def _chunk_invoice_text(raw_text: str, extraction: dict) -> list[dict]:
     """
     Split invoice data into semantic chunks for embedding.
 
-    Three chunk types:
-      1. 'header' — vendor, client, dates, totals (structured summary)
-      2. 'line_items' — all line item descriptions concatenated
-      3. 'full_text' — the complete raw OCR text
-
     Returns:
         List of dicts with 'chunk_text' and 'chunk_type'.
     """
     chunks = []
 
-    # Chunk 1: Structured header summary
     inv = extraction.get("invoice", {})
     vendor = extraction.get("vendor", {})
     client = extraction.get("client", {})
 
+    # Chunk 1: Structured header summary
     header = (
         f"Invoice {inv.get('invoice_number', 'N/A')} "
         f"from {vendor.get('name', 'Unknown')} "
@@ -95,7 +61,7 @@ def _chunk_invoice_text(raw_text: str, extraction: dict) -> list[dict]:
         )
         chunks.append({"chunk_text": items_text, "chunk_type": "line_items"})
 
-    # Chunk 3: Full raw text
+    # Chunk 3: Full raw OCR text
     if raw_text.strip():
         chunks.append({"chunk_text": raw_text, "chunk_type": "full_text"})
 
@@ -110,42 +76,50 @@ def generate_and_store_embeddings(
     extraction: dict,
 ) -> int:
     """
-    Generate embeddings for invoice chunks and store in pgvector.
+    Generate embeddings for all chunks of an invoice and store in pgvector.
 
     Args:
         db: Supabase client.
-        company_id: Tenant ID.
-        invoice_id: The invoice these embeddings belong to.
-        raw_text: Raw OCR text.
-        extraction: The structured JSON extraction dict.
+        company_id: Tenant UUID.
+        invoice_id: Invoice UUID these embeddings belong to.
+        raw_text: Raw OCR text from invoice_raw_documents.
+        extraction: Structured JSON extraction dict.
 
     Returns:
-        Number of chunks embedded and stored.
+        Number of chunks successfully embedded and stored.
     """
     chunks = _chunk_invoice_text(raw_text, extraction)
+    if not chunks:
+        log.warning(f"No chunks generated for invoice {invoice_id}")
+        return 0
+
+    embedder = get_embedding_provider()
+    texts = [c["chunk_text"] for c in chunks]
+
+    try:
+        vectors = embedder.embed(texts)
+    except Exception as e:
+        log.error(f"Embedding generation failed for invoice {invoice_id}: {e}")
+        raise
+
     stored = 0
-
-    for chunk in chunks:
+    for chunk, vector in zip(chunks, vectors):
         try:
-            embedding = _generate_embedding(chunk["chunk_text"])
-
             db.table("invoice_embeddings").insert({
                 "company_id": company_id,
                 "invoice_id": invoice_id,
                 "chunk_text": chunk["chunk_text"],
                 "chunk_type": chunk["chunk_type"],
-                "embedding": embedding,
+                "embedding": vector,
                 "metadata": {
                     "invoice_id": invoice_id,
                     "chunk_type": chunk["chunk_type"],
                 },
             }).execute()
-
             stored += 1
-
         except Exception as e:
             log.error(
-                f"Failed to embed chunk ({chunk['chunk_type']}) "
+                f"Failed to store chunk ({chunk['chunk_type']}) "
                 f"for invoice {invoice_id}: {e}"
             )
 

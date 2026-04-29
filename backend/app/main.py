@@ -12,7 +12,8 @@ from fastapi.responses import JSONResponse
 from app.core.config import get_settings
 from app.core.supabase import get_supabase
 from app.core.exceptions import AppError, NotFoundError, DatabaseError
-from app.routers import invoices, vendors, clients , upload
+from app.routers import invoices, vendors, clients , upload , query
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,6 +71,7 @@ app.include_router(invoices.router, prefix=settings.API_V1_PREFIX)
 app.include_router(vendors.router, prefix=settings.API_V1_PREFIX)
 app.include_router(clients.router, prefix=settings.API_V1_PREFIX)
 app.include_router(upload.router, prefix=settings.API_V1_PREFIX)
+app.include_router(query.router, prefix=settings.API_V1_PREFIX)
 
 # ---------------------------------------------------------------------------
 # Health check

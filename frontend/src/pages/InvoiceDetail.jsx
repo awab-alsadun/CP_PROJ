@@ -51,8 +51,16 @@ export default function InvoiceDetail() {
     async function load() {
       setLoading(true)
       try {
-        const data = await invoicesApi.get(id)
-        setInvoice(data)
+        const [invoiceRes, lineItemsRes, paymentsRes] = await Promise.allSettled([
+          invoicesApi.get(id),
+          invoicesApi.getLineItems(id),
+          invoicesApi.getPayments(id),
+        ])
+        if (invoiceRes.status === 'rejected') throw new Error(invoiceRes.reason?.message)
+        const invoice = invoiceRes.value
+        invoice.line_items = lineItemsRes.status === 'fulfilled' ? lineItemsRes.value : []
+        invoice.payments   = paymentsRes.status  === 'fulfilled' ? paymentsRes.value  : []
+        setInvoice(invoice)
       } catch (e) {
         setError(e.message)
       } finally {
