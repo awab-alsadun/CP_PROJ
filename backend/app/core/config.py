@@ -26,27 +26,30 @@ class Settings(BaseSettings):
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
     # --- Ollama (local LLM) ---
-    # Base URL for Ollama API. Default is localhost standard port.
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3"
-    OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text"  # outputs 768-dim, zero-padded to 1536
+    OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text"
 
     # --- LLM Provider ---
-    # Controls which backend handles chat completion AND embeddings.
-    # "openai"  → uses OpenAI API (requires OPENAI_API_KEY)
-    # "ollama"  → uses local Ollama instance (requires Ollama running locally)
+    # "openai" → OpenAI API  |  "ollama" → local Ollama instance
     LLM_PROVIDER: Literal["openai", "ollama"] = "openai"
 
+    # --- Cohere (reranking) ---
+    CO_API_KEY: str = ""
+    COHERE_RERANK_MODEL: str = "rerank-v3.5"
+
     # --- Embedding config ---
-    # Stored vector dimension in pgvector. Do NOT change after first backfill
-    # without dropping and recreating invoice_embeddings table.
     EMBEDDING_DIMENSION: int = 1536
 
+    # --- Document processing ---
+    MAX_DOCUMENT_PAGES: int = 100
+    DOCUMENT_CHUNK_SIZE_TOKENS: int = 500
+    DOCUMENT_CHUNK_OVERLAP_TOKENS: int = 100
+
     # --- OCR ---
-    TESSERACT_PATH: str = ""  # e.g. "D:\\tess\\tesseract.exe" on Windows
+    TESSERACT_PATH: str = ""
 
     # --- MVP ---
-    # Hardcoded company_id until auth layer is added.
     MVP_COMPANY_ID: str = "7bf697fc-7220-40c7-9678-542d624d22ad"
 
     model_config = {

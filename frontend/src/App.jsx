@@ -14,6 +14,7 @@ import CreateInvoice from './pages/CreateInvoice'
 import Vendors from './pages/Vendors'
 import Clients from './pages/Clients'
 import UploadExtract from './pages/UploadExtract'
+import CompanyDocuments from './pages/CompanyDocuments'
 import Analytics from './pages/Analytics'
 import AiChat from './pages/AiChat'
 import Settings from './pages/Settings'
@@ -27,20 +28,16 @@ function RequireAuth({ children }) {
 
 // Page titles for topbar
 const PAGE_META = {
-  '/':          { title: 'Dashboard',        subtitle: 'Overview of your financial activity' },
-  '/invoices':  { title: 'Invoices',         subtitle: 'All invoices across vendors and clients' },
-  '/create':    { title: 'Create Invoice',   subtitle: 'New outbound invoice' },
-  '/vendors':   { title: 'Vendors',          subtitle: 'Manage and view vendor relationships' },
-  '/clients':   { title: 'Clients',          subtitle: 'Manage and view client relationships' },
-  '/upload':    { title: 'Upload & Extract', subtitle: 'AI-powered invoice ingestion pipeline' },
-  '/analytics': { title: 'Analytics',        subtitle: 'Spending trends and financial metrics' },
-  '/chat':      { title: 'AI Chat',          subtitle: 'Hybrid SQL + RAG invoice assistant' },
-  '/settings':  { title: 'Settings',         subtitle: 'Workspace and pipeline configuration' },
-}
-
-function PagedShell({ path }) {
-  const meta = PAGE_META[path] || {}
-  return <AppShell pageTitle={meta.title} pageSubtitle={meta.subtitle} />
+  '/':           { title: 'Dashboard',          subtitle: 'Overview of your financial activity' },
+  '/invoices':   { title: 'Invoices',           subtitle: 'All invoices across vendors and clients' },
+  '/create':     { title: 'Create Invoice',     subtitle: 'New outbound invoice' },
+  '/vendors':    { title: 'Vendors',            subtitle: 'Manage and view vendor relationships' },
+  '/clients':    { title: 'Clients',            subtitle: 'Manage and view client relationships' },
+  '/upload':     { title: 'Upload & Extract',   subtitle: 'AI-powered invoice ingestion pipeline' },
+  '/documents':  { title: 'Company Documents',  subtitle: 'Regulation and compliance document library' },
+  '/analytics':  { title: 'Analytics',          subtitle: 'Spending trends and financial metrics' },
+  '/chat':       { title: 'AI Chat',            subtitle: 'Hybrid SQL + RAG invoice assistant' },
+  '/settings':   { title: 'Settings',           subtitle: 'Workspace and pipeline configuration' },
 }
 
 export default function App() {
@@ -63,6 +60,7 @@ export default function App() {
               <Route path="vendors" element={<Vendors />} />
               <Route path="clients" element={<Clients />} />
               <Route path="upload" element={<UploadExtract />} />
+              <Route path="documents" element={<CompanyDocuments />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="chat" element={<AiChat />} />
               <Route path="settings" element={<Settings />} />

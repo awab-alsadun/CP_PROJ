@@ -4,7 +4,7 @@ Query Router
 POST /api/v1/query
 
 Accepts a natural language question and returns an AI-generated answer
-with citations, routed through either SQL or RAG path.
+with citations, routed through SQL / RAG / hybrid paths.
 
 Request body:
     { "question": "string" }
@@ -12,19 +12,9 @@ Request body:
 Response:
     {
         "answer": "string",
-        "sources": [
-            {
-                "invoice_id": "uuid",
-                "invoice_number": "string",
-                "chunk_text": "string",
-                "similarity": 0.0
-            }
-        ],
-        "query_type": "sql" | "rag"
+        "sources": [ ... ],
+        "query_type": "sql" | "rag_invoice" | "rag_compliance" | "hybrid"
     }
-
-company_id: hardcoded MVP_COMPANY_ID from settings.
-Replace with auth-derived company_id when JWT auth is added.
 """
 
 import logging
@@ -58,16 +48,19 @@ class QueryRequest(BaseModel):
         return v
 
 
-class QuerySource(BaseModel):
+class QuerySourceResponse(BaseModel):
     invoice_id: str
     invoice_number: str
     chunk_text: str
     similarity: float
+    source_type: str
+    citation: str
+    metadata: dict = {}
 
 
 class QueryResponse(BaseModel):
     answer: str
-    sources: list[QuerySource]
+    sources: list[QuerySourceResponse]
     query_type: str
 
 
@@ -79,11 +72,13 @@ async def query_invoices(
     db: Client = Depends(get_supabase),
 ):
     """
-    Ask a natural language question about your invoices.
+    Ask a natural language question about your invoices and regulatory documents.
 
     Routes to:
     - SQL path for aggregation questions (totals, counts, averages)
-    - RAG path for semantic questions (content, descriptions, specific items)
+    - RAG invoice path for semantic questions about invoice content
+    - RAG compliance path for regulatory/tax questions
+    - Hybrid path for cross-referencing invoices against regulations
     """
     settings = get_settings()
     company_id = settings.MVP_COMPANY_ID
@@ -99,11 +94,14 @@ async def query_invoices(
     return QueryResponse(
         answer=result.answer,
         sources=[
-            QuerySource(
+            QuerySourceResponse(
                 invoice_id=s.invoice_id,
                 invoice_number=s.invoice_number,
                 chunk_text=s.chunk_text,
                 similarity=s.similarity,
+                source_type=s.source_type,
+                citation=s.citation,
+                metadata=s.metadata,
             )
             for s in result.sources
         ],

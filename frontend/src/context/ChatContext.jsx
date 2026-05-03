@@ -28,20 +28,24 @@ export function ChatProvider({ children }) {
     setIsLoading(true)
 
     try {
-      const companyId = localStorage.getItem('company_id') || ''
       const res = await fetch('/api/v1/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text, company_id: companyId }),
+        body: JSON.stringify({ question: text }),
       })
       const data = res.ok ? await res.json() : null
-      const content = data?.answer || data?.response || data?.message || 'The query endpoint is not available yet. This will be wired up in Phase 3.'
+      const content = data?.answer || 'The query endpoint is not available yet.'
+
+      // Map backend sources[].citation to the citations array that ChatPanel renders
+      const citations = (data?.sources || []).map(s => s.citation).filter(Boolean)
 
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content,
-        citations: data?.citations || [],
+        citations,
+        queryType: data?.query_type || null,
+        sources: data?.sources || [],
         timestamp: new Date().toISOString(),
       }])
     } catch {

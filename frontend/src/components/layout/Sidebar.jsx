@@ -2,20 +2,21 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, FileText, PlusSquare, Building2,
   Users, Upload, MessageSquare, BarChart3, Settings,
-  Zap, ChevronLeft, ChevronRight
+  Zap, ChevronLeft, ChevronRight, BookOpen
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '../../lib/utils'
 
 const NAV_ITEMS = [
-  { to: '/',          icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/invoices',  icon: FileText,        label: 'Invoices' },
-  { to: '/create',    icon: PlusSquare,      label: 'Create Invoice' },
-  { to: '/vendors',   icon: Building2,       label: 'Vendors' },
-  { to: '/clients',   icon: Users,           label: 'Clients' },
-  { to: '/upload',    icon: Upload,          label: 'Upload & Extract' },
-  { to: '/analytics', icon: BarChart3,       label: 'Analytics' },
-  { to: '/chat',      icon: MessageSquare,   label: 'AI Chat' },
+  { to: '/',           icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/invoices',   icon: FileText,        label: 'Invoices' },
+  { to: '/create',     icon: PlusSquare,      label: 'Create Invoice' },
+  { to: '/vendors',    icon: Building2,       label: 'Vendors' },
+  { to: '/clients',    icon: Users,           label: 'Clients' },
+  { to: '/upload',     icon: Upload,          label: 'Upload & Extract' },
+  { to: '/documents',  icon: BookOpen,        label: 'Documents' },
+  { to: '/analytics',  icon: BarChart3,       label: 'Analytics' },
+  { to: '/chat',       icon: MessageSquare,   label: 'AI Chat' },
 ]
 
 const BOTTOM_ITEMS = [

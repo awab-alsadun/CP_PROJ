@@ -4,6 +4,7 @@ Run: uvicorn app.main:app --reload --port 8000
 """
 
 from contextlib import asynccontextmanager
+import logging
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,7 @@ from fastapi.responses import JSONResponse
 from app.core.config import get_settings
 from app.core.supabase import get_supabase
 from app.core.exceptions import AppError, NotFoundError, DatabaseError
-from app.routers import invoices, vendors, clients , upload , query
+from app.routers import invoices, vendors, clients , upload , query, documents
 
 
 @asynccontextmanager
@@ -72,6 +73,8 @@ app.include_router(vendors.router, prefix=settings.API_V1_PREFIX)
 app.include_router(clients.router, prefix=settings.API_V1_PREFIX)
 app.include_router(upload.router, prefix=settings.API_V1_PREFIX)
 app.include_router(query.router, prefix=settings.API_V1_PREFIX)
+app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
+
 
 # ---------------------------------------------------------------------------
 # Health check
@@ -89,3 +92,4 @@ def health_check():
         "status": "ok" if db_status == "connected" else "degraded",
         "database": db_status,
     }
+logging.basicConfig(level=logging.INFO)
