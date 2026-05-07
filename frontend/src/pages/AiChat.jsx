@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
-import { SendHorizontal, Trash2, Bot, Sparkles } from 'lucide-react'
+import { SendHorizontal, Trash2, Bot, Sparkles, FileText, Scale, ChevronDown, ChevronUp } from 'lucide-react'
 import { useChat } from '../context/ChatContext'
 import { formatRelative } from '../lib/utils'
 
@@ -12,11 +12,68 @@ const SUGGESTIONS = [
   'Are there any duplicate invoice numbers?',
 ]
 
+const QUERY_BADGE = {
+  sql:            { label: 'SQL',    bg: '#EFF6FF', color: '#3B82F6' },
+  rag_invoice:    { label: 'RAG',    bg: '#F5F3FF', color: '#8B5CF6' },
+  rag_compliance: { label: 'RAG',    bg: '#F5F3FF', color: '#8B5CF6' },
+  hybrid:         { label: 'Hybrid', bg: '#FFFBEB', color: '#D4A847' },
+}
+
+function SourceCard({ source }) {
+  const [expanded, setExpanded] = useState(false)
+  const isInvoice = source.source_type === 'invoices'
+  const Icon = isInvoice ? FileText : Scale
+  const iconColor = isInvoice ? '#3B82F6' : '#8B5CF6'
+  const pct = source.similarity != null ? Math.round(source.similarity * 100) : null
+
+  return (
+    <div className="rounded-xl border text-xs overflow-hidden"
+      style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
+      <div
+        className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer"
+        onClick={() => source.chunk_text && setExpanded(v => !v)}
+      >
+        <Icon size={13} style={{ color: iconColor }} className="flex-shrink-0" />
+        <span className="flex-1 font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+          {source.citation || source.invoice_number || source.document_name || 'Source'}
+        </span>
+        {source.section_title && (
+          <span className="text-xs truncate max-w-[120px]" style={{ color: 'var(--text-muted)' }}>
+            {source.section_title}
+          </span>
+        )}
+        {pct != null && (
+          <span className="font-mono font-medium flex-shrink-0 text-xs px-1.5 py-0.5 rounded"
+            style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
+            {pct}%
+          </span>
+        )}
+        {source.chunk_text && (
+          expanded
+            ? <ChevronUp size={12} style={{ color: 'var(--text-muted)' }} />
+            : <ChevronDown size={12} style={{ color: 'var(--text-muted)' }} />
+        )}
+      </div>
+      {expanded && source.chunk_text && (
+        <div className="px-3 pb-3 border-t" style={{ borderColor: 'var(--border)' }}>
+          <p className="mt-2 leading-relaxed"
+            style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+            {source.chunk_text.slice(0, 400)}{source.chunk_text.length > 400 ? '…' : ''}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Message({ msg }) {
   const isUser = msg.role === 'user'
+  const badge = !isUser && msg.queryType ? QUERY_BADGE[msg.queryType] : null
+  const sources = msg.sources || []
+
   return (
     <div className={`flex gap-4 ${isUser ? 'flex-row-reverse' : ''} max-w-3xl ${isUser ? 'ml-auto' : 'mr-auto'} w-full`}>
-      <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-semibold`}
+      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-semibold"
         style={{
           background: isUser ? 'var(--accent)' : 'var(--bg-secondary)',
           color: isUser ? '#131310' : 'var(--text-secondary)',
@@ -24,7 +81,16 @@ function Message({ msg }) {
         }}>
         {isUser ? 'U' : <Bot size={15} />}
       </div>
-      <div className={`flex flex-col gap-1.5 flex-1 ${isUser ? 'items-end' : ''}`}>
+
+      <div className={`flex flex-col gap-2 flex-1 ${isUser ? 'items-end' : ''}`}>
+        {/* Query type badge */}
+        {badge && (
+          <span className="self-start text-xs px-2.5 py-0.5 rounded-full font-medium"
+            style={{ background: badge.bg, color: badge.color }}>
+            {badge.label}
+          </span>
+        )}
+
         <div className="px-4 py-3 rounded-2xl text-sm leading-relaxed"
           style={{
             background: isUser ? 'var(--accent)' : 'var(--bg-secondary)',
@@ -33,16 +99,19 @@ function Message({ msg }) {
           }}>
           {msg.content}
         </div>
-        {msg.citations?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {msg.citations.map((c, i) => (
-              <span key={i} className="text-xs px-2 py-0.5 rounded-full border font-mono"
-                style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
-                {c}
-              </span>
+
+        {/* Sources */}
+        {!isUser && sources.length > 0 && (
+          <div className="w-full space-y-1.5">
+            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+              Sources ({sources.length})
+            </p>
+            {sources.slice(0, 6).map((s, i) => (
+              <SourceCard key={i} source={s} />
             ))}
           </div>
         )}
+
         <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
           {formatRelative(msg.timestamp)}
         </span>
@@ -78,9 +147,7 @@ export default function AiChat() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  useEffect(() => {
-    inputRef.current?.focus()
-  }, [])
+  useEffect(() => { inputRef.current?.focus() }, [])
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return
@@ -90,7 +157,7 @@ export default function AiChat() {
 
   return (
     <div className="flex flex-col h-full" style={{ background: 'var(--bg-primary)' }}>
-      {/* Chat header */}
+      {/* Header */}
       <div className="flex items-center justify-between px-8 py-4 border-b"
         style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
         <div className="flex items-center gap-3">
@@ -99,9 +166,11 @@ export default function AiChat() {
             <Sparkles size={16} color="#131310" />
           </div>
           <div>
-            <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Invoice AI Assistant</p>
+            <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+              Invoice AI Assistant
+            </p>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              Hybrid SQL + RAG · Ask anything about your financial data
+              Hybrid SQL + RAG · Invoices + Compliance Documents
             </p>
           </div>
         </div>
@@ -121,6 +190,9 @@ export default function AiChat() {
             <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
               Ask about your invoices
             </p>
+            <p className="text-sm text-center max-w-xs" style={{ color: 'var(--text-muted)' }}>
+              Query invoice data with SQL precision or search compliance documents semantically
+            </p>
           </div>
         )}
 
@@ -137,12 +209,9 @@ export default function AiChat() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {SUGGESTIONS.map(s => (
-              <button
-                key={s}
-                onClick={() => sendMessage(s)}
+              <button key={s} onClick={() => sendMessage(s)}
                 className="text-left text-xs px-3 py-2.5 rounded-xl border transition-all hover:border-[var(--accent)]"
-                style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-secondary)' }}
-              >
+                style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-secondary)' }}>
                 {s}
               </button>
             ))}
@@ -159,16 +228,13 @@ export default function AiChat() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-            placeholder="Ask about your invoices, vendors, or financial data…"
+            placeholder="Ask about your invoices, vendors, or compliance documents…"
             rows={1}
             className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
             style={{ color: 'var(--text-primary)', minHeight: '24px', maxHeight: '120px' }}
           />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="btn-primary h-9 px-3 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
+          <button onClick={handleSend} disabled={!input.trim() || isLoading}
+            className="btn-primary h-9 px-3 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
             <SendHorizontal size={15} />
           </button>
         </div>
