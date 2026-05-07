@@ -6,10 +6,14 @@ Thin routing layer — all logic lives in services/invoice_service.py.
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 from supabase import Client
+from decimal import Decimal
+from datetime import date
 
+from app.core.config import get_settings
 from app.core.supabase import get_supabase
-from app.core.exceptions import NotFoundError, DatabaseError
+from app.core.exceptions import NotFoundError, DatabaseError, ValidationError
 from app.models.schemas import (
     InvoiceCreate,
     InvoiceRead,
@@ -29,9 +33,30 @@ def _handle(func, *args, **kwargs):
         return func(*args, **kwargs)
     except NotFoundError as e:
         raise HTTPException(404, e.message)
+    except ValidationError as e:
+        raise HTTPException(400, e.message)
     except DatabaseError as e:
         raise HTTPException(502, f"{e.message}: {e.detail}")
 
+
+# ---------------------------------------------------------------------------
+# Request models for new endpoints
+# ---------------------------------------------------------------------------
+
+class TransitionRequest(BaseModel):
+    new_status: str
+
+
+class PaymentRequest(BaseModel):
+    amount: Decimal
+    method: str | None = None
+    reference: str | None = None
+    payment_date: date = Field(default_factory=date.today)
+
+
+# ---------------------------------------------------------------------------
+# CRUD
+# ---------------------------------------------------------------------------
 
 @router.post("/", response_model=InvoiceRead, status_code=201)
 def create_invoice(payload: InvoiceCreate, db: Client = Depends(get_supabase)):
@@ -84,3 +109,54 @@ def get_payments(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
 @router.get("/{invoice_id}/raw-document", response_model=InvoiceRawDocumentRead | None)
 def get_raw_document(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
     return _handle(invoice_service.get_raw_document, db, invoice_id)
+
+
+# ---------------------------------------------------------------------------
+# New endpoints — Lifecycle + Payments + Raw
+# ---------------------------------------------------------------------------
+
+@router.post("/{invoice_id}/transition")
+def transition_status(
+    invoice_id: uuid.UUID,
+    body: TransitionRequest,
+    db: Client = Depends(get_supabase),
+):
+    settings = get_settings()
+    company_id = settings.MVP_COMPANY_ID
+    return _handle(
+        invoice_service.transition_invoice_status,
+        db, company_id, invoice_id, body.new_status,
+    )
+
+
+@router.post("/{invoice_id}/payments")
+def record_payment(
+    invoice_id: uuid.UUID,
+    body: PaymentRequest,
+    db: Client = Depends(get_supabase),
+):
+    settings = get_settings()
+    company_id = settings.MVP_COMPANY_ID
+    return _handle(
+        invoice_service.record_payment,
+        db, company_id, invoice_id,
+        {
+            "amount": float(body.amount),
+            "method": body.method,
+            "reference": body.reference,
+            "payment_date": body.payment_date.isoformat(),
+        },
+    )
+
+
+@router.get("/{invoice_id}/raw")
+def get_raw(
+    invoice_id: uuid.UUID,
+    db: Client = Depends(get_supabase),
+):
+    settings = get_settings()
+    company_id = settings.MVP_COMPANY_ID
+    return _handle(
+        invoice_service.get_raw_document_for_company,
+        db, company_id, invoice_id,
+    )

@@ -30,6 +30,7 @@ from app.services.vendor_service import get_or_create_vendor
 from app.services.client_service import get_or_create_client
 from app.services.address_service import get_or_create_address
 from app.services.storage_service import upload_to_storage
+from app.services.notification_service import create_notification
 
 log = logging.getLogger(__name__)
 
@@ -80,10 +81,11 @@ def process_invoice(
             db, company_id, file_bytes, filename,
             invoice_number=None,
         )
-        print(f"STORAGE SUCCESS: {storage_path}")
+        log.info(f"Storage upload complete: {storage_path}")
     except Exception as e:
-        print(f"STORAGE FAILED: {e}")
+        log.error(f"Storage upload failed for {filename}: {e}")
         storage_path = None
+
     # ------------------------------------------------------------------
     # Step 2: LLM extraction - raw text -> structured JSON
     # ------------------------------------------------------------------
@@ -230,7 +232,6 @@ def process_invoice(
         "extraction_json": extraction,
         "schema_version":  "1.0",
         "storage_path":    storage_path,
-
     }).execute()
 
     log.info(f"Invoice stored: {invoice_id} ({invoice_number})")
@@ -245,6 +246,22 @@ def process_invoice(
     except Exception as e:
         log.error(f"Embedding generation failed for {invoice_id}: {e}")
         embed_count = 0
+
+    # ------------------------------------------------------------------
+    # Step 5: Create upload notification
+    # ------------------------------------------------------------------
+    try:
+        vendor_name = vendor_data.get("name", "Unknown")
+        confidence_pct = int(float(confidence) * 100) if confidence else 0
+        create_notification(
+            db, company_id,
+            type="upload",
+            title="Invoice extracted",
+            message=f"Invoice {invoice_number} from {vendor_name} extracted successfully (confidence: {confidence_pct}%)",
+            related_invoice_id=invoice_id,
+        )
+    except Exception as e:
+        log.error(f"Upload notification failed: {e}")
 
     # ------------------------------------------------------------------
     # Return summary

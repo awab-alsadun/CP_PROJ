@@ -12,8 +12,8 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
 from app.core.supabase import get_supabase
-from app.core.exceptions import AppError, NotFoundError, DatabaseError
-from app.routers import invoices, vendors, clients , upload , query, documents
+from app.core.exceptions import AppError, NotFoundError, DatabaseError, ValidationError
+from app.routers import invoices, vendors, clients, upload, query, documents, analytics, notifications
 
 
 @asynccontextmanager
@@ -52,6 +52,11 @@ async def not_found_handler(request: Request, exc: NotFoundError):
     return JSONResponse(status_code=404, content={"error": exc.message})
 
 
+@app.exception_handler(ValidationError)
+async def validation_error_handler(request: Request, exc: ValidationError):
+    return JSONResponse(status_code=400, content={"error": exc.message})
+
+
 @app.exception_handler(DatabaseError)
 async def database_error_handler(request: Request, exc: DatabaseError):
     return JSONResponse(
@@ -74,6 +79,8 @@ app.include_router(clients.router, prefix=settings.API_V1_PREFIX)
 app.include_router(upload.router, prefix=settings.API_V1_PREFIX)
 app.include_router(query.router, prefix=settings.API_V1_PREFIX)
 app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
+app.include_router(analytics.router, prefix=settings.API_V1_PREFIX)
+app.include_router(notifications.router, prefix=settings.API_V1_PREFIX)
 
 
 # ---------------------------------------------------------------------------
@@ -92,4 +99,6 @@ def health_check():
         "status": "ok" if db_status == "connected" else "degraded",
         "database": db_status,
     }
+
+
 logging.basicConfig(level=logging.INFO)
