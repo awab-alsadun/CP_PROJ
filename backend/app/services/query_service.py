@@ -432,7 +432,6 @@ def handle_query(db: Client, company_id: str, question: str) -> QueryResult:
     all_chunks.sort(key=lambda c: c.similarity, reverse=True)
 
     # ── Step 7: Rerank with Cohere ────────────────────────────────────────────
-    # ── Step 7: Rerank with Cohere ────────────────────────────────────────────
     if intent == "hybrid" and len(source_names) > 1:
         # Hybrid: rerank each source separately, then merge
         # Guarantees both invoice and regulation chunks appear in context

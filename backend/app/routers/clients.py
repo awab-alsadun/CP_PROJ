@@ -29,14 +29,15 @@ def create_client(payload: ClientCreate, db: SupabaseClient = Depends(get_supaba
     return _handle(client_service.create_client, db, payload)
 
 
-@router.get("/", response_model=list[ClientRead])
+@router.get("/")
 def list_clients(
     company_id: uuid.UUID = Query(...),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
     db: SupabaseClient = Depends(get_supabase),
 ):
-    return _handle(client_service.list_clients, db, company_id, limit, offset)
+    return _handle(client_service.list_clients, db, company_id, limit, offset, search)
 
 
 @router.get("/{client_id}", response_model=ClientRead)

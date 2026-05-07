@@ -54,7 +54,6 @@ class InvoiceSource(RetrievalSource):
                         chunk_text=row["chunk_text"],
                         similarity=row.get("similarity", 0.0),
                         metadata={
-                            "chunk_index": row.get("chunk_index"),
                             "model_name": row.get("model_name"),
                         },
                     ))

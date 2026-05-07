@@ -6,10 +6,14 @@ Thin routing layer — all logic lives in services/invoice_service.py.
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 from supabase import Client
+from decimal import Decimal
+from datetime import date
 
+from app.core.config import get_settings
 from app.core.supabase import get_supabase
-from app.core.exceptions import NotFoundError, DatabaseError
+from app.core.exceptions import NotFoundError, DatabaseError, ValidationError
 from app.models.schemas import (
     InvoiceCreate,
     InvoiceRead,
@@ -29,26 +33,52 @@ def _handle(func, *args, **kwargs):
         return func(*args, **kwargs)
     except NotFoundError as e:
         raise HTTPException(404, e.message)
+    except ValidationError as e:
+        raise HTTPException(400, e.message)
     except DatabaseError as e:
         raise HTTPException(502, f"{e.message}: {e.detail}")
 
+
+# ---------------------------------------------------------------------------
+# Request models for new endpoints
+# ---------------------------------------------------------------------------
+
+class TransitionRequest(BaseModel):
+    new_status: str
+
+
+class PaymentRequest(BaseModel):
+    amount: Decimal
+    method: str | None = None
+    reference: str | None = None
+    payment_date: date = Field(default_factory=date.today)
+
+
+# ---------------------------------------------------------------------------
+# CRUD
+# ---------------------------------------------------------------------------
 
 @router.post("/", response_model=InvoiceRead, status_code=201)
 def create_invoice(payload: InvoiceCreate, db: Client = Depends(get_supabase)):
     return _handle(invoice_service.create_invoice, db, payload)
 
 
-@router.get("/", response_model=list[InvoiceRead])
+@router.get("/")
 def list_invoices(
     company_id: uuid.UUID = Query(...),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    status: str | None = Query(None),
+    search: str | None = Query(None),
     db: Client = Depends(get_supabase),
 ):
-    return _handle(invoice_service.list_invoices, db, company_id, limit, offset)
+    return _handle(
+        invoice_service.list_invoices,
+        db, company_id, limit, offset, status, search,
+    )
 
 
-@router.get("/{invoice_id}", response_model=InvoiceRead)
+@router.get("/{invoice_id}")
 def get_invoice(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
     return _handle(invoice_service.get_invoice, db, invoice_id)
 
@@ -84,3 +114,54 @@ def get_payments(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
 @router.get("/{invoice_id}/raw-document", response_model=InvoiceRawDocumentRead | None)
 def get_raw_document(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
     return _handle(invoice_service.get_raw_document, db, invoice_id)
+
+
+# ---------------------------------------------------------------------------
+# Lifecycle + Payments + Raw
+# ---------------------------------------------------------------------------
+
+@router.post("/{invoice_id}/transition")
+def transition_status(
+    invoice_id: uuid.UUID,
+    body: TransitionRequest,
+    db: Client = Depends(get_supabase),
+):
+    settings = get_settings()
+    company_id = settings.MVP_COMPANY_ID
+    return _handle(
+        invoice_service.transition_invoice_status,
+        db, company_id, invoice_id, body.new_status,
+    )
+
+
+@router.post("/{invoice_id}/payments")
+def record_payment(
+    invoice_id: uuid.UUID,
+    body: PaymentRequest,
+    db: Client = Depends(get_supabase),
+):
+    settings = get_settings()
+    company_id = settings.MVP_COMPANY_ID
+    return _handle(
+        invoice_service.record_payment,
+        db, company_id, invoice_id,
+        {
+            "amount": float(body.amount),
+            "method": body.method,
+            "reference": body.reference,
+            "payment_date": body.payment_date.isoformat(),
+        },
+    )
+
+
+@router.get("/{invoice_id}/raw")
+def get_raw(
+    invoice_id: uuid.UUID,
+    db: Client = Depends(get_supabase),
+):
+    settings = get_settings()
+    company_id = settings.MVP_COMPANY_ID
+    return _handle(
+        invoice_service.get_raw_document_for_company,
+        db, company_id, invoice_id,
+    )

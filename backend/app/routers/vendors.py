@@ -1,58 +1,150 @@
 """
-Vendor endpoints. Delegates to services/vendor_service.py.
+Client service — DB operations for clients.
 """
 
 import uuid
+from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from supabase import Client
+from supabase import Client as SupabaseClient
 
-from app.core.supabase import get_supabase
 from app.core.exceptions import NotFoundError, DatabaseError
-from app.models.schemas import VendorCreate, VendorRead, VendorUpdate
-from app.services import vendor_service
-
-router = APIRouter(prefix="/vendors", tags=["vendors"])
+from app.models.schemas import ClientCreate, ClientUpdate
 
 
-def _handle(func, *args, **kwargs):
+def create_client(db: SupabaseClient, payload: ClientCreate) -> dict:
     try:
-        return func(*args, **kwargs)
-    except NotFoundError as e:
-        raise HTTPException(404, e.message)
-    except DatabaseError as e:
-        raise HTTPException(502, e.message)
+        data = payload.model_dump(mode="json")
+        result = db.table("clients").insert(data).execute()
+    except Exception as e:
+        raise DatabaseError("Failed to create client", detail=str(e))
+    if not result.data:
+        raise DatabaseError("Insert returned no data")
+    return result.data[0]
 
 
-@router.post("/", response_model=VendorRead, status_code=201)
-def create_vendor(payload: VendorCreate, db: Client = Depends(get_supabase)):
-    return _handle(vendor_service.create_vendor, db, payload)
+def get_or_create_client(
+    db: SupabaseClient, company_id: uuid.UUID, name: str, tax_id: str, **kwargs
+) -> dict:
+    try:
+        result = (
+            db.table("clients")
+            .select("*")
+            .eq("company_id", str(company_id))
+            .eq("tax_id", tax_id)
+            .is_("deleted_at", "null")
+            .limit(1)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError("Failed to lookup client", detail=str(e))
+
+    if result.data:
+        return result.data[0]
+
+    payload = ClientCreate(
+        company_id=company_id, name=name, tax_id=tax_id, **kwargs
+    )
+    return create_client(db, payload)
 
 
-@router.get("/", response_model=list[VendorRead])
-def list_vendors(
-    company_id: uuid.UUID = Query(...),
-    limit: int = Query(50, ge=1, le=200),
-    offset: int = Query(0, ge=0),
-    db: Client = Depends(get_supabase),
-):
-    return _handle(vendor_service.list_vendors, db, company_id, limit, offset)
+def list_clients(
+    db: SupabaseClient,
+    company_id: uuid.UUID,
+    limit: int = 20,
+    offset: int = 0,
+    search: str | None = None,
+) -> dict:
+    """Returns paginated response with optional search on name/tax_id."""
+    try:
+        count_query = (
+            db.table("clients")
+            .select("id", count="exact")
+            .eq("company_id", str(company_id))
+            .is_("deleted_at", "null")
+        )
+
+        data_query = (
+            db.table("clients")
+            .select("*")
+            .eq("company_id", str(company_id))
+            .is_("deleted_at", "null")
+        )
+
+        if search:
+            or_filter = f"name.ilike.%{search}%,tax_id.ilike.%{search}%"
+            count_query = count_query.or_(or_filter)
+            data_query = data_query.or_(or_filter)
+
+        count_result = count_query.execute()
+        total = count_result.count or 0
+
+        result = (
+            data_query
+            .order("created_at", desc=True)
+            .range(offset, offset + limit - 1)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError("Failed to list clients", detail=str(e))
+
+    return {
+        "data": result.data or [],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
-@router.get("/{vendor_id}", response_model=VendorRead)
-def get_vendor(vendor_id: uuid.UUID, db: Client = Depends(get_supabase)):
-    return _handle(vendor_service.get_vendor, db, vendor_id)
+def get_client(db: SupabaseClient, client_id: uuid.UUID) -> dict:
+    try:
+        result = (
+            db.table("clients")
+            .select("*")
+            .eq("id", str(client_id))
+            .is_("deleted_at", "null")
+            .single()
+            .execute()
+        )
+    except Exception as e:
+        if "No rows" in str(e):
+            raise NotFoundError(f"Client {client_id} not found")
+        raise DatabaseError("Failed to get client", detail=str(e))
+    if not result.data:
+        raise NotFoundError(f"Client {client_id} not found")
+    return result.data
 
 
-@router.patch("/{vendor_id}", response_model=VendorRead)
-def update_vendor(
-    vendor_id: uuid.UUID,
-    payload: VendorUpdate,
-    db: Client = Depends(get_supabase),
-):
-    return _handle(vendor_service.update_vendor, db, vendor_id, payload)
+def update_client(
+    db: SupabaseClient, client_id: uuid.UUID, payload: ClientUpdate
+) -> dict:
+    data = payload.model_dump(mode="json", exclude_none=True)
+    if not data:
+        return get_client(db, client_id)
+    try:
+        result = (
+            db.table("clients")
+            .update(data)
+            .eq("id", str(client_id))
+            .is_("deleted_at", "null")
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError("Failed to update client", detail=str(e))
+    if not result.data:
+        raise NotFoundError(f"Client {client_id} not found")
+    return result.data[0]
 
 
-@router.delete("/{vendor_id}", status_code=204)
-def delete_vendor(vendor_id: uuid.UUID, db: Client = Depends(get_supabase)):
-    _handle(vendor_service.soft_delete_vendor, db, vendor_id)
+def soft_delete_client(db: SupabaseClient, client_id: uuid.UUID) -> None:
+    try:
+        result = (
+            db.table("clients")
+            .update({"deleted_at": datetime.utcnow().isoformat()})
+            .eq("id", str(client_id))
+            .is_("deleted_at", "null")
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError("Failed to delete client", detail=str(e))
+    if not result.data:
+        raise NotFoundError(f"Client {client_id} not found")
