@@ -1,6 +1,8 @@
 import { AlertTriangle, Inbox, Loader2 } from 'lucide-react'
 import { statusConfig, confidenceColor, confidenceLabel } from '../../lib/utils'
 
+// ── Existing components (unchanged) ──────────────────────────────────────────
+
 export function StatusBadge({ status }) {
   const cfg = statusConfig(status)
   return (
@@ -126,3 +128,129 @@ export function SectionHeader({ title, action }) {
     </div>
   )
 }
+
+// ── New components ────────────────────────────────────────────────────────────
+
+export function InvoiceTypeBadge({ type }) {
+  const isPayable = type === 'payable'
+  return (
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold tracking-wide"
+      style={{
+        background: isPayable ? '#EFF6FF' : '#F0FDF4',
+        color: isPayable ? '#3B82F6' : '#16A34A',
+        border: `1px solid ${isPayable ? '#BFDBFE' : '#BBF7D0'}`,
+      }}
+    >
+      {isPayable ? 'AP' : 'AR'}
+    </span>
+  )
+}
+
+export function ProgressBar({ value, max, color = '#22C55E', height = 6 }) {
+  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0
+  return (
+    <div className="w-full rounded-full overflow-hidden" style={{ height, background: 'var(--border)' }}>
+      <div
+        className="h-full rounded-full transition-all duration-500"
+        style={{ width: `${pct}%`, background: color }}
+      />
+    </div>
+  )
+}
+
+export function ComplianceFlagBadge({ severity }) {
+  const cfg = {
+    high:   { label: 'High',   bg: '#FEF2F2', color: '#EF4444', border: '#FECACA' },
+    medium: { label: 'Medium', bg: '#FFFBEB', color: '#F59E0B', border: '#FDE68A' },
+    low:    { label: 'Low',    bg: 'var(--bg-secondary)', color: 'var(--text-muted)', border: 'var(--border)' },
+  }[severity] || { label: severity, bg: 'var(--bg-secondary)', color: 'var(--text-muted)', border: 'var(--border)' }
+
+  return (
+    <span
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+      style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}
+    >
+      {cfg.label}
+    </span>
+  )
+}
+
+export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', danger = false }) {
+  if (!open) return null
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      <div
+        className="absolute inset-0"
+        style={{ background: 'rgba(0,0,0,0.45)' }}
+        onClick={onCancel}
+      />
+      <div
+        className="relative w-full max-w-sm rounded-2xl border p-6 shadow-xl animate-fade-up"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}
+      >
+        <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{title}</h3>
+        <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>{message}</p>
+        <div className="flex gap-2 justify-end">
+          <button onClick={onCancel} className="btn-secondary text-sm">Cancel</button>
+          <button
+            onClick={onConfirm}
+            className="text-sm px-4 py-2 rounded-xl font-medium transition-all"
+            style={{
+              background: danger ? '#EF4444' : 'var(--accent)',
+              color: danger ? '#fff' : '#131310',
+            }}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+// Module-level registry so toast() can be called from anywhere without a hook
+
+let _addToast = null
+
+export function ToastProvider({ children }) {
+  const [toasts, setToasts] = React.useState([])
+
+  React.useEffect(() => {
+    _addToast = (message, type = 'success') => {
+      const id = Date.now()
+      setToasts(p => [...p, { id, message, type }])
+      setTimeout(() => setToasts(p => p.filter(t => t.id !== id)), 4000)
+    }
+    return () => { _addToast = null }
+  }, [])
+
+  return (
+    <>
+      {children}
+      <div className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none">
+        {toasts.map(t => (
+          <div
+            key={t.id}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium animate-fade-up pointer-events-auto"
+            style={{
+              background: 'var(--bg-card)',
+              border: `1px solid ${t.type === 'error' ? '#FECACA' : t.type === 'warning' ? '#FDE68A' : '#BBF7D0'}`,
+              color: t.type === 'error' ? '#EF4444' : t.type === 'warning' ? '#F59E0B' : '#16A34A',
+              minWidth: 260,
+            }}
+          >
+            {t.message}
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
+
+export function toast(message, type = 'success') {
+  if (_addToast) _addToast(message, type)
+}
+
+import React from 'react'

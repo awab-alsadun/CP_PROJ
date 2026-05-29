@@ -25,9 +25,6 @@ def create_client(db: SupabaseClient, payload: ClientCreate) -> dict:
 def get_or_create_client(
     db: SupabaseClient, company_id: uuid.UUID, name: str, tax_id: str, **kwargs
 ) -> dict:
-    """
-    Upsert by (company_id, tax_id). Used by extraction pipeline.
-    """
     try:
         result = (
             db.table("clients")
@@ -51,21 +48,51 @@ def get_or_create_client(
 
 
 def list_clients(
-    db: SupabaseClient, company_id: uuid.UUID, limit: int = 50, offset: int = 0
-) -> list[dict]:
+    db: SupabaseClient,
+    company_id: uuid.UUID,
+    limit: int = 20,
+    offset: int = 0,
+    search: str | None = None,
+) -> dict:
+    """Returns paginated response with optional search on name/tax_id."""
     try:
-        result = (
+        count_query = (
+            db.table("clients")
+            .select("id", count="exact")
+            .eq("company_id", str(company_id))
+            .is_("deleted_at", "null")
+        )
+
+        data_query = (
             db.table("clients")
             .select("*")
             .eq("company_id", str(company_id))
             .is_("deleted_at", "null")
+        )
+
+        if search:
+            or_filter = f"name.ilike.%{search}%,tax_id.ilike.%{search}%"
+            count_query = count_query.or_(or_filter)
+            data_query = data_query.or_(or_filter)
+
+        count_result = count_query.execute()
+        total = count_result.count or 0
+
+        result = (
+            data_query
             .order("created_at", desc=True)
             .range(offset, offset + limit - 1)
             .execute()
         )
     except Exception as e:
         raise DatabaseError("Failed to list clients", detail=str(e))
-    return result.data
+
+    return {
+        "data": result.data or [],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 def get_client(db: SupabaseClient, client_id: uuid.UUID) -> dict:

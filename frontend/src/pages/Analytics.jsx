@@ -5,28 +5,7 @@ import {
 } from 'recharts'
 import { analyticsApi } from '../lib/api'
 import { formatCurrency } from '../lib/utils'
-import { PageLoader } from '../components/ui'
-
-// Mock data until analytics endpoints are built (Phase 4)
-const MOCK_SPENDING = [
-  { vendor: 'Acme Corp', amount: 42000 }, { vendor: 'TechSupply', amount: 31500 },
-  { vendor: 'GlobalShip', amount: 28900 }, { vendor: 'Medicore', amount: 19400 },
-  { vendor: 'BuildRight', amount: 15200 },
-]
-const MOCK_TRENDS = [
-  { month: 'Jun', invoices: 8, amount: 42000 }, { month: 'Jul', invoices: 12, amount: 58000 },
-  { month: 'Aug', invoices: 10, amount: 51000 }, { month: 'Sep', invoices: 15, amount: 67000 },
-  { month: 'Oct', invoices: 18, amount: 74000 }, { month: 'Nov', invoices: 22, amount: 89000 },
-]
-const MOCK_TIMING = [
-  { range: '0-7 days', count: 18 }, { range: '8-14 days', count: 12 },
-  { range: '15-30 days', count: 9 }, { range: '31-60 days', count: 6 },
-  { range: '60+ days', count: 5 },
-]
-const MOCK_OVERDUE = [
-  { month: 'Jun', rate: 8 }, { month: 'Jul', rate: 12 }, { month: 'Aug', rate: 9 },
-  { month: 'Sep', rate: 15 }, { month: 'Oct', rate: 11 }, { month: 'Nov', rate: 7 },
-]
+import { PageLoader, SectionHeader } from '../components/ui'
 
 const ChartCard = ({ title, subtitle, children, height = 220 }) => (
   <div className="card p-5">
@@ -52,84 +31,152 @@ const tooltipStyle = {
 const axisTickStyle = { fontSize: 11, fill: 'var(--text-muted)', fontFamily: 'DM Sans' }
 
 export default function Analytics() {
-  const [data, setData] = useState({
-    spending: MOCK_SPENDING,
-    trends: MOCK_TRENDS,
-    timing: MOCK_TIMING,
-    overdue: MOCK_OVERDUE,
-  })
-  const [loading] = useState(false)
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [spending,   setSpending]   = useState(null)
+  const [trends,     setTrends]     = useState(null)
+  const [timing,     setTiming]     = useState(null)
+  const [overdue,    setOverdue]    = useState(null)
+  const [loading,    setLoading]    = useState(true)
 
-  // When analytics endpoints are built, fetch real data:
-  // useEffect(() => { analyticsApi.spending().then(...) }, [])
+  useEffect(() => {
+    async function load() {
+      setLoading(true)
+      const [s, t, pt, o] = await Promise.allSettled([
+        analyticsApi.spending(),
+        analyticsApi.trends(),
+        analyticsApi.paymentTiming(),
+        analyticsApi.overdue(),
+      ])
+      if (s.status  === 'fulfilled') setSpending(s.value)
+      if (t.status  === 'fulfilled') setTrends(t.value)
+      if (pt.status === 'fulfilled') setTiming(pt.value)
+      if (o.status  === 'fulfilled') setOverdue(o.value)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   if (loading) return <div className="p-6"><PageLoader /></div>
 
+  const vendorData  = spending?.vendors || []
+  const clientData  = spending?.clients || []
+  const trendsData  = trends?.months    || []
+  const timingData  = timing?.distribution || []
+  const overdueData = overdue?.aging_buckets || []
+
+  const TIMING_COLORS = ['#22C55E', '#86EFAC', '#FDE68A', '#FCA5A5', '#EF4444']
+
   return (
     <div className="p-6 space-y-4 animate-fade-up">
-      <div>
-        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-          Charts are displaying mock data — analytics endpoints will be wired in Phase 4.
-        </p>
+
+      {/* Type filter */}
+      <div className="flex items-center justify-between">
+        <div />
+        <div className="flex gap-1 p-1 rounded-xl border"
+          style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
+          {[['all', 'All'], ['payable', 'Payables (AP)'], ['receivable', 'Receivables (AR)']].map(([v, l]) => (
+            <button key={v} onClick={() => setTypeFilter(v)}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150"
+              style={typeFilter === v
+                ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
+                : { color: 'var(--text-muted)' }
+              }>
+              {l}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Spending by Vendor" subtitle="Top 5 vendors by invoice amount">
-          <BarChart data={data.spending} layout="vertical" barSize={18}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-            <XAxis type="number" axisLine={false} tickLine={false} tick={axisTickStyle}
-              tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-            <YAxis type="category" dataKey="vendor" axisLine={false} tickLine={false}
-              tick={axisTickStyle} width={80} />
-            <Tooltip contentStyle={tooltipStyle}
-              formatter={v => [formatCurrency(v), 'Amount']} />
-            <Bar dataKey="amount" fill="var(--accent)" radius={[0, 4, 4, 0]} />
-          </BarChart>
-        </ChartCard>
+        {(typeFilter === 'all' || typeFilter === 'payable') && (
+          <ChartCard title="Spending by Vendor" subtitle="Top vendors by invoice amount (AP)">
+            {vendorData.length === 0
+              ? <div className="h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>No vendor data</div>
+              : <BarChart data={vendorData} layout="vertical" barSize={18}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={axisTickStyle}
+                    tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                  <YAxis type="category" dataKey="vendor_name" axisLine={false} tickLine={false}
+                    tick={axisTickStyle} width={80} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), 'Amount']} />
+                  <Bar dataKey="total_spent" fill="var(--accent)" radius={[0, 4, 4, 0]} />
+                </BarChart>
+            }
+          </ChartCard>
+        )}
 
-        <ChartCard title="Monthly Invoice Volume" subtitle="Invoice count vs amount over time">
-          <LineChart data={data.trends}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={axisTickStyle} />
-            <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={axisTickStyle}
-              tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-            <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={axisTickStyle} />
-            <Tooltip contentStyle={tooltipStyle}
-              formatter={(v, name) => [name === 'amount' ? formatCurrency(v) : v, name === 'amount' ? 'Revenue' : 'Count']} />
-            <Line yAxisId="left" type="monotone" dataKey="amount" stroke="var(--accent)"
-              strokeWidth={2} dot={{ r: 3, fill: 'var(--accent)' }} />
-            <Line yAxisId="right" type="monotone" dataKey="invoices" stroke="#3B82F6"
-              strokeWidth={2} dot={{ r: 3, fill: '#3B82F6' }} strokeDasharray="4 4" />
-          </LineChart>
-        </ChartCard>
+        {(typeFilter === 'all' || typeFilter === 'receivable') && (
+          <ChartCard title="Revenue by Client" subtitle="Top clients by billed amount (AR)">
+            {clientData.length === 0
+              ? <div className="h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>No client data</div>
+              : <BarChart data={clientData} layout="vertical" barSize={18}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
+                  <XAxis type="number" axisLine={false} tickLine={false} tick={axisTickStyle}
+                    tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                  <YAxis type="category" dataKey="client_name" axisLine={false} tickLine={false}
+                    tick={axisTickStyle} width={80} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), 'Amount']} />
+                  <Bar dataKey="total_revenue" fill="#22C55E" radius={[0, 4, 4, 0]} />
+                </BarChart>
+            }
+          </ChartCard>
+        )}
       </div>
 
       {/* Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Payment Timing Distribution" subtitle="Days from issue to payment">
-          <BarChart data={data.timing} barSize={32}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="range" axisLine={false} tickLine={false} tick={axisTickStyle} />
-            <YAxis axisLine={false} tickLine={false} tick={axisTickStyle} />
-            <Tooltip contentStyle={tooltipStyle} formatter={v => [v, 'Invoices']} />
-            <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-              {data.timing.map((entry, i) => (
-                <Cell key={i} fill={i < 2 ? '#22C55E' : i < 3 ? '#F59E0B' : '#EF4444'} />
-              ))}
-            </Bar>
-          </BarChart>
+        <ChartCard title="Monthly Invoice Volume" subtitle="Invoice count and amount over time">
+          {trendsData.length === 0
+            ? <div className="h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>No trend data</div>
+            : <LineChart data={trendsData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={axisTickStyle} />
+                <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={axisTickStyle}
+                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={axisTickStyle} />
+                <Tooltip contentStyle={tooltipStyle}
+                  formatter={(v, name) => [name === 'total_amount' ? formatCurrency(v) : v, name === 'total_amount' ? 'Amount' : 'Count']} />
+                <Line yAxisId="left" type="monotone" dataKey="total_amount" stroke="var(--accent)"
+                  strokeWidth={2} dot={{ r: 3, fill: 'var(--accent)' }} />
+                <Line yAxisId="right" type="monotone" dataKey="invoice_count" stroke="#3B82F6"
+                  strokeWidth={2} dot={{ r: 3, fill: '#3B82F6' }} strokeDasharray="4 4" />
+              </LineChart>
+          }
         </ChartCard>
 
-        <ChartCard title="Overdue Rate Over Time" subtitle="% of invoices past due date by month">
-          <LineChart data={data.overdue}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="month" axisLine={false} tickLine={false} tick={axisTickStyle} />
-            <YAxis axisLine={false} tickLine={false} tick={axisTickStyle} tickFormatter={v => `${v}%`} />
-            <Tooltip contentStyle={tooltipStyle} formatter={v => [`${v}%`, 'Overdue Rate']} />
-            <Line type="monotone" dataKey="rate" stroke="#EF4444" strokeWidth={2}
-              dot={{ r: 3, fill: '#EF4444' }} />
-          </LineChart>
+        <ChartCard title="Payment Timing Distribution" subtitle="Days from issue to payment">
+          {timingData.length === 0
+            ? <div className="h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>No timing data</div>
+            : <BarChart data={timingData} barSize={32}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="range" axisLine={false} tickLine={false} tick={axisTickStyle} />
+                <YAxis axisLine={false} tickLine={false} tick={axisTickStyle} />
+                <Tooltip contentStyle={tooltipStyle} formatter={v => [v, 'Invoices']} />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {timingData.map((_, i) => (
+                    <Cell key={i} fill={TIMING_COLORS[Math.min(i, TIMING_COLORS.length - 1)]} />
+                  ))}
+                </Bar>
+              </BarChart>
+          }
+        </ChartCard>
+      </div>
+
+      {/* Row 3 — Overdue aging */}
+      <div className="grid grid-cols-1 gap-4">
+        <ChartCard title="Overdue Aging" subtitle="Outstanding amounts by days past due">
+          {overdueData.length === 0
+            ? <div className="h-full flex items-center justify-center text-sm" style={{ color: 'var(--text-muted)' }}>No overdue data</div>
+            : <BarChart data={overdueData} barSize={36}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="range" axisLine={false} tickLine={false} tick={axisTickStyle} />
+                <YAxis axisLine={false} tickLine={false} tick={axisTickStyle}
+                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
+                <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), 'Amount']} />
+                <Bar dataKey="amount" fill="#EF4444" radius={[4, 4, 0, 0]} />
+              </BarChart>
+          }
         </ChartCard>
       </div>
     </div>

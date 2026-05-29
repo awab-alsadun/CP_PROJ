@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Sun, Moon, MessageSquare, Bell, X, CheckCheck,
-  Upload, RefreshCw, CreditCard, AlertCircle, Info, FileText
+  Upload, RefreshCw, CreditCard, AlertCircle, Info, ShieldAlert
 } from 'lucide-react'
 import { useTheme } from '../../context/ThemeContext'
 import { useChat } from '../../context/ChatContext'
@@ -15,6 +15,7 @@ const TYPE_CONFIG = {
   payment:       { icon: CreditCard,  color: '#D4A847', bg: '#FFFBEB' },
   overdue:       { icon: AlertCircle, color: '#EF4444', bg: '#FEF2F2' },
   system:        { icon: Info,        color: '#6B7280', bg: '#F9FAFB' },
+  compliance:    { icon: ShieldAlert, color: '#F97316', bg: '#FFF7ED' },
 }
 
 function NotificationItem({ n, onRead, navigate }) {
@@ -23,7 +24,10 @@ function NotificationItem({ n, onRead, navigate }) {
 
   const handleClick = () => {
     if (!n.is_read) onRead(n.id)
-    if (n.related_invoice_id) navigate(`/invoices/${n.related_invoice_id}`)
+    if (n.related_invoice_id) {
+      const type = n.invoice_type === 'receivable' ? 'receivables' : 'payables'
+      navigate(`/${type}/${n.related_invoice_id}`)
+    }
   }
 
   return (
@@ -32,7 +36,7 @@ function NotificationItem({ n, onRead, navigate }) {
       className="flex gap-3 px-4 py-3 cursor-pointer transition-colors"
       style={{
         background: n.is_read ? 'transparent' : 'var(--accent-light)',
-        borderLeft: n.is_read ? '3px solid transparent' : '3px solid var(--accent)',
+        borderLeft: n.is_read ? '3px solid transparent' : `3px solid ${cfg.color}`,
       }}
       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
       onMouseLeave={e => e.currentTarget.style.background = n.is_read ? 'transparent' : 'var(--accent-light)'}
@@ -42,8 +46,7 @@ function NotificationItem({ n, onRead, navigate }) {
         <Icon size={13} style={{ color: cfg.color }} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-semibold leading-tight truncate"
-          style={{ color: 'var(--text-primary)' }}>
+        <p className="text-xs font-semibold leading-tight truncate" style={{ color: 'var(--text-primary)' }}>
           {n.title}
         </p>
         <p className="text-xs mt-0.5 leading-snug" style={{ color: 'var(--text-secondary)' }}>
@@ -78,19 +81,15 @@ export default function Topbar({ title, subtitle }) {
       const res = await notificationsApi.list(false, 20)
       setNotifs(res?.notifications || [])
       setUnreadCount(res?.unread_count ?? 0)
-    } catch {
-      // Notifications endpoint not yet built — fail silently
-    }
+    } catch { /* fail silently */ }
   }, [])
 
-  // Poll every 30s
   useEffect(() => {
     fetchNotifs()
     const interval = setInterval(fetchNotifs, 30000)
     return () => clearInterval(interval)
   }, [fetchNotifs])
 
-  // Close on outside click or Escape
   useEffect(() => {
     if (!open) return
     const handleKey = (e) => { if (e.key === 'Escape') setOpen(false) }
@@ -138,19 +137,15 @@ export default function Topbar({ title, subtitle }) {
           </h1>
         )}
         {subtitle && (
-          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {subtitle}
-          </p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{subtitle}</p>
         )}
       </div>
 
       <div className="flex items-center gap-1">
-        {/* Theme toggle */}
         <button onClick={toggle} className="btn-ghost p-2 rounded-xl" aria-label="Toggle theme">
           {theme === 'dark' ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
         </button>
 
-        {/* Notifications bell */}
         <div className="relative">
           <button
             ref={bellRef}
@@ -167,7 +162,6 @@ export default function Topbar({ title, subtitle }) {
             )}
           </button>
 
-          {/* Notification panel */}
           {open && (
             <div
               ref={panelRef}
@@ -179,7 +173,6 @@ export default function Topbar({ title, subtitle }) {
                 boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
               }}
             >
-              {/* Panel header */}
               <div className="flex items-center justify-between px-4 py-3 border-b"
                 style={{ borderColor: 'var(--border)' }}>
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -207,7 +200,6 @@ export default function Topbar({ title, subtitle }) {
                 </div>
               </div>
 
-              {/* Notifications list */}
               <div className="overflow-y-auto divide-y" style={{ maxHeight: 400, borderColor: 'var(--border-subtle)' }}>
                 {notifs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 gap-2">
@@ -229,7 +221,6 @@ export default function Topbar({ title, subtitle }) {
           )}
         </div>
 
-        {/* AI Chat trigger */}
         <button
           onClick={() => setIsOpen(true)}
           className="btn-primary ml-2 h-8 text-xs"

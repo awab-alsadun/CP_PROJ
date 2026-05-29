@@ -1,247 +1,162 @@
-import { useRef, useEffect, useState } from 'react'
-import { SendHorizontal, Trash2, Bot, Sparkles, FileText, Scale, ChevronDown, ChevronUp } from 'lucide-react'
-import { useChat } from '../context/ChatContext'
-import { formatRelative } from '../lib/utils'
-
-const SUGGESTIONS = [
-  'Which vendors have the most unpaid invoices?',
-  'What is the total revenue for last month?',
-  'Show me all overdue invoices',
-  'Which clients pay the slowest?',
-  'Compare spending across vendors this quarter',
-  'Are there any duplicate invoice numbers?',
-]
+import React, { useEffect, useRef, useState } from 'react';
+import { Send, Trash2, FileText, Scale } from 'lucide-react';
+import { useChat } from '../context/ChatContext';
 
 const QUERY_BADGE = {
-  sql:            { label: 'SQL',    bg: '#EFF6FF', color: '#3B82F6' },
-  rag_invoice:    { label: 'RAG',    bg: '#F5F3FF', color: '#8B5CF6' },
-  rag_compliance: { label: 'RAG',    bg: '#F5F3FF', color: '#8B5CF6' },
-  hybrid:         { label: 'Hybrid', bg: '#FFFBEB', color: '#D4A847' },
-}
+  sql:            { label: 'SQL',    color: '#3B82F6' },
+  rag_invoice:    { label: 'RAG',    color: '#8B5CF6' },
+  rag_compliance: { label: 'RAG',    color: '#8B5CF6' },
+  hybrid:         { label: 'Hybrid', color: '#D4A847' },
+};
 
-function SourceCard({ source }) {
-  const [expanded, setExpanded] = useState(false)
-  const isInvoice = source.source_type === 'invoices'
-  const Icon = isInvoice ? FileText : Scale
-  const iconColor = isInvoice ? '#3B82F6' : '#8B5CF6'
-  const pct = source.similarity != null ? Math.round(source.similarity * 100) : null
-
-  return (
-    <div className="rounded-xl border text-xs overflow-hidden"
-      style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
-      <div
-        className="flex items-center gap-2.5 px-3 py-2.5 cursor-pointer"
-        onClick={() => source.chunk_text && setExpanded(v => !v)}
-      >
-        <Icon size={13} style={{ color: iconColor }} className="flex-shrink-0" />
-        <span className="flex-1 font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-          {source.citation || source.invoice_number || source.document_name || 'Source'}
-        </span>
-        {source.section_title && (
-          <span className="text-xs truncate max-w-[120px]" style={{ color: 'var(--text-muted)' }}>
-            {source.section_title}
-          </span>
-        )}
-        {pct != null && (
-          <span className="font-mono font-medium flex-shrink-0 text-xs px-1.5 py-0.5 rounded"
-            style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>
-            {pct}%
-          </span>
-        )}
-        {source.chunk_text && (
-          expanded
-            ? <ChevronUp size={12} style={{ color: 'var(--text-muted)' }} />
-            : <ChevronDown size={12} style={{ color: 'var(--text-muted)' }} />
-        )}
-      </div>
-      {expanded && source.chunk_text && (
-        <div className="px-3 pb-3 border-t" style={{ borderColor: 'var(--border)' }}>
-          <p className="mt-2 leading-relaxed"
-            style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
-            {source.chunk_text.slice(0, 400)}{source.chunk_text.length > 400 ? '…' : ''}
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function Message({ msg }) {
-  const isUser = msg.role === 'user'
-  const badge = !isUser && msg.queryType ? QUERY_BADGE[msg.queryType] : null
-  const sources = msg.sources || []
-
-  return (
-    <div className={`flex gap-4 ${isUser ? 'flex-row-reverse' : ''} max-w-3xl ${isUser ? 'ml-auto' : 'mr-auto'} w-full`}>
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-semibold"
-        style={{
-          background: isUser ? 'var(--accent)' : 'var(--bg-secondary)',
-          color: isUser ? '#131310' : 'var(--text-secondary)',
-          border: isUser ? 'none' : '1px solid var(--border)',
-        }}>
-        {isUser ? 'U' : <Bot size={15} />}
-      </div>
-
-      <div className={`flex flex-col gap-2 flex-1 ${isUser ? 'items-end' : ''}`}>
-        {/* Query type badge */}
-        {badge && (
-          <span className="self-start text-xs px-2.5 py-0.5 rounded-full font-medium"
-            style={{ background: badge.bg, color: badge.color }}>
-            {badge.label}
-          </span>
-        )}
-
-        <div className="px-4 py-3 rounded-2xl text-sm leading-relaxed"
-          style={{
-            background: isUser ? 'var(--accent)' : 'var(--bg-secondary)',
-            color: isUser ? '#131310' : 'var(--text-primary)',
-            borderRadius: isUser ? '16px 4px 16px 16px' : '4px 16px 16px 16px',
-          }}>
-          {msg.content}
-        </div>
-
-        {/* Sources */}
-        {!isUser && sources.length > 0 && (
-          <div className="w-full space-y-1.5">
-            <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-              Sources ({sources.length})
-            </p>
-            {sources.slice(0, 6).map((s, i) => (
-              <SourceCard key={i} source={s} />
-            ))}
-          </div>
-        )}
-
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          {formatRelative(msg.timestamp)}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function TypingIndicator() {
-  return (
-    <div className="flex gap-4 max-w-3xl mr-auto w-full">
-      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border"
-        style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
-        <Bot size={15} style={{ color: 'var(--text-secondary)' }} />
-      </div>
-      <div className="px-4 py-3.5 rounded-2xl flex items-center gap-1.5"
-        style={{ background: 'var(--bg-secondary)', borderRadius: '4px 16px 16px 16px' }}>
-        <span className="loading-dot" />
-        <span className="loading-dot" />
-        <span className="loading-dot" />
-      </div>
-    </div>
-  )
-}
+const SUGGESTIONS = [
+  'Which vendors have the highest outstanding balances?',
+  'Show me all overdue invoices from last month',
+  'What is the total amount paid this quarter?',
+  'Are there any compliance issues I should know about?',
+];
 
 export default function AiChat() {
-  const { messages, isLoading, sendMessage, clearMessages } = useChat()
-  const [input, setInput] = useState('')
-  const bottomRef = useRef(null)
-  const inputRef = useRef(null)
+  const { messages, sendMessage, clearMessages, isLoading } = useChat();
+  const [input, setInput] = useState('');
+  const bottomRef = useRef(null);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, isLoading]);
 
-  useEffect(() => { inputRef.current?.focus() }, [])
-
-  const handleSend = () => {
-    if (!input.trim() || isLoading) return
-    sendMessage(input.trim())
-    setInput('')
+  function handleSend() {
+    const q = input.trim();
+    if (!q || isLoading) return;
+    setInput('');
+    sendMessage(q);
   }
 
   return (
-    <div className="flex flex-col h-full" style={{ background: 'var(--bg-primary)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 112px)', maxWidth: 800, margin: '0 auto' }}>
       {/* Header */}
-      <div className="flex items-center justify-between px-8 py-4 border-b"
-        style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-            style={{ background: 'var(--accent)' }}>
-            <Sparkles size={16} color="#131310" />
-          </div>
-          <div>
-            <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-              Invoice AI Assistant
-            </p>
-            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              Hybrid SQL + RAG · Invoices + Compliance Documents
-            </p>
-          </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+          Ask questions about your invoices, vendors, payments, and financial data.
         </div>
-        <button onClick={clearMessages} className="btn-ghost text-xs h-8">
-          <Trash2 size={13} /> Clear
-        </button>
+        {messages.length > 0 && (
+          <button className="btn-ghost" onClick={clearMessages} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, padding: '5px 10px' }}>
+            <Trash2 size={12} /> Clear
+          </button>
+        )}
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-8 py-6 space-y-5">
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 8 }}>
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
-              style={{ background: 'var(--accent-light)' }}>
-              <Sparkles size={24} style={{ color: 'var(--accent)' }} />
+          <div>
+            <div style={{ textAlign: 'center', padding: '40px 0 32px', color: 'var(--text-muted)', fontSize: 14 }}>
+              Start by asking a question about your financial data.
             </div>
-            <p className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Ask about your invoices
-            </p>
-            <p className="text-sm text-center max-w-xs" style={{ color: 'var(--text-muted)' }}>
-              Query invoice data with SQL precision or search compliance documents semantically
-            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {SUGGESTIONS.map((s, i) => (
+                <button key={i} className="card" onClick={() => { setInput(s); }} style={{
+                  textAlign: 'left', padding: '12px 16px', cursor: 'pointer', fontSize: 12,
+                  color: 'var(--text-secondary)', lineHeight: 1.5,
+                  transition: 'transform 0.15s',
+                }}>
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {messages.map(msg => <Message key={msg.id} msg={msg} />)}
-        {isLoading && <TypingIndicator />}
+        {messages.map(msg => (
+          <ChatMessage key={msg.id} msg={msg} />
+        ))}
+
+        {isLoading && (
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+            <span className="loading-dot" />
+            <span className="loading-dot" style={{ animationDelay: '0.15s' }} />
+            <span className="loading-dot" style={{ animationDelay: '0.30s' }} />
+            <span style={{ marginLeft: 6 }}>Thinking…</span>
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Suggestions */}
-      {messages.length <= 1 && !isLoading && (
-        <div className="px-8 pb-4">
-          <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>
-            Suggested questions
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {SUGGESTIONS.map(s => (
-              <button key={s} onClick={() => sendMessage(s)}
-                className="text-left text-xs px-3 py-2.5 rounded-xl border transition-all hover:border-[var(--accent)]"
-                style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-secondary)' }}>
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Input */}
-      <div className="px-8 pb-6">
-        <div className="flex gap-3 items-end p-3 rounded-2xl border"
-          style={{ background: 'var(--bg-card)', borderColor: 'var(--border)' }}>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-            placeholder="Ask about your invoices, vendors, or compliance documents…"
-            rows={1}
-            className="flex-1 bg-transparent text-sm resize-none outline-none leading-relaxed"
-            style={{ color: 'var(--text-primary)', minHeight: '24px', maxHeight: '120px' }}
-          />
-          <button onClick={handleSend} disabled={!input.trim() || isLoading}
-            className="btn-primary h-9 px-3 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
-            <SendHorizontal size={15} />
-          </button>
-        </div>
-        <p className="text-xs text-center mt-2" style={{ color: 'var(--text-muted)' }}>
-          Enter to send · Shift+Enter for newline
-        </p>
+      <div style={{ paddingTop: 16, borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
+        <input
+          className="input"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+          placeholder="Ask about invoices, vendors, payments, or analytics…"
+          style={{ flex: 1, fontSize: 14, padding: '10px 16px' }}
+          disabled={isLoading}
+        />
+        <button className="btn-primary" onClick={handleSend} disabled={isLoading || !input.trim()} style={{ padding: '10px 18px', borderRadius: 10 }}>
+          <Send size={15} />
+        </button>
       </div>
     </div>
-  )
+  );
+}
+
+function ChatMessage({ msg }) {
+  const [expanded, setExpanded] = useState(false);
+  const isUser = msg.role === 'user';
+  const badge = QUERY_BADGE[msg.queryType];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: isUser ? 'flex-end' : 'flex-start', gap: 6 }}>
+      <div style={{
+        maxWidth: '85%', padding: '12px 16px', borderRadius: isUser ? '16px 16px 4px 16px' : '4px 16px 16px 16px',
+        background: isUser ? 'var(--accent)' : (msg.error ? '#EF444415' : 'var(--bg-card)'),
+        color: isUser ? '#131310' : (msg.error ? '#EF4444' : 'var(--text-primary)'),
+        border: isUser ? 'none' : '1px solid var(--border)',
+        fontSize: 14, lineHeight: 1.7, whiteSpace: 'pre-wrap',
+      }}>
+        {msg.content}
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        {badge && (
+          <span style={{ fontSize: 10, fontWeight: 700, color: badge.color, background: badge.color + '18', padding: '2px 7px', borderRadius: 4 }}>
+            {badge.label}
+          </span>
+        )}
+        {msg.sources?.length > 0 && (
+          <button className="btn-ghost" onClick={() => setExpanded(e => !e)} style={{ fontSize: 11, padding: '2px 8px', color: 'var(--text-muted)' }}>
+            {expanded ? 'Hide sources' : `${msg.sources.length} source${msg.sources.length > 1 ? 's' : ''}`}
+          </button>
+        )}
+      </div>
+
+      {expanded && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: '85%', width: '100%' }}>
+          {msg.sources.slice(0, 6).map((s, i) => {
+            const Icon = s.source_type === 'regulation' ? Scale : FileText;
+            const invType = s.invoice_type || 'payable';
+            return (
+              <div key={i} style={{ padding: '10px 14px', borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border)', fontSize: 12 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                  <Icon size={12} color="var(--text-muted)" />
+                  {s.invoice_id ? (
+                    <a href={`/${invType === 'receivable' ? 'receivables' : 'payables'}/${s.invoice_id}`} style={{ fontWeight: 600, color: 'var(--accent)', textDecoration: 'none' }}>
+                      {s.citation || `Invoice ${s.invoice_id.slice(0, 8)}`}
+                    </a>
+                  ) : (
+                    <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{s.citation || `Source ${i + 1}`}</span>
+                  )}
+                  {s.similarity != null && (
+                    <span style={{ marginLeft: 'auto', color: 'var(--text-muted)' }}>{Math.round(s.similarity * 100)}% match</span>
+                  )}
+                </div>
+                {s.chunk_text && (
+                  <div style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>{s.chunk_text.slice(0, 200)}{s.chunk_text.length > 200 ? '…' : ''}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }

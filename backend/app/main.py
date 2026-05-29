@@ -13,16 +13,26 @@ from fastapi.responses import JSONResponse
 from app.core.config import get_settings
 from app.core.supabase import get_supabase
 from app.core.exceptions import AppError, NotFoundError, DatabaseError, ValidationError
-from app.routers import invoices, vendors, clients, upload, query, documents, analytics, notifications
+from app.routers import (
+    invoices,
+    vendors,
+    clients,
+    upload,
+    query,
+    documents,
+    analytics,
+    notifications,
+    payments,
+    settings as settings_router,
+    admin,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: validate Supabase connection
     db = get_supabase()
     db.table("companies").select("id").limit(1).execute()
     yield
-    # Shutdown: nothing to clean yet
 
 
 settings = get_settings()
@@ -73,14 +83,17 @@ async def app_error_handler(request: Request, exc: AppError):
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
-app.include_router(invoices.router, prefix=settings.API_V1_PREFIX)
-app.include_router(vendors.router, prefix=settings.API_V1_PREFIX)
-app.include_router(clients.router, prefix=settings.API_V1_PREFIX)
-app.include_router(upload.router, prefix=settings.API_V1_PREFIX)
-app.include_router(query.router, prefix=settings.API_V1_PREFIX)
-app.include_router(documents.router, prefix=settings.API_V1_PREFIX)
-app.include_router(analytics.router, prefix=settings.API_V1_PREFIX)
-app.include_router(notifications.router, prefix=settings.API_V1_PREFIX)
+app.include_router(invoices.router,           prefix=settings.API_V1_PREFIX)
+app.include_router(vendors.router,            prefix=settings.API_V1_PREFIX)
+app.include_router(clients.router,            prefix=settings.API_V1_PREFIX)
+app.include_router(upload.router,             prefix=settings.API_V1_PREFIX)
+app.include_router(query.router,              prefix=settings.API_V1_PREFIX)
+app.include_router(documents.router,          prefix=settings.API_V1_PREFIX)
+app.include_router(analytics.router,          prefix=settings.API_V1_PREFIX)
+app.include_router(notifications.router,      prefix=settings.API_V1_PREFIX)
+app.include_router(payments.router,           prefix=settings.API_V1_PREFIX)
+app.include_router(settings_router.router,    prefix=settings.API_V1_PREFIX)
+app.include_router(admin.router,              prefix=settings.API_V1_PREFIX)
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +109,7 @@ def health_check():
         db_status = f"error: {e}"
 
     return {
-        "status": "ok" if db_status == "connected" else "degraded",
+        "status":   "ok" if db_status == "connected" else "degraded",
         "database": db_status,
     }
 

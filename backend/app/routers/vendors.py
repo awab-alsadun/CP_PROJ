@@ -29,14 +29,15 @@ def create_vendor(payload: VendorCreate, db: Client = Depends(get_supabase)):
     return _handle(vendor_service.create_vendor, db, payload)
 
 
-@router.get("/", response_model=list[VendorRead])
+@router.get("/")
 def list_vendors(
     company_id: uuid.UUID = Query(...),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=200),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
     db: Client = Depends(get_supabase),
 ):
-    return _handle(vendor_service.list_vendors, db, company_id, limit, offset)
+    return _handle(vendor_service.list_vendors, db, company_id, limit, offset, search)
 
 
 @router.get("/{vendor_id}", response_model=VendorRead)

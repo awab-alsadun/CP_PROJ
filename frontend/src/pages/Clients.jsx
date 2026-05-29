@@ -1,140 +1,79 @@
-import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Search, Users, ChevronLeft, ChevronRight } from 'lucide-react'
-import { clientsApi } from '../lib/api'
-import { formatCurrency, truncate } from '../lib/utils'
-import { PageLoader, ErrorState, EmptyState } from '../components/ui'
+import React, { useCallback, useEffect, useState } from 'react';
+import { Users } from 'lucide-react';
+import { clientsApi } from '../lib/api';
+import { EmptyState, ErrorState, PageLoader } from '../components/ui';
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 50;
 
 export default function Clients() {
-  const navigate = useNavigate()
-  const [clients,  setClients]  = useState([])
-  const [loading,  setLoading]  = useState(true)
-  const [error,    setError]    = useState(null)
-  const [search,   setSearch]   = useState('')
-  const [page,     setPage]     = useState(1)
-  const [total,    setTotal]    = useState(0)
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
+    setLoading(true); setError(null);
     try {
-      const res = await clientsApi.list({ page, limit: PAGE_SIZE })
-      const list = Array.isArray(res) ? res : (res?.clients || res?.data || [])
-      setClients(list)
-      // res.total will exist when backend adds count; until then use array length as lower bound
-      setTotal(res?.total ?? null)
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [page])
+      const res = await clientsApi.list({ page, limit: PAGE_SIZE });
+      setData(res.data || res || []);
+      setTotal(res.total ?? 0);
+    } catch (e) { setError(e.message); }
+    finally { setLoading(false); }
+  }, [page]);
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { load(); }, [load]);
 
-  const filtered = clients.filter(c =>
-    !search.trim() ||
-    c.name?.toLowerCase().includes(search.toLowerCase()) ||
-    c.tax_id?.includes(search) ||
-    c.email?.toLowerCase().includes(search.toLowerCase())
-  )
-
-  const totalPages = total != null ? Math.ceil(total / PAGE_SIZE) : null
+  const filtered = search ? data.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()) || c.email?.toLowerCase().includes(search.toLowerCase())) : data;
+  const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
 
   return (
-    <div className="p-6 space-y-4 animate-fade-up">
-      <div className="flex items-center justify-between">
-        <div className="relative w-64">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--text-muted)' }} />
-          <input className="input pl-9 h-9 text-sm" placeholder="Search clients…"
-            value={search} onChange={e => setSearch(e.target.value)} />
+    <div>
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 12, alignItems: 'center' }}>
+          <input className="input" placeholder="Search clients…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, fontSize: 13, padding: '6px 12px' }} />
+          {total > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{total} total</span>}
         </div>
-        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {total != null ? `${total} total` : ''}
-        </span>
-      </div>
 
-      <div className="card overflow-hidden">
-        {loading ? <PageLoader />
-          : error ? <ErrorState message={error} onRetry={load} />
-          : filtered.length === 0 ? (
-            <EmptyState icon={Users} title="No clients found"
-              description="Clients are created when invoices are ingested or created manually." />
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      {['Client', 'Tax ID', 'Email', 'Phone', 'Total Billed', 'Invoices'].map(h => (
-                        <th key={h} className="text-left px-5 py-3 text-xs font-medium uppercase tracking-wide"
-                          style={{ color: 'var(--text-muted)' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map(c => (
-                      <tr key={c.id}
-                        className="table-row-hover cursor-pointer transition-colors"
-                        style={{ borderBottom: '1px solid var(--border-subtle)' }}
-                        onClick={() => navigate(`/clients/${c.id}`)}
-                      >
-                        <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-semibold flex-shrink-0"
-                              style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}>
-                              {c.name?.[0]?.toUpperCase() || 'C'}
-                            </div>
-                            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                              {truncate(c.name, 30)}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <span className="font-mono text-xs" style={{ color: 'var(--text-muted)' }}>
-                            {c.tax_id || '—'}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-sm" style={{ color: 'var(--text-secondary)' }}>{c.email || '—'}</td>
-                        <td className="px-5 py-3.5 text-sm" style={{ color: 'var(--text-secondary)' }}>{c.phone || '—'}</td>
-                        <td className="px-5 py-3.5">
-                          <span className="font-mono text-sm" style={{ color: 'var(--text-primary)' }}>
-                            {c.total_billed != null ? formatCurrency(c.total_billed) : '—'}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                          {c.invoice_count ?? '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+        {loading ? <PageLoader /> : error ? <ErrorState message={error} onRetry={load} /> : filtered.length === 0 ? (
+          <EmptyState icon={Users} title="No clients found" />
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  {['Name', 'Email', 'Phone', 'Tax ID', 'Credit Balance', 'Invoice Count'].map(h => (
+                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(c => (
+                  <tr key={c.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 600, fontSize: 13 }}>{c.name}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>{c.email || '—'}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>{c.phone || '—'}</td>
+                    <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{c.tax_id}</td>
+                    <td style={{ padding: '12px 16px' }}>{c.credit_balance && c.credit_balance > 0 ? <span className="font-mono text-xs" style={{color:"#F59E0B"}}>{c.credit_balance.toFixed(2)}</span> : <span style={{color:"var(--text-muted)"}}>—</span>}</td>
+                    <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{c.invoice_count ?? '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
 
-              {totalPages != null && totalPages > 1 && (
-                <div className="flex items-center justify-between px-5 py-3 border-t"
-                  style={{ borderColor: 'var(--border)' }}>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Page {page} of {totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button onClick={() => setPage(p => Math.max(1, p - 1))}
-                      disabled={page === 1} className="btn-ghost p-1.5 disabled:opacity-40">
-                      <ChevronLeft size={14} />
-                    </button>
-                    <button onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                      disabled={page >= totalPages} className="btn-ghost p-1.5 disabled:opacity-40">
-                      <ChevronRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+        {!loading && !error && total > PAGE_SIZE && (
+          <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(p => p - 1)} style={{ padding: '5px 12px', fontSize: 12 }}>Previous</button>
+              <button className="btn-secondary" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} style={{ padding: '5px 12px', fontSize: 12 }}>Next</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  )
+  );
 }

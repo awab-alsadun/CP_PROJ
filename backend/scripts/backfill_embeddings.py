@@ -20,7 +20,7 @@ Checkpoint file: backfill_checkpoint.json (in backend/ directory)
 Batching:
     - Embeddings are generated per invoice (3 chunks per invoice)
     - OpenAI rate limit: ~30k TPM. At ~500 tokens per invoice, this is
-      ~60 invoices per minute. Script includes 60s backoff on 429.
+    ~60 invoices per minute. Script includes 60s backoff on 429.
     - Ollama: no rate limits, runs as fast as local hardware allows.
 """
 
@@ -133,7 +133,14 @@ def main():
     for i, record in enumerate(pending, 1):
         invoice_id = record["invoice_id"]
         raw_text = record.get("raw_text") or ""
-        extraction = record.get("extraction_json") or {}
+        extraction_raw = record.get("extraction_json") or {}
+        if isinstance(extraction_raw, str):
+            try:
+                extraction = json.loads(extraction_raw)
+            except Exception:
+                extraction = {}
+        else:
+            extraction = extraction_raw
 
         log.info(f"[{i}/{len(pending)}] Embedding invoice {invoice_id}...")
 

@@ -32,27 +32,44 @@ def spending(
     months: int = Query(6, ge=1, le=24),
     db: Client = Depends(get_supabase),
 ):
+    """AP spending by vendor. Payables only."""
     settings = get_settings()
     return _handle(analytics_service.get_spending, db, settings.MVP_COMPANY_ID, months)
+
+
+@router.get("/revenue")
+def revenue(
+    months: int = Query(6, ge=1, le=24),
+    db: Client = Depends(get_supabase),
+):
+    """AR revenue by client. Receivables only."""
+    settings = get_settings()
+    return _handle(analytics_service.get_revenue, db, settings.MVP_COMPANY_ID, months)
 
 
 @router.get("/trends")
 def trends(
     months: int = Query(12, ge=1, le=36),
+    invoice_type: str | None = Query(None, description="'payable' or 'receivable'"),
     db: Client = Depends(get_supabase),
 ):
+    """Monthly volume trends, optionally filtered by invoice type."""
     settings = get_settings()
-    return _handle(analytics_service.get_trends, db, settings.MVP_COMPANY_ID, months)
+    return _handle(
+        analytics_service.get_trends, db, settings.MVP_COMPANY_ID, months, invoice_type
+    )
 
 
 @router.get("/payment-timing")
 def payment_timing(db: Client = Depends(get_supabase)):
+    """Client payment speed analysis. Receivables only."""
     settings = get_settings()
     return _handle(analytics_service.get_payment_timing, db, settings.MVP_COMPANY_ID)
 
 
 @router.get("/overdue")
 def overdue(db: Client = Depends(get_supabase)):
+    """Overdue invoices — both payables and receivables."""
     settings = get_settings()
     return _handle(analytics_service.get_overdue, db, settings.MVP_COMPANY_ID)
 

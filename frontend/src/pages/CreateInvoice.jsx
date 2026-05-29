@@ -1,321 +1,277 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Plus, Trash2, ArrowLeft } from 'lucide-react'
-import { invoicesApi, vendorsApi, clientsApi } from '../lib/api'
-import { formatCurrency } from '../lib/utils'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FileDown, FileUp, Plus, Trash2 } from 'lucide-react';
+import { invoicesApi, vendorsApi, clientsApi, settingsApi, uploadApi } from '../lib/api';
+import { formatCurrency } from '../lib/utils';
+import { toast, PageLoader } from '../components/ui';
 
-const EMPTY_LINE = { description: '', quantity: 1, unit_price: 0, discount: 0 }
-
-function Field({ label, required, children }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-        {label} {required && <span style={{ color: 'var(--accent)' }}>*</span>}
-      </label>
-      {children}
-    </div>
-  )
-}
+const CURRENCIES = ['USD','EUR','GBP','TRY','SAR','AED','EGP','BHD','DKK','FIN'];
+const EMPTY_ITEM = { description: '', quantity: 1, unit_price: 0, discount: 0 };
 
 export default function CreateInvoice() {
-  const navigate = useNavigate()
-  const [vendors, setVendors] = useState([])
-  const [clients, setClients] = useState([])
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState(null)
+  const navigate = useNavigate();
+  const [type, setType] = useState(null); // 'payable' | 'receivable'
+  const [vendors, setVendors] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const [form, setForm] = useState({
-    invoice_number: '',
-    issue_date: new Date().toISOString().split('T')[0],
-    due_date: '',
-    currency: 'USD',
-    tax_percent: 0,
-    payment_method: '',
-    description: '',
-    discount: 0,
-    vendor_id: '',
-    client_id: '',
-    status: 'draft',
-  })
-
-  const [lineItems, setLineItems] = useState([{ ...EMPTY_LINE }])
+  // Form state
+  const [entityId, setEntityId] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0,10));
+  const [dueDate, setDueDate] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [taxRate, setTaxRate] = useState(0);
+  const [description, setDescription] = useState('');
+  const [lineItems, setLineItems] = useState([{ ...EMPTY_ITEM }]);
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
-    vendorsApi.list().then(res => {
-      const list = Array.isArray(res) ? res : (res?.vendors || res?.data || [])
-      setVendors(list)
-    }).catch(() => {})
-    clientsApi.list().then(res => {
-      const list = Array.isArray(res) ? res : (res?.clients || res?.data || [])
-      setClients(list)
-    }).catch(() => {})
-  }, [])
+    vendorsApi.list({ limit: 200 }).then(r => setVendors(r.data || r || [])).catch(() => {});
+    clientsApi.list({ limit: 200 }).then(r => setClients(r.data || r || [])).catch(() => {});
+    settingsApi.get().then(s => { setSettings(s); setTaxRate(s?.default_tax_rate || 0); }).catch(() => {});
+  }, []);
 
-  const setField = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  // Calculations
+  const subtotal = lineItems.reduce((s, i) => s + ((i.quantity * i.unit_price) - (i.discount || 0)), 0);
+  const totalTax = subtotal * (taxRate / 100);
+  const grandTotal = subtotal + totalTax;
 
-  const setLine = (i, k, v) => setLineItems(prev =>
-    prev.map((item, idx) => idx === i ? { ...item, [k]: v } : item)
-  )
+  function updateItem(idx, field, value) {
+    setLineItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: field === 'description' ? value : parseFloat(value) || 0 } : item));
+  }
 
-  const addLine = () => setLineItems(prev => [...prev, { ...EMPTY_LINE }])
-  const removeLine = (i) => setLineItems(prev => prev.filter((_, idx) => idx !== i))
+  function addItem() { setLineItems(prev => [...prev, { ...EMPTY_ITEM }]); }
+  function removeItem(idx) { setLineItems(prev => prev.filter((_, i) => i !== idx)); }
 
-  // Live calculations
-  const subtotal = lineItems.reduce((s, l) => {
-    const qty = parseFloat(l.quantity) || 0
-    const price = parseFloat(l.unit_price) || 0
-    const disc = parseFloat(l.discount) || 0
-    return s + (qty * price - disc)
-  }, 0)
-  const invoiceDiscount = parseFloat(form.discount) || 0
-  const taxable = subtotal - invoiceDiscount
-  const totalTax = taxable * ((parseFloat(form.tax_percent) || 0) / 100)
-  const grandTotal = taxable + totalTax
-
-  const handleSubmit = async (statusOverride) => {
-    setSaving(true)
-    setError(null)
+  async function handleSubmit(sendNow = false) {
+    if (!entityId) { toast('Select a ' + (type === 'payable' ? 'vendor' : 'client'), 'error'); return; }
+    if (!invoiceNumber) { toast('Enter an invoice number', 'error'); return; }
+    setLoading(true);
     try {
-      const payload = {
-        ...form,
-        status: statusOverride || form.status,
+      const body = {
+        invoice_type: type,
+        invoice_number: invoiceNumber,
+        issue_date: issueDate,
+        due_date: dueDate || null,
+        currency,
+        tax_percent: taxRate,
         subtotal,
         total_tax: totalTax,
         grand_total: grandTotal,
-        tax_percent: parseFloat(form.tax_percent) || 0,
-        discount: invoiceDiscount,
-        line_items: lineItems.map(l => ({
-          description: l.description,
-          quantity: parseFloat(l.quantity) || 0,
-          unit_price: parseFloat(l.unit_price) || 0,
-          discount: parseFloat(l.discount) || 0,
-          line_subtotal: (parseFloat(l.quantity) || 0) * (parseFloat(l.unit_price) || 0) - (parseFloat(l.discount) || 0),
-        })),
+        description: description || null,
+        status: type === 'payable' ? 'unpaid' : (sendNow ? 'draft' : 'draft'),
+        ...(type === 'payable' ? { vendor_id: entityId } : { client_id: entityId }),
+      };
+      const inv = await invoicesApi.create(body);
+      // Create line items
+      for (const li of lineItems) {
+        if (li.description) {
+          await fetch(`/api/v1/invoices/${inv.id}/line-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...li, invoice_id: inv.id, line_subtotal: (li.quantity * li.unit_price) - li.discount, company_id: inv.company_id }),
+          }).catch(() => {});
+        }
       }
-      const res = await invoicesApi.create(payload)
-      navigate(`/invoices/${res.id || res.invoice?.id}`)
-    } catch (e) {
-      setError(e.message)
-      setSaving(false)
-    }
+      // Upload file if payable
+      if (type === 'payable' && file) {
+        await uploadApi.upload(file).catch(() => {});
+      }
+      // Send if receivable + sendNow
+      if (type === 'receivable' && sendNow) {
+        await invoicesApi.transition(inv.id, 'sent').catch(() => {});
+      }
+      toast(`Invoice ${inv.invoice_number} created`);
+      navigate(`/${type === 'payable' ? 'payables' : 'receivables'}/${inv.id}`);
+    } catch (e) { toast(e.message, 'error'); }
+    finally { setLoading(false); }
   }
 
+  if (!type) {
+    return (
+      <div style={{ maxWidth: 600, margin: '60px auto', textAlign: 'center' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Create Invoice</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: 32, fontSize: 14 }}>Choose the invoice type to begin</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <TypeCard
+            icon={FileDown} label="Record a Payable"
+            sub="An invoice you received from a vendor"
+            color="#3B82F6"
+            onClick={() => setType('payable')}
+          />
+          <TypeCard
+            icon={FileUp} label="Create a Receivable"
+            sub="An invoice you're sending to a client"
+            color="#22C55E"
+            onClick={() => setType('receivable')}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const entityList = type === 'payable' ? vendors : clients;
+  const entityLabel = type === 'payable' ? 'Vendor' : 'Client';
+
   return (
-    <div className="p-6 max-w-4xl space-y-5 animate-fade-up">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="btn-ghost p-2 rounded-xl">
-          <ArrowLeft size={16} />
-        </button>
-        <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-          New Invoice
-        </h1>
-      </div>
-
-      {error && (
-        <div className="card p-4 border-red-200 dark:border-red-900 text-sm text-red-600">
-          {error}
-        </div>
-      )}
-
-      {/* Invoice header info */}
-      <div className="card p-5 space-y-4">
-        <h2 className="text-sm font-semibold pb-2 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>
-          Invoice Details
+    <div style={{ maxWidth: 780, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+        <button className="btn-ghost" onClick={() => setType(null)} style={{ fontSize: 13, padding: '6px 12px' }}>← Back</button>
+        <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700 }}>
+          {type === 'payable' ? 'Record Payable' : 'Create Receivable'}
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Field label="Invoice Number" required>
-            <input className="input h-9 text-sm" value={form.invoice_number}
-              onChange={e => setField('invoice_number', e.target.value)}
-              placeholder="INV-001" />
-          </Field>
-          <Field label="Issue Date" required>
-            <input className="input h-9 text-sm" type="date" value={form.issue_date}
-              onChange={e => setField('issue_date', e.target.value)} />
-          </Field>
-          <Field label="Due Date">
-            <input className="input h-9 text-sm" type="date" value={form.due_date}
-              onChange={e => setField('due_date', e.target.value)} />
-          </Field>
-          <Field label="Currency" required>
-            <select className="input h-9 text-sm" value={form.currency}
-              onChange={e => setField('currency', e.target.value)}>
-              {['USD', 'EUR', 'GBP', 'TRY', 'AED', 'SAR'].map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Tax Rate (%)">
-            <input className="input h-9 text-sm" type="number" min="0" max="100" step="0.1"
-              value={form.tax_percent}
-              onChange={e => setField('tax_percent', e.target.value)}
-              placeholder="0" />
-          </Field>
-          <Field label="Payment Method">
-            <select className="input h-9 text-sm" value={form.payment_method}
-              onChange={e => setField('payment_method', e.target.value)}>
-              <option value="">— Select —</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="credit_card">Credit Card</option>
-              <option value="cash">Cash</option>
-              <option value="check">Check</option>
-            </select>
-          </Field>
-        </div>
-        <Field label="Description">
-          <textarea className="input text-sm resize-none" rows={2} value={form.description}
-            onChange={e => setField('description', e.target.value)}
-            placeholder="Optional invoice description" />
-        </Field>
       </div>
 
-      {/* Vendor & Client */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="card p-5 space-y-3">
-          <h2 className="text-sm font-semibold pb-2 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>
-            Vendor
-          </h2>
-          <Field label="Select Vendor">
-            <select className="input h-9 text-sm" value={form.vendor_id}
-              onChange={e => setField('vendor_id', e.target.value)}>
-              <option value="">— Select vendor —</option>
-              {vendors.map(v => (
-                <option key={v.id} value={v.id}>{v.name}</option>
-              ))}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <div className="card" style={{ padding: 20 }}>
+          <FormField label={entityLabel}>
+            <select className="input" value={entityId} onChange={e => setEntityId(e.target.value)} style={{ width: '100%' }}>
+              <option value="">Select {entityLabel}…</option>
+              {entityList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
             </select>
-          </Field>
+          </FormField>
+          <FormField label="Invoice Number">
+            <input className="input" value={invoiceNumber} onChange={e => setInvoiceNumber(e.target.value)} placeholder="INV-001" style={{ width: '100%' }} />
+          </FormField>
+          <FormField label="Currency">
+            <select className="input" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: '100%' }}>
+              {CURRENCIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </FormField>
         </div>
-        <div className="card p-5 space-y-3">
-          <h2 className="text-sm font-semibold pb-2 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>
-            Client
-          </h2>
-          <Field label="Select Client">
-            <select className="input h-9 text-sm" value={form.client_id}
-              onChange={e => setField('client_id', e.target.value)}>
-              <option value="">— Select client —</option>
-              {clients.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </Field>
+        <div className="card" style={{ padding: 20 }}>
+          <FormField label="Issue Date">
+            <input className="input" type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} style={{ width: '100%' }} />
+          </FormField>
+          <FormField label="Due Date">
+            <input className="input" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} style={{ width: '100%' }} />
+          </FormField>
+          <FormField label={`Tax Rate (%)`}>
+            <input className="input" type="number" value={taxRate} onChange={e => setTaxRate(parseFloat(e.target.value) || 0)} style={{ width: '100%' }} />
+          </FormField>
         </div>
       </div>
 
-      {/* Line items */}
-      <div className="card overflow-hidden">
-        <div className="px-5 py-3.5 border-b flex items-center justify-between"
-          style={{ borderColor: 'var(--border)' }}>
-          <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Line Items</h2>
-          <button onClick={addLine} className="btn-secondary text-xs h-7">
-            <Plus size={12} /> Add Line
+      {/* Line Items */}
+      <div className="card" style={{ marginBottom: 16, padding: 0, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontWeight: 600, fontSize: 13 }}>Line Items</span>
+          <button className="btn-secondary" onClick={addItem} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12 }}>
+            <Plus size={12} /> Add Row
           </button>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Description', 'Quantity', 'Unit Price', 'Discount', 'Subtotal', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-2.5 text-xs font-medium uppercase tracking-wide"
-                    style={{ color: 'var(--text-muted)' }}>
-                    {h}
-                  </th>
+                {['Description', 'Qty', 'Unit Price', 'Discount', 'Total', ''].map(h => (
+                  <th key={h} style={{ padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {lineItems.map((line, i) => {
-                const sub = (parseFloat(line.quantity) || 0) * (parseFloat(line.unit_price) || 0) - (parseFloat(line.discount) || 0)
+              {lineItems.map((li, idx) => {
+                const lineTotal = (li.quantity * li.unit_price) - li.discount;
                 return (
-                  <tr key={i} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-                    <td className="px-4 py-2">
-                      <input className="input h-8 text-sm min-w-[180px]"
-                        value={line.description}
-                        onChange={e => setLine(i, 'description', e.target.value)}
-                        placeholder="Item description" />
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '8px 12px', minWidth: 200 }}>
+                      <input className="input" value={li.description} onChange={e => updateItem(idx, 'description', e.target.value)} placeholder="Item description" style={{ width: '100%', fontSize: 12 }} />
                     </td>
-                    <td className="px-4 py-2">
-                      <input className="input h-8 text-sm w-20 font-mono"
-                        type="number" min="0" step="0.01"
-                        value={line.quantity}
-                        onChange={e => setLine(i, 'quantity', e.target.value)} />
+                    <td style={{ padding: '8px 12px', width: 70 }}>
+                      <input className="input" type="number" value={li.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} style={{ width: '100%', fontSize: 12 }} />
                     </td>
-                    <td className="px-4 py-2">
-                      <input className="input h-8 text-sm w-28 font-mono"
-                        type="number" min="0" step="0.01"
-                        value={line.unit_price}
-                        onChange={e => setLine(i, 'unit_price', e.target.value)} />
+                    <td style={{ padding: '8px 12px', width: 110 }}>
+                      <input className="input" type="number" value={li.unit_price} onChange={e => updateItem(idx, 'unit_price', e.target.value)} style={{ width: '100%', fontSize: 12 }} />
                     </td>
-                    <td className="px-4 py-2">
-                      <input className="input h-8 text-sm w-24 font-mono"
-                        type="number" min="0" step="0.01"
-                        value={line.discount}
-                        onChange={e => setLine(i, 'discount', e.target.value)} />
+                    <td style={{ padding: '8px 12px', width: 90 }}>
+                      <input className="input" type="number" value={li.discount} onChange={e => updateItem(idx, 'discount', e.target.value)} style={{ width: '100%', fontSize: 12 }} />
                     </td>
-                    <td className="px-4 py-2">
-                      <span className="font-mono text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                        {formatCurrency(sub, form.currency)}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">
-                      {lineItems.length > 1 && (
-                        <button onClick={() => removeLine(i)} className="btn-ghost p-1.5 text-red-400 hover:text-red-600">
-                          <Trash2 size={13} />
-                        </button>
-                      )}
+                    <td style={{ padding: '8px 12px', fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600 }}>{formatCurrency(lineTotal, currency)}</td>
+                    <td style={{ padding: '8px 12px' }}>
+                      {lineItems.length > 1 && <button className="btn-ghost" onClick={() => removeItem(idx)} style={{ padding: 4 }}><Trash2 size={13} color="#EF4444" /></button>}
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
         </div>
-
-        {/* Totals */}
-        <div className="p-5 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="flex justify-end">
-            <div className="w-64 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
-                <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>
-                  {formatCurrency(subtotal, form.currency)}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm items-center">
-                <span style={{ color: 'var(--text-muted)' }}>Discount</span>
-                <input className="input h-7 text-xs font-mono w-28 text-right"
-                  type="number" min="0" step="0.01"
-                  value={form.discount}
-                  onChange={e => setField('discount', e.target.value)}
-                  placeholder="0.00" />
-              </div>
-              <div className="flex justify-between text-sm">
-                <span style={{ color: 'var(--text-muted)' }}>Tax ({form.tax_percent}%)</span>
-                <span className="font-mono" style={{ color: 'var(--text-secondary)' }}>
-                  {formatCurrency(totalTax, form.currency)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Grand Total</span>
-                <span className="font-mono text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {formatCurrency(grandTotal, form.currency)}
-                </span>
-              </div>
+        <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ minWidth: 220, display: 'flex', flexDirection: 'column', gap: 5, fontSize: 13 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{formatCurrency(subtotal, currency)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--text-secondary)' }}>Tax ({taxRate}%)</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{formatCurrency(totalTax, currency)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 15, borderTop: '1px solid var(--border)', paddingTop: 6, marginTop: 2 }}>
+              <span>Total</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{formatCurrency(grandTotal, currency)}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex justify-end gap-3 pb-8">
-        <button onClick={() => navigate(-1)} className="btn-secondary">Cancel</button>
-        <button onClick={() => handleSubmit('draft')} disabled={saving} className="btn-secondary disabled:opacity-50">
-          Save as Draft
-        </button>
-        <button onClick={() => handleSubmit('sent')} disabled={saving} className="btn-primary disabled:opacity-50">
-          {saving ? 'Saving…' : 'Save & Send'}
+      {/* Notes + file upload */}
+      <div style={{ display: 'grid', gridTemplateColumns: type === 'payable' ? '1fr 1fr' : '1fr', gap: 16, marginBottom: 24 }}>
+        <div className="card" style={{ padding: 20 }}>
+          <FormField label="Description / Notes">
+            <textarea className="input" value={description} onChange={e => setDescription(e.target.value)} rows={3} style={{ width: '100%', resize: 'vertical' }} />
+          </FormField>
+        </div>
+        {type === 'payable' && (
+          <div className="card" style={{ padding: 20 }}>
+            <FormField label="Attach Invoice (PDF / Image)">
+              <div
+                onClick={() => document.getElementById('fi').click()}
+                style={{ border: '1.5px dashed var(--border)', borderRadius: 8, padding: '20px', textAlign: 'center', cursor: 'pointer', fontSize: 13, color: file ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                {file ? file.name : 'Click to attach file'}
+              </div>
+              <input id="fi" type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: 'none' }} onChange={e => setFile(e.target.files[0])} />
+            </FormField>
+          </div>
+        )}
+      </div>
+
+      {/* Submit */}
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+        <button className="btn-secondary" onClick={() => navigate(-1)} style={{ padding: '10px 20px' }}>Cancel</button>
+        {type === 'receivable' && (
+          <button className="btn-secondary" onClick={() => handleSubmit(false)} disabled={loading} style={{ padding: '10px 20px' }}>
+            Save as Draft
+          </button>
+        )}
+        <button className="btn-primary" onClick={() => handleSubmit(type === 'receivable')} disabled={loading} style={{ padding: '10px 24px' }}>
+          {loading ? 'Creating…' : type === 'payable' ? 'Record Payable' : 'Save & Send'}
         </button>
       </div>
     </div>
-  )
+  );
+}
+
+function TypeCard({ icon: Icon, label, sub, color, onClick }) {
+  return (
+    <div className="card" onClick={onClick} style={{ cursor: 'pointer', padding: '28px 24px', textAlign: 'center', transition: 'transform 0.15s, box-shadow 0.15s' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.1)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}>
+      <div style={{ width: 48, height: 48, borderRadius: 12, background: color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+        <Icon size={22} color={color} />
+      </div>
+      <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{label}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }}>{sub}</div>
+    </div>
+  );
+}
+
+function FormField({ label, children }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
+      {children}
+    </div>
+  );
 }

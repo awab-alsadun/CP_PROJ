@@ -52,6 +52,21 @@ class Settings(BaseSettings):
     # --- MVP ---
     MVP_COMPANY_ID: str = "7bf697fc-7220-40c7-9678-542d624d22ad"
 
+    # --- Email delivery ---
+    # "mock" → logs to console only, never fails
+    # "sendgrid" → calls SendGrid API v3
+    EMAIL_PROVIDER: Literal["mock", "sendgrid"] = "mock"
+    SENDGRID_API_KEY: str = ""
+    SENDGRID_FROM_EMAIL: str = "noreply@invoicesystem.com"
+
+    # --- SMS delivery ---
+    # "mock" → logs to console only, never fails
+    # "twilio" → calls Twilio REST API
+    SMS_PROVIDER: Literal["mock", "twilio"] = "mock"
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_FROM_NUMBER: str = ""
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

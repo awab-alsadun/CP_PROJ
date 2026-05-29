@@ -25,11 +25,6 @@ def create_vendor(db: Client, payload: VendorCreate) -> dict:
 def get_or_create_vendor(
     db: Client, company_id: uuid.UUID, name: str, tax_id: str, **kwargs
 ) -> dict:
-    """
-    Upsert by (company_id, tax_id). Used by extraction pipeline —
-    if the vendor already exists for this tenant, return it.
-    Otherwise create it.
-    """
     try:
         result = (
             db.table("vendors")
@@ -53,21 +48,56 @@ def get_or_create_vendor(
 
 
 def list_vendors(
-    db: Client, company_id: uuid.UUID, limit: int = 50, offset: int = 0
-) -> list[dict]:
+    db: Client,
+    company_id: uuid.UUID,
+    limit: int = 20,
+    offset: int = 0,
+    search: str | None = None,
+) -> dict:
+    """Returns paginated response with optional search on name/tax_id."""
     try:
-        result = (
+        # --- Count query ---
+        count_query = (
+            db.table("vendors")
+            .select("id", count="exact")
+            .eq("company_id", str(company_id))
+            .is_("deleted_at", "null")
+        )
+
+        # --- Data query ---
+        data_query = (
             db.table("vendors")
             .select("*")
             .eq("company_id", str(company_id))
             .is_("deleted_at", "null")
+        )
+
+        if search:
+            # supabase-py doesn't support OR natively across columns,
+            # so search name only via ilike, then also check tax_id in Python
+            # For simplicity: use .or_() filter
+            or_filter = f"name.ilike.%{search}%,tax_id.ilike.%{search}%"
+            count_query = count_query.or_(or_filter)
+            data_query = data_query.or_(or_filter)
+
+        count_result = count_query.execute()
+        total = count_result.count or 0
+
+        result = (
+            data_query
             .order("created_at", desc=True)
             .range(offset, offset + limit - 1)
             .execute()
         )
     except Exception as e:
         raise DatabaseError("Failed to list vendors", detail=str(e))
-    return result.data
+
+    return {
+        "data": result.data or [],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
 
 def get_vendor(db: Client, vendor_id: uuid.UUID) -> dict:

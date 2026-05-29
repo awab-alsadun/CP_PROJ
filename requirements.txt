@@ -13,3 +13,4 @@ img2pdf
 sentence-transformers
 docling
 cohere
+reportlab

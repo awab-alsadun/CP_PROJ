@@ -37,6 +37,12 @@ export function formatRelative(dateStr) {
   return formatDate(dateStr)
 }
 
+export function daysOverdue(dueDateStr) {
+  if (!dueDateStr) return 0
+  const diff = Math.floor((Date.now() - new Date(dueDateStr)) / 86400000)
+  return diff > 0 ? diff : 0
+}
+
 export function confidenceColor(score) {
   if (score === null || score === undefined) return 'text-[var(--text-muted)]'
   if (score >= 0.85) return 'confidence-high'
@@ -53,12 +59,14 @@ export function confidenceLabel(score) {
 
 export function statusConfig(status) {
   const configs = {
-    draft:   { label: 'Draft',   class: 'badge-draft',   dot: '#A8A89F' },
-    sent:    { label: 'Sent',    class: 'badge-sent',    dot: '#3B82F6' },
-    paid:    { label: 'Paid',    class: 'badge-paid',    dot: '#22C55E' },
-    overdue: { label: 'Overdue', class: 'badge-overdue', dot: '#EF4444' },
+    draft:          { label: 'Draft',   class: 'badge-draft',          dot: '#A8A89F' },
+    sent:           { label: 'Sent',    class: 'badge-sent',           dot: '#3B82F6' },
+    paid:           { label: 'Paid',    class: 'badge-paid',           dot: '#22C55E' },
+    overdue:        { label: 'Overdue', class: 'badge-overdue',        dot: '#EF4444' },
+    unpaid:         { label: 'Unpaid',  class: 'badge-unpaid',         dot: '#6B7280' },
+    partially_paid: { label: 'Partial', class: 'badge-partially-paid', dot: '#F59E0B' },
   }
-  return configs[status] || configs.draft
+  return configs[status] || { label: status, class: 'badge-draft', dot: '#A8A89F' }
 }
 
 export function truncate(str, n = 40) {

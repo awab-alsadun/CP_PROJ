@@ -10,23 +10,35 @@ async function request(path, options = {}) {
     ...options,
   })
   if (!res.ok) {
+    const ct = res.headers.get('content-type') || ''
+    if (ct.includes('application/pdf') || ct.includes('application/octet-stream')) {
+      throw new Error(`HTTP ${res.status}`)
+    }
     const err = await res.json().catch(() => ({ detail: 'Request failed' }))
     const detail = Array.isArray(err.detail)
       ? err.detail.map(e => `${e.loc?.join('.')}: ${e.msg}`).join(', ')
       : (err.detail || err.error || `HTTP ${res.status}`)
     throw new Error(detail)
   }
-  return res.json()
+  const ct = res.headers.get('content-type') || ''
+  if (ct.includes('application/pdf') || ct.includes('application/octet-stream')) {
+    return res.blob()
+  }
+  const text = await res.text()
+  return text ? JSON.parse(text) : null
 }
 
+// ── Invoices ─────────────────────────────────────────────────────────────────
+
 export const invoicesApi = {
-  list: ({ page = 1, limit = 50, status, search } = {}) => {
+  list: ({ page = 1, limit = 50, status, search, invoice_type } = {}) => {
     const q = new URLSearchParams()
     q.set('company_id', getCompanyId())
     q.set('limit', limit)
     q.set('offset', (page - 1) * limit)
     if (status && status !== 'all') q.set('status', status)
     if (search?.trim()) q.set('search', search.trim())
+    if (invoice_type) q.set('invoice_type', invoice_type)
     return request(`/invoices/?${q}`)
   },
   get: (id) => request(`/invoices/${id}`),
@@ -44,14 +56,41 @@ export const invoicesApi = {
   getPayments:  (id) => request(`/invoices/${id}/payments`),
   getLineItems: (id) => request(`/invoices/${id}/line-items`),
   getRaw:       (id) => request(`/invoices/${id}/raw`),
+  getPdf:       (id) => request(`/invoices/${id}/pdf`),
+  getComplianceFlags: (id) => request(`/invoices/${id}/compliance-flags`),
+  creditNote: (id, { amount, reason }) => request(`/invoices/${id}/credit-note`, {
+    method: 'POST',
+    body: JSON.stringify({ amount, reason }),
+  }),
+  refund: (id, { payment_id, amount }) => request(`/invoices/${id}/refund`, {
+    method: 'POST',
+    body: JSON.stringify({ payment_id, amount }),
+  }),
 }
 
+// ── Payments ─────────────────────────────────────────────────────────────────
+
+export const paymentsApi = {
+  allocate: ({ entity_id, entity_type, amount, currency, method, reference, payment_date }) =>
+    request('/payments/allocate', {
+      method: 'POST',
+      body: JSON.stringify({
+        entity_id, entity_type, amount, currency,
+        method, reference, payment_date,
+        company_id: getCompanyId(),
+      }),
+    }),
+}
+
+// ── Vendors ───────────────────────────────────────────────────────────────────
+
 export const vendorsApi = {
-  list: ({ page = 1, limit = 50 } = {}) => {
+  list: ({ page = 1, limit = 50, search } = {}) => {
     const q = new URLSearchParams()
     q.set('company_id', getCompanyId())
     q.set('limit', limit)
     q.set('offset', (page - 1) * limit)
+    if (search?.trim()) q.set('search', search.trim())
     return request(`/vendors/?${q}`)
   },
   get: (id) => request(`/vendors/${id}`),
@@ -60,12 +99,15 @@ export const vendorsApi = {
   delete: (id) => request(`/vendors/${id}`, { method: 'DELETE' }),
 }
 
+// ── Clients ───────────────────────────────────────────────────────────────────
+
 export const clientsApi = {
-  list: ({ page = 1, limit = 50 } = {}) => {
+  list: ({ page = 1, limit = 50, search } = {}) => {
     const q = new URLSearchParams()
     q.set('company_id', getCompanyId())
     q.set('limit', limit)
     q.set('offset', (page - 1) * limit)
+    if (search?.trim()) q.set('search', search.trim())
     return request(`/clients/?${q}`)
   },
   get: (id) => request(`/clients/${id}`),
@@ -73,6 +115,8 @@ export const clientsApi = {
   update: (id, body) => request(`/clients/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (id) => request(`/clients/${id}`, { method: 'DELETE' }),
 }
+
+// ── Upload ────────────────────────────────────────────────────────────────────
 
 export const uploadApi = {
   upload: async (file) => {
@@ -86,6 +130,8 @@ export const uploadApi = {
     return res.json()
   }
 }
+
+// ── Documents ─────────────────────────────────────────────────────────────────
 
 export const documentsApi = {
   upload: async (file, documentType = 'general', country = null) => {
@@ -104,6 +150,8 @@ export const documentsApi = {
   delete: (id) => request(`/documents/${id}`, { method: 'DELETE' }),
   update: (id, body) => request(`/documents/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 }
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
 
 export const analyticsApi = {
   dashboard: () => {
@@ -132,6 +180,8 @@ export const analyticsApi = {
   },
 }
 
+// ── Notifications ─────────────────────────────────────────────────────────────
+
 export const notificationsApi = {
   list: (unreadOnly = false, limit = 20) => {
     const q = new URLSearchParams({ company_id: getCompanyId(), limit })
@@ -142,9 +192,55 @@ export const notificationsApi = {
   markAllRead: () => request(`/notifications/read-all`, { method: 'POST' }),
 }
 
+// ── Query ─────────────────────────────────────────────────────────────────────
+
 export const queryApi = {
   ask: (question) => request('/query', {
     method: 'POST',
     body: JSON.stringify({ question }),
   })
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────────
+
+export const settingsApi = {
+  get: () => {
+    const q = new URLSearchParams({ company_id: getCompanyId() })
+    return request(`/settings?${q}`)
+  },
+  update: (data) => request('/settings', {
+    method: 'PATCH',
+    body: JSON.stringify({ ...data, company_id: getCompanyId() }),
+  }),
+  taxRates: () => request('/settings/tax-rates'),
+  setPassword: (password) => request('/settings/set-password', {
+    method: 'POST',
+    body: JSON.stringify({ password, company_id: getCompanyId() }),
+  }),
+  pipeline: () => {
+    const q = new URLSearchParams({ company_id: getCompanyId() })
+    return request(`/settings/pipeline?${q}`)
+  },
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+
+export const adminApi = {
+  runOverdueCheck: () => request('/admin/run-overdue-check', {
+    method: 'POST',
+    body: JSON.stringify({ company_id: getCompanyId() }),
+  }),
+  runComplianceCheck: () => request('/admin/run-compliance-check', {
+    method: 'POST',
+    body: JSON.stringify({ company_id: getCompanyId() }),
+  }),
+}
+
+// ── Compliance ────────────────────────────────────────────────────────────────
+
+export const complianceApi = {
+  summary: () => {
+    const q = new URLSearchParams({ company_id: getCompanyId() })
+    return request(`/compliance/summary?${q}`)
+  },
 }

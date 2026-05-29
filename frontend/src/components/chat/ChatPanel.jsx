@@ -1,243 +1,122 @@
-import { useRef, useEffect, useState } from 'react'
-import { X, Maximize2, Minimize2, SendHorizontal, Trash2, Bot, FileText, Scale, ChevronDown, ChevronUp } from 'lucide-react'
-import { useChat } from '../../context/ChatContext'
-import { formatRelative, cn } from '../../lib/utils'
+import React, { useEffect, useRef, useState } from 'react';
+import { X, Send, FileText, Scale, Trash2 } from 'lucide-react';
+import { useChat } from '../../context/ChatContext';
+import { formatDate } from '../../lib/utils';
 
-const QUERY_TYPE_BADGE = {
-  sql:            { label: 'SQL',    bg: '#EFF6FF', color: '#3B82F6' },
-  rag_invoice:    { label: 'RAG',    bg: '#F5F3FF', color: '#8B5CF6' },
-  rag_compliance: { label: 'RAG',    bg: '#F5F3FF', color: '#8B5CF6' },
-  hybrid:         { label: 'Hybrid', bg: '#FFFBEB', color: '#D4A847' },
-}
+const QUERY_BADGE = {
+  sql:            { label: 'SQL',    color: '#3B82F6' },
+  rag_invoice:    { label: 'RAG',    color: '#8B5CF6' },
+  rag_compliance: { label: 'RAG',    color: '#8B5CF6' },
+  hybrid:         { label: 'Hybrid', color: '#D4A847' },
+};
 
-function SourceCard({ source }) {
-  const [expanded, setExpanded] = useState(false)
-  const isInvoice = source.source_type === 'invoices'
-  const Icon = isInvoice ? FileText : Scale
-  const iconColor = isInvoice ? '#3B82F6' : '#8B5CF6'
-  const pct = source.similarity != null ? Math.round(source.similarity * 100) : null
+export default function ChatPanel({ open, onClose }) {
+  const { messages, sendMessage, clearMessages, isLoading } = useChat();
+  const [input, setInput] = useState('');
+  const bottomRef = useRef(null);
 
-  return (
-    <div className="rounded-xl border text-xs overflow-hidden"
-      style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
-      <div
-        className="flex items-center gap-2 px-3 py-2 cursor-pointer"
-        onClick={() => source.chunk_text && setExpanded(v => !v)}
-      >
-        <Icon size={12} style={{ color: iconColor }} className="flex-shrink-0" />
-        <span className="flex-1 font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-          {source.citation || source.invoice_number || source.document_name || 'Source'}
-        </span>
-        {pct != null && (
-          <span className="font-mono flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
-            {pct}%
-          </span>
-        )}
-        {source.chunk_text && (
-          expanded
-            ? <ChevronUp size={11} style={{ color: 'var(--text-muted)' }} className="flex-shrink-0" />
-            : <ChevronDown size={11} style={{ color: 'var(--text-muted)' }} className="flex-shrink-0" />
-        )}
-      </div>
-      {expanded && source.chunk_text && (
-        <div className="px-3 pb-2.5 pt-0 border-t" style={{ borderColor: 'var(--border)' }}>
-          <p className="leading-relaxed line-clamp-4 mt-1.5"
-            style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
-            {source.chunk_text.slice(0, 300)}{source.chunk_text.length > 300 ? '…' : ''}
-          </p>
-          {source.section_title && (
-            <p className="mt-1 font-medium" style={{ color: 'var(--text-muted)', fontSize: 10 }}>
-              {source.section_title}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-function ChatMessage({ msg }) {
-  const isUser = msg.role === 'user'
-  const badge = msg.queryType ? QUERY_TYPE_BADGE[msg.queryType] : null
-  const sources = msg.sources || []
-
-  return (
-    <div className={cn('flex gap-3 animate-fade-up', isUser && 'flex-row-reverse')}>
-      <div className={cn(
-        'w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-semibold',
-        isUser ? 'text-white' : 'border',
-      )} style={{
-        background: isUser ? 'var(--accent)' : 'var(--bg-secondary)',
-        borderColor: 'var(--border)',
-        color: isUser ? '#131310' : 'var(--text-secondary)',
-      }}>
-        {isUser ? 'U' : <Bot size={14} />}
-      </div>
-
-      <div className={cn('flex flex-col gap-1.5 max-w-[82%]', isUser && 'items-end')}>
-        {/* Query type badge */}
-        {!isUser && badge && (
-          <span className="self-start text-xs px-2 py-0.5 rounded-full font-medium"
-            style={{ background: badge.bg, color: badge.color }}>
-            {badge.label}
-          </span>
-        )}
-
-        <div className={cn(
-          'px-3 py-2.5 rounded-2xl text-sm leading-relaxed',
-          isUser ? 'rounded-tr-sm' : 'rounded-tl-sm',
-          msg.error && 'border border-red-200',
-        )} style={{
-          background: isUser ? 'var(--accent)' : 'var(--bg-secondary)',
-          color: isUser ? '#131310' : 'var(--text-primary)',
-        }}>
-          {msg.content}
-        </div>
-
-        {/* Source cards */}
-        {!isUser && sources.length > 0 && (
-          <div className="w-full space-y-1 mt-0.5">
-            {sources.slice(0, 6).map((s, i) => (
-              <SourceCard key={i} source={s} />
-            ))}
-          </div>
-        )}
-
-        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          {formatRelative(msg.timestamp)}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function TypingIndicator() {
-  return (
-    <div className="flex gap-3">
-      <div className="w-7 h-7 rounded-xl flex items-center justify-center border flex-shrink-0"
-        style={{ background: 'var(--bg-secondary)', borderColor: 'var(--border)' }}>
-        <Bot size={14} style={{ color: 'var(--text-secondary)' }} />
-      </div>
-      <div className="px-3 py-3 rounded-2xl rounded-tl-sm flex items-center gap-1"
-        style={{ background: 'var(--bg-secondary)' }}>
-        <span className="loading-dot" />
-        <span className="loading-dot" />
-        <span className="loading-dot" />
-      </div>
-    </div>
-  )
-}
-
-export default function ChatPanel() {
-  const { isOpen, setIsOpen, isExpanded, setIsExpanded, messages, isLoading, sendMessage, clearMessages } = useChat()
-  const [input, setInput] = useState('')
-  const messagesEndRef = useRef(null)
-  const inputRef = useRef(null)
-
-  useEffect(() => {
-    if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
-  }, [isOpen, messages])
-
-  const handleSend = () => {
-    if (!input.trim()) return
-    sendMessage(input.trim())
-    setInput('')
+  function handleSend() {
+    const q = input.trim();
+    if (!q || isLoading) return;
+    setInput('');
+    sendMessage(q);
   }
 
-  if (!isOpen) return null
-
   return (
-    <div
-      className={cn(
-        'fixed top-0 right-0 h-full z-50 flex flex-col border-l animate-slide-in-right',
-        isExpanded ? 'w-full max-w-2xl' : 'w-80 sm:w-96'
-      )}
-      style={{ background: 'var(--bg-sidebar)', borderColor: 'var(--border)' }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 h-14 border-b flex-shrink-0"
-        style={{ borderColor: 'var(--border)' }}>
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl flex items-center justify-center"
-            style={{ background: 'var(--accent)' }}>
-            <Bot size={14} color="#131310" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold leading-none" style={{ color: 'var(--text-primary)' }}>
-              Invoice AI
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-              Ask anything about your data
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1">
-          <button onClick={clearMessages} className="btn-ghost p-1.5 rounded-lg" title="Clear chat">
-            <Trash2 size={14} />
-          </button>
-          <button onClick={() => setIsExpanded(e => !e)} className="btn-ghost p-1.5 rounded-lg">
-            {isExpanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          </button>
-          <button onClick={() => { setIsOpen(false); setIsExpanded(false) }}
-            className="btn-ghost p-1.5 rounded-lg">
-            <X size={14} />
-          </button>
+    <div style={{
+      position: 'fixed', right: open ? 0 : -400, top: 0, bottom: 0, width: 380,
+      background: 'var(--bg-card)', borderLeft: '1px solid var(--border)',
+      display: 'flex', flexDirection: 'column', zIndex: 300,
+      transition: 'right 0.25s ease', boxShadow: open ? '-8px 0 40px rgba(0,0,0,0.15)' : 'none',
+    }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontWeight: 600, fontSize: 14, fontFamily: 'var(--font-display)' }}>AI Assistant</span>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button className="btn-ghost" onClick={clearMessages} title="Clear" style={{ padding: 6, borderRadius: 6 }}><Trash2 size={14} /></button>
+          <button className="btn-ghost" onClick={onClose} style={{ padding: 6, borderRadius: 6 }}><X size={14} /></button>
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {messages.map(msg => <ChatMessage key={msg.id} msg={msg} />)}
-        {isLoading && <TypingIndicator />}
-        <div ref={messagesEndRef} />
+      <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 12, marginTop: 40 }}>
+            Ask about invoices, vendors, payments, or analytics.
+          </div>
+        )}
+        {messages.map(msg => (
+          <Message key={msg.id} msg={msg} />
+        ))}
+        {isLoading && (
+          <div style={{ display: 'flex', gap: 4, padding: '8px 0' }}>
+            {[0,1,2].map(i => <span key={i} className="loading-dot" style={{ animationDelay: `${i*0.15}s` }} />)}
+          </div>
+        )}
+        <div ref={bottomRef} />
       </div>
 
-      {/* Suggestions */}
-      {messages.length <= 1 && !isLoading && (
-        <div className="px-4 pb-2 flex flex-col gap-1.5">
-          <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Suggestions</p>
-          {[
-            'Which vendors have unpaid invoices?',
-            'Total revenue this month',
-            'Show overdue invoices',
-          ].map(s => (
-            <button key={s} onClick={() => sendMessage(s)}
-              className="text-left text-xs px-3 py-2 rounded-xl border transition-all duration-150 hover:border-[var(--accent)]"
-              style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg-secondary)' }}>
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Input */}
-      <div className="p-4 border-t flex-shrink-0" style={{ borderColor: 'var(--border)' }}>
-        <div className="flex gap-2 items-end">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() } }}
-            placeholder="Ask about your invoices..."
-            rows={1}
-            className="input flex-1 resize-none leading-relaxed"
-            style={{ minHeight: '38px', maxHeight: '120px' }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || isLoading}
-            className="btn-primary h-9 px-3 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <SendHorizontal size={15} />
-          </button>
-        </div>
-        <p className="text-xs mt-2 text-center" style={{ color: 'var(--text-muted)' }}>
-          Enter to send · Shift+Enter for newline
-        </p>
+      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+        <input
+          className="input"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleSend()}
+          placeholder="Ask anything…"
+          style={{ flex: 1, fontSize: 13, padding: '8px 12px' }}
+        />
+        <button className="btn-primary" onClick={handleSend} disabled={isLoading} style={{ padding: '8px 12px', borderRadius: 8 }}>
+          <Send size={14} />
+        </button>
       </div>
     </div>
-  )
+  );
+}
+
+function Message({ msg }) {
+  const [expanded, setExpanded] = useState(false);
+  const badge = QUERY_BADGE[msg.queryType];
+  const isUser = msg.role === 'user';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: isUser ? 'flex-end' : 'flex-start', gap: 4 }}>
+      <div style={{
+        maxWidth: '90%', padding: '8px 12px', borderRadius: isUser ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
+        background: isUser ? 'var(--accent)' : (msg.error ? '#EF444422' : 'var(--bg-secondary)'),
+        color: isUser ? '#131310' : (msg.error ? '#EF4444' : 'var(--text-primary)'),
+        fontSize: 13, lineHeight: 1.6,
+      }}>
+        {msg.content}
+      </div>
+
+      {badge && (
+        <span style={{ fontSize: 10, fontWeight: 600, color: badge.color, background: badge.color + '20', padding: '1px 6px', borderRadius: 4 }}>
+          {badge.label}
+        </span>
+      )}
+
+      {msg.sources?.length > 0 && (
+        <button
+          className="btn-ghost"
+          onClick={() => setExpanded(e => !e)}
+          style={{ fontSize: 11, padding: '2px 6px', color: 'var(--text-muted)' }}>
+          {expanded ? 'Hide' : `${msg.sources.length} source${msg.sources.length > 1 ? 's' : ''}`}
+        </button>
+      )}
+
+      {expanded && msg.sources.slice(0, 6).map((s, i) => {
+        const Icon = s.source_type === 'regulation' ? Scale : FileText;
+        return (
+          <div key={i} style={{ width: '90%', padding: '8px 10px', borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border)', fontSize: 11 }}>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
+              <Icon size={11} color="var(--text-muted)" />
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{s.citation || `Source ${i + 1}`}</span>
+              {s.similarity != null && <span style={{ color: 'var(--text-muted)', marginLeft: 'auto' }}>{Math.round(s.similarity * 100)}%</span>}
+            </div>
+            {s.chunk_text && <div style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>{s.chunk_text.slice(0, 120)}…</div>}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
