@@ -89,11 +89,36 @@ def _attach_vendor_client_names(db: Client, invoices: list[dict]) -> list[dict]:
     return invoices
 
 
+def _insert_compliance_flag(
+    db: Client, company_id: str, invoice_id: str,
+    flag_type: str, severity: str, reason: str,
+) -> None:
+    """Best-effort compliance flag insert. Never raises."""
+    try:
+        db.table("compliance_flags").insert({
+            "company_id": company_id,
+            "invoice_id": invoice_id,
+            "flag_type":  flag_type,
+            "severity":   severity,
+            "reason":     reason,
+        }).execute()
+        log.warning(
+            f"compliance_flag  invoice_id={invoice_id}  type={flag_type}  "
+            f"severity={severity}  reason={reason!r}"
+        )
+    except Exception as e:
+        log.error(
+            f"compliance_flag_insert_failed  invoice_id={invoice_id}  "
+            f"type={flag_type}  error={e}"
+        )
+
+
 # ---------------------------------------------------------------------------
 # CRUD
 # ---------------------------------------------------------------------------
 
 def create_invoice(db: Client, payload: InvoiceCreate) -> dict:
+    """Bare insert. Kept for callers that don't need the full receivable flow."""
     try:
         data = payload.model_dump(mode="json")
         result = db.table("invoices").insert(data).execute()
@@ -149,7 +174,6 @@ def list_invoices(
                 pass
 
         if search:
-            # Fetch all matching IDs first, then paginate in Python
             broad_q = (
                 db.table("invoices")
                 .select("id, invoice_number, vendor_id, client_id")
@@ -186,7 +210,6 @@ def list_invoices(
             invoices = data_result.data or []
 
         else:
-            # No search — straightforward paginated query
             count_q = (
                 db.table("invoices")
                 .select("id", count="exact")
@@ -310,6 +333,316 @@ def soft_delete_invoice(db: Client, invoice_id: uuid.UUID) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Receivable creation (form input) — full flow
+# ---------------------------------------------------------------------------
+
+def _fetch_client_for_pdf(
+    db: Client,
+    client_id: str | None,
+    client_address_id: str | None,
+) -> dict:
+    """Compose the client_data dict the renderer expects."""
+    if not client_id:
+        return {"address": {}}
+    try:
+        cr = (
+            db.table("clients")
+            .select("name, tax_id, email, phone")
+            .eq("id", str(client_id))
+            .single()
+            .execute()
+        )
+        client = cr.data or {}
+    except Exception as e:
+        log.error(f"client fetch failed for {client_id}: {e}")
+        client = {}
+
+    address: dict = {}
+    if client_address_id:
+        try:
+            ar = (
+                db.table("addresses")
+                .select("street, city, state, postal_code, country")
+                .eq("id", str(client_address_id))
+                .single()
+                .execute()
+            )
+            address = ar.data or {}
+        except Exception as e:
+            log.error(f"address fetch failed for {client_address_id}: {e}")
+
+    return {**client, "address": address}
+
+
+def _build_raw_text(invoice: dict, client: dict, line_items: list) -> str:
+    """Plain-text representation of the invoice for raw_text storage."""
+    lines: list[str] = []
+    lines.append(f"Invoice: {invoice.get('invoice_number')}")
+    lines.append("Type: receivable")
+    lines.append("")
+    lines.append("From: K4Y")
+    lines.append("1200 Tech Park Drive, Suite 400, Austin, TX 78701")
+    lines.append("Tax ID: 84-2957301")
+    lines.append("")
+    lines.append(f"To: {client.get('name', 'Unknown')}")
+    addr = client.get("address") or {}
+    addr_parts = [
+        addr.get("street"),
+        ", ".join(p for p in [addr.get("city"), addr.get("state"), addr.get("postal_code")] if p),
+        addr.get("country"),
+    ]
+    for ap in addr_parts:
+        if ap:
+            lines.append(ap)
+    if client.get("tax_id"):
+        lines.append(f"Tax ID: {client['tax_id']}")
+    lines.append("")
+    lines.append(f"Issue date: {invoice.get('issue_date')}")
+    if invoice.get("due_date"):
+        lines.append(f"Due date: {invoice['due_date']}")
+    lines.append(f"Currency: {invoice.get('currency')}")
+    lines.append("")
+    lines.append("Line items:")
+    for i, li in enumerate(line_items, 1):
+        lines.append(
+            f"  {i}. {li.get('description')} | "
+            f"qty={li.get('quantity')} | "
+            f"unit_price={li.get('unit_price')} | "
+            f"subtotal={li.get('line_subtotal')}"
+        )
+    lines.append("")
+    lines.append(f"Subtotal: {invoice.get('subtotal')}")
+    lines.append(f"Tax ({invoice.get('tax_percent')}%): {invoice.get('total_tax')}")
+    if invoice.get("discount"):
+        lines.append(f"Discount: {invoice.get('discount')}")
+    lines.append(f"Grand total: {invoice.get('grand_total')}")
+    return "\n".join(lines)
+
+
+def _build_extraction_json(invoice: dict, client: dict, line_items: list) -> dict:
+    """
+    Synthetic extraction_json matching the shape the OCR/LLM pipeline produces.
+    Used by embedding_service chunk builders, so the same keys must be present.
+    """
+    return {
+        "schema_version": "1.0",
+        "document_metadata": {
+            "document_type":        "invoice",
+            "extraction_timestamp": datetime.utcnow().isoformat(),
+            "confidence_score":     1.0,
+            "source":               "form_input",
+        },
+        "invoice": {
+            "invoice_number": invoice.get("invoice_number"),
+            "issue_date":     invoice.get("issue_date"),
+            "due_date":       invoice.get("due_date"),
+            "currency":       invoice.get("currency"),
+            "tax_percent":    invoice.get("tax_percent"),
+            "subtotal":       invoice.get("subtotal"),
+            "total_tax":      invoice.get("total_tax"),
+            "grand_total":    invoice.get("grand_total"),
+            "discount":       invoice.get("discount"),
+            "payment_method": invoice.get("payment_method"),
+            "description":    invoice.get("description"),
+            "status":         invoice.get("status"),
+        },
+        "vendor": None,
+        "client": {
+            "name":    client.get("name"),
+            "tax_id":  client.get("tax_id"),
+            "email":   client.get("email"),
+            "phone":   client.get("phone"),
+            "address": client.get("address") or {},
+        },
+        "line_items": [
+            {
+                "description":   li.get("description"),
+                "quantity":      li.get("quantity"),
+                "unit_price":    li.get("unit_price"),
+                "line_subtotal": li.get("line_subtotal"),
+                "discount":      li.get("discount", 0),
+            } for li in line_items
+        ],
+        "payments": [],
+    }
+
+
+def create_receivable_invoice(db: Client, payload) -> dict:
+    """
+    Create a receivable invoice from structured form input.
+
+    Flow:
+      1. Insert invoice row (fatal on failure)
+      2. Insert line_items (best-effort)
+      3. Fetch client + address for PDF
+      4. Render PDF (non-fatal → pdf_render_failed flag)
+      5. Insert raw_doc with storage_path=None (non-fatal)
+      6. Upload PDF, update raw_doc.storage_path (non-fatal → storage_upload_failed)
+      7. Generate embeddings (non-fatal → embedding_failed)
+      8. Run compliance validation (non-fatal)
+
+    payload: any pydantic model exposing model_dump(mode="json"). Must contain
+             InvoiceCreate fields plus an optional `line_items` list.
+    """
+    # ── Step 1: Insert invoice ────────────────────────────────────────────
+    data = payload.model_dump(mode="json")
+    line_items_input = data.pop("line_items", []) or []
+
+    try:
+        result = db.table("invoices").insert(data).execute()
+    except Exception as e:
+        raise DatabaseError("Failed to create receivable invoice", detail=str(e))
+    if not result.data:
+        raise DatabaseError("Invoice insert returned no data")
+
+    invoice    = result.data[0]
+    invoice_id = invoice["id"]
+    company_id = invoice["company_id"]
+    inv_num    = invoice.get("invoice_number", "Unknown")
+
+    log.info(
+        f"receivable_create  invoice_id={invoice_id}  "
+        f"invoice_number={inv_num!r}  client_id={invoice.get('client_id')}"
+    )
+
+    # ── Step 2: Insert line_items ─────────────────────────────────────────
+    line_items_rows: list[dict] = []
+    if line_items_input:
+        rows = [{
+            "company_id":    company_id,
+            "invoice_id":    invoice_id,
+            "description":   li.get("description", ""),
+            "quantity":      li.get("quantity", 1),
+            "unit_price":    li.get("unit_price", 0),
+            "line_subtotal": li.get("line_subtotal", 0),
+            "discount":      li.get("discount", 0),
+        } for li in line_items_input]
+        try:
+            li_result = db.table("line_items").insert(rows).execute()
+            line_items_rows = li_result.data or rows
+            log.info(
+                f"receivable_create  line_items_inserted={len(line_items_rows)}  "
+                f"invoice_id={invoice_id}"
+            )
+        except Exception as e:
+            log.error(
+                f"receivable_create  stage=line_items_insert_failed  "
+                f"invoice_id={invoice_id}  error={e}"
+            )
+            line_items_rows = rows  # use the prepared rows for PDF/embedding
+
+    # ── Step 3: Fetch client + address for PDF ────────────────────────────
+    client_data = _fetch_client_for_pdf(
+        db, invoice.get("client_id"), invoice.get("client_address_id")
+    )
+
+    # Build text artifacts once — shared by raw_doc and embedding
+    raw_text        = _build_raw_text(invoice, client_data, line_items_rows)
+    extraction_json = _build_extraction_json(invoice, client_data, line_items_rows)
+
+    # ── Step 4: Render PDF (in-memory) ────────────────────────────────────
+    pdf_bytes: bytes | None = None
+    try:
+        from app.services.receivable_pdf_renderer import render_receivable_pdf
+        pdf_bytes = render_receivable_pdf(invoice, client_data, line_items_rows)
+        log.info(
+            f"receivable_create  stage=pdf_rendered  "
+            f"invoice_id={invoice_id}  size_bytes={len(pdf_bytes)}"
+        )
+    except Exception as e:
+        log.error(
+            f"receivable_create  stage=pdf_render_failed  "
+            f"invoice_id={invoice_id}  error={e}"
+        )
+        _insert_compliance_flag(
+            db, company_id, invoice_id,
+            "pdf_render_failed", "medium",
+            f"PDF rendering failed: {e}",
+        )
+
+    # ── Step 5: Insert raw_doc (storage_path = None for now) ──────────────
+    raw_doc_id: str | None = None
+    try:
+        raw_doc_result = db.table("invoice_raw_documents").insert({
+            "company_id":      company_id,
+            "invoice_id":      invoice_id,
+            "raw_text":        raw_text,
+            "extraction_json": extraction_json,
+            "schema_version":  "1.0",
+            "storage_path":    None,
+        }).execute()
+        raw_doc_id = raw_doc_result.data[0]["id"] if raw_doc_result.data else None
+    except Exception as e:
+        log.error(
+            f"receivable_create  stage=raw_doc_insert_failed  "
+            f"invoice_id={invoice_id}  error={e}"
+        )
+
+    # ── Step 6: Upload PDF to storage, update storage_path ────────────────
+    if pdf_bytes:
+        try:
+            from app.services.storage_service import upload_invoice_pdf
+            storage_path = upload_invoice_pdf(
+                db, company_id, invoice_id, pdf_bytes
+            )
+            if raw_doc_id:
+                db.table("invoice_raw_documents").update({
+                    "storage_path": storage_path,
+                }).eq("id", raw_doc_id).execute()
+            log.info(
+                f"receivable_create  stage=storage_uploaded  "
+                f"invoice_id={invoice_id}  path={storage_path}"
+            )
+        except Exception as e:
+            log.error(
+                f"receivable_create  stage=storage_upload_failed  "
+                f"invoice_id={invoice_id}  error={e}"
+            )
+            _insert_compliance_flag(
+                db, company_id, invoice_id,
+                "storage_upload_failed", "medium",
+                f"PDF upload to storage failed: {e}",
+            )
+
+    # ── Step 7: Embeddings ────────────────────────────────────────────────
+    try:
+        from app.services.embedding_service import generate_and_store_embeddings
+        embed_count = generate_and_store_embeddings(
+            db, company_id, invoice_id, raw_text, extraction_json
+        )
+        log.info(
+            f"receivable_create  stage=embeddings_stored  "
+            f"invoice_id={invoice_id}  chunks={embed_count}"
+        )
+    except Exception as e:
+        log.error(
+            f"receivable_create  stage=embedding_failed  "
+            f"invoice_id={invoice_id}  error={e}"
+        )
+        _insert_compliance_flag(
+            db, company_id, invoice_id,
+            "embedding_failed", "low",
+            f"Embedding generation failed: {e}",
+        )
+
+    # ── Step 8: Compliance check ──────────────────────────────────────────
+    try:
+        from app.services.compliance_service import validate_invoice_compliance
+        validate_invoice_compliance(db, company_id, invoice_id)
+    except Exception as e:
+        log.error(
+            f"receivable_create  stage=compliance_failed  "
+            f"invoice_id={invoice_id}  error={e}"
+        )
+
+    log.info(
+        f"receivable_create_complete  invoice_id={invoice_id}  "
+        f"invoice_number={inv_num!r}"
+    )
+    return invoice
+
+
+# ---------------------------------------------------------------------------
 # Invoice Lifecycle — Type-Aware Status Transitions
 # ---------------------------------------------------------------------------
 
@@ -361,8 +694,6 @@ def transition_invoice_status(
             message=f"Invoice {inv_number} ({invoice_type}) changed from '{old_status}' to '{new_status}'",
             invoice_id=str(invoice_id))
 
-    # Wire: receivable sent → PDF generation + email (called from router layer)
-    # Wire: any → overdue  → email/SMS (called from overdue_service)
     return updated
 
 
@@ -380,7 +711,6 @@ def record_payment(
     if invoice.get("company_id") != company_id:
         raise NotFoundError(f"Invoice {invoice_id} not found")
 
-    # Insert payment record
     try:
         pay_result = db.table("payments").insert({
             "company_id":   company_id,
@@ -397,7 +727,6 @@ def record_payment(
 
     payment = pay_result.data[0]
 
-    # Sum all payments for this invoice
     try:
         all_payments = (
             db.table("payments").select("amount")
@@ -414,7 +743,6 @@ def record_payment(
     invoice_type = invoice.get("invoice_type", "payable")
     old_status  = invoice.get("status", "unpaid")
 
-    # Determine new status
     if grand_total > 0 and total_paid >= grand_total:
         new_status = "paid"
     elif total_paid > 0:
@@ -422,7 +750,6 @@ def record_payment(
     else:
         new_status = old_status
 
-    # Update invoice: amount_paid_so_far + status if changed
     update_payload: dict = {"amount_paid_so_far": round(total_paid, 2),
                             "updated_at": datetime.utcnow().isoformat()}
     if new_status != old_status:
@@ -435,7 +762,6 @@ def record_payment(
     except Exception as e:
         log.error(f"Failed to update invoice after payment: {e}")
 
-    # Audit + notification
     if new_status != old_status:
         _write_audit(db, company_id, str(invoice_id),
                      {"status": old_status, "amount_paid_so_far": invoice.get("amount_paid_so_far")},
@@ -450,9 +776,9 @@ def record_payment(
                 message=f"Partial payment ${float(payment_data['amount']):.2f} on {inv_number} (${total_paid:.2f}/${grand_total:.2f})",
                 invoice_id=str(invoice_id))
 
-    payment["invoice_status"]    = new_status
-    payment["total_paid"]        = round(total_paid, 2)
-    payment["grand_total"]       = round(grand_total, 2)
+    payment["invoice_status"]     = new_status
+    payment["total_paid"]         = round(total_paid, 2)
+    payment["grand_total"]        = round(grand_total, 2)
     payment["amount_paid_so_far"] = round(total_paid, 2)
     return payment
 
