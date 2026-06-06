@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronLeft, ChevronRight, FileUp, AlertCircle, DollarSign, Send } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, FileUp, AlertCircle, DollarSign, Send, Files } from 'lucide-react'
 import { invoicesApi } from '../lib/api'
 import { formatCurrency, formatDate, daysOverdue, truncate } from '../lib/utils'
 import { StatusBadge, MetricCard, PageLoader, ErrorState, EmptyState } from '../components/ui'
@@ -31,6 +31,11 @@ export default function Receivables() {
   const [page,     setPage]     = useState(1)
   const [total,    setTotal]    = useState(0)
 
+  // Mount-cached DB-wide totals (unaffected by filter/search/page)
+  const [totalAll,      setTotalAll]      = useState(null)
+  const [totalOverdue,  setTotalOverdue]  = useState(null)
+  const [totalDrafts,   setTotalDrafts]   = useState(null)
+
   const debouncedSearch = useDebounce(search)
 
   const load = useCallback(async () => {
@@ -53,8 +58,27 @@ export default function Receivables() {
   useEffect(() => { load() }, [load])
   useEffect(() => { setPage(1) }, [status, debouncedSearch])
 
+  // One-shot DB counts on mount. Partial failures tolerated.
+  useEffect(() => {
+    let cancelled = false
+    Promise.allSettled([
+      invoicesApi.list({ invoice_type: 'receivable', limit: 1 }),
+      invoicesApi.list({ invoice_type: 'receivable', status: 'overdue', limit: 1 }),
+      invoicesApi.list({ invoice_type: 'receivable', status: 'draft',   limit: 1 }),
+    ]).then(results => {
+      if (cancelled) return
+      const [allR, overdueR, draftR] = results
+      setTotalAll(    allR.status     === 'fulfilled' ? (allR.value?.total     ?? 0) : null)
+      setTotalOverdue(overdueR.status === 'fulfilled' ? (overdueR.value?.total ?? 0) : null)
+      setTotalDrafts( draftR.status   === 'fulfilled' ? (draftR.value?.total   ?? 0) : null)
+    })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const totalPages = total ? Math.ceil(total / PAGE_SIZE) : 0
 
+  // Visible-on-this-page metrics
   const outstanding  = invoices.filter(i => ['sent','unpaid','partially_paid','overdue'].includes(i.status))
                                .reduce((s, i) => s + ((i.grand_total || 0) - (i.amount_paid_so_far || 0)), 0)
   const overdueCount = invoices.filter(i => i.status === 'overdue').length
@@ -62,14 +86,20 @@ export default function Receivables() {
   const sentAmt      = invoices.filter(i => i.status === 'sent')
                                .reduce((s, i) => s + (i.grand_total || 0), 0)
 
+  // X / Y display strings
+  const overdueDisplay = totalOverdue != null ? `${overdueCount} / ${totalOverdue}` : `${overdueCount}`
+  const draftsDisplay  = totalDrafts  != null ? `${draftCount} / ${totalDrafts}`    : `${draftCount}`
+  const totalDisplay   = totalAll     != null ? String(totalAll) : '—'
+
   return (
     <div className="p-6 space-y-4 animate-fade-up">
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Outstanding"      value={formatCurrency(outstanding)} icon={DollarSign} accentColor="#22C55E" />
-        <MetricCard label="Overdue"          value={overdueCount}                icon={AlertCircle} accentColor="#EF4444" />
-        <MetricCard label="Drafts"           value={draftCount}                  icon={FileUp}  accentColor="#A8A89F" />
-        <MetricCard label="Sent Awaiting"    value={formatCurrency(sentAmt)}     icon={Send}    accentColor="#3B82F6" />
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <MetricCard label="Total Receivables" value={totalDisplay}                icon={Files}       accentColor="#3B82F6" />
+        <MetricCard label="Outstanding"       value={formatCurrency(outstanding)} icon={DollarSign}  accentColor="#22C55E" />
+        <MetricCard label="Overdue"           value={overdueDisplay}              icon={AlertCircle} accentColor="#EF4444" />
+        <MetricCard label="Drafts"            value={draftsDisplay}               icon={FileUp}      accentColor="#A8A89F" />
+        <MetricCard label="Sent Awaiting"     value={formatCurrency(sentAmt)}     icon={Send}        accentColor="#3B82F6" />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
@@ -160,7 +190,7 @@ export default function Receivables() {
                             </span>
                           </td>
                           <td className="px-5 py-3.5">
-                            <StatusBadge status={inv.status} />
+                            <StatusBadge invoice={inv} />
                           </td>
                           <td className="px-5 py-3.5 text-sm"
                             style={{ color: od > 0 ? '#EF4444' : 'var(--text-muted)' }}>

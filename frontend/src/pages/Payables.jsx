@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronLeft, ChevronRight, FileDown, AlertCircle, DollarSign, Clock } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, FileDown, AlertCircle, DollarSign, Files } from 'lucide-react'
 import { invoicesApi } from '../lib/api'
 import { formatCurrency, formatDate, daysOverdue, truncate } from '../lib/utils'
 import { StatusBadge, MetricCard, PageLoader, ErrorState, EmptyState } from '../components/ui'
@@ -28,6 +28,10 @@ export default function Payables() {
   const [page,     setPage]     = useState(1)
   const [total,    setTotal]    = useState(0)
 
+  // Mount-cached DB-wide totals (unaffected by filter/search/page)
+  const [totalAll,     setTotalAll]     = useState(null)
+  const [totalOverdue, setTotalOverdue] = useState(null)
+
   const debouncedSearch = useDebounce(search)
 
   const load = useCallback(async () => {
@@ -50,20 +54,41 @@ export default function Payables() {
   useEffect(() => { load() }, [load])
   useEffect(() => { setPage(1) }, [status, debouncedSearch])
 
+  // One-shot DB counts on mount. Partial failures tolerated.
+  useEffect(() => {
+    let cancelled = false
+    Promise.allSettled([
+      invoicesApi.list({ invoice_type: 'payable', limit: 1 }),
+      invoicesApi.list({ invoice_type: 'payable', status: 'overdue', limit: 1 }),
+    ]).then(results => {
+      if (cancelled) return
+      const [allR, overdueR] = results
+      setTotalAll(allR.status === 'fulfilled' ? (allR.value?.total ?? 0) : null)
+      setTotalOverdue(overdueR.status === 'fulfilled' ? (overdueR.value?.total ?? 0) : null)
+    })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const totalPages = total ? Math.ceil(total / PAGE_SIZE) : 0
 
-  // Summary metrics derived from current page data (approximate)
-  const unpaidAmt  = invoices.filter(i => ['unpaid','partially_paid','overdue'].includes(i.status))
-                             .reduce((s, i) => s + ((i.grand_total || 0) - (i.amount_paid_so_far || 0)), 0)
+  // Visible-on-this-page metrics
+  const unpaidAmt    = invoices.filter(i => ['unpaid','partially_paid','overdue'].includes(i.status))
+                               .reduce((s, i) => s + ((i.grand_total || 0) - (i.amount_paid_so_far || 0)), 0)
   const overdueCount = invoices.filter(i => i.status === 'overdue').length
+
+  // X / Y display strings. Y is null while loading or on error — degrade to plain X.
+  const overdueDisplay = totalOverdue != null ? `${overdueCount} / ${totalOverdue}` : `${overdueCount}`
+  const totalDisplay   = totalAll != null ? String(totalAll) : '—'
 
   return (
     <div className="p-6 space-y-4 animate-fade-up">
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Total Unpaid"     value={formatCurrency(unpaidAmt)} icon={DollarSign} accentColor="#D4A847" />
-        <MetricCard label="Overdue"          value={overdueCount}              icon={AlertCircle} accentColor="#EF4444" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <MetricCard label="Total Payables" value={totalDisplay}              icon={Files}       accentColor="#3B82F6" />
+        <MetricCard label="Total Unpaid"   value={formatCurrency(unpaidAmt)} icon={DollarSign}  accentColor="#D4A847" />
+        <MetricCard label="Overdue"        value={overdueDisplay}            icon={AlertCircle} accentColor="#EF4444" />
       </div>
 
       {/* Toolbar */}
@@ -156,7 +181,7 @@ export default function Payables() {
                             </span>
                           </td>
                           <td className="px-5 py-3.5">
-                            <StatusBadge status={inv.status} />
+                            <StatusBadge invoice={inv} />
                           </td>
                           <td className="px-5 py-3.5 text-sm"
                             style={{ color: od > 0 ? '#EF4444' : 'var(--text-muted)' }}>

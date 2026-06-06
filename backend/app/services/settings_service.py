@@ -79,7 +79,9 @@ def get_company_settings(db: Client, company_id: str) -> dict:
             db.table("companies")
             .select(
                 "id, name, domain, country, default_tax_rate, "
-                "address, phone, email, tax_id, logo_url, created_at"
+                "address, phone, email, tax_id, logo_url, created_at, "
+                "invoice_primary_color, invoice_accent_color, "
+                "invoice_text_color, invoice_footer_text"
             )
             .eq("id", company_id)
             .single()

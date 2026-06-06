@@ -24,7 +24,12 @@ class ValidationError(AppError):
     """Business rule violation (not schema validation — Pydantic handles that)."""
     pass
 
-
+class DuplicateError(AppError):
+    """Raised when a unique constraint would be violated."""
+    def __init__(self, message: str = "Duplicate record"):
+        self.message = message
+        super().__init__(message)
+        
 class DatabaseError(AppError):
     """Supabase/Postgres operation failed."""
     pass

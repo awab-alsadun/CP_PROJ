@@ -1,10 +1,27 @@
 import { AlertTriangle, Inbox, Loader2 } from 'lucide-react'
 import { statusConfig, confidenceColor, confidenceLabel } from '../../lib/utils'
 
-// ── Existing components (unchanged) ──────────────────────────────────────────
+// ── Existing components ───────────────────────────────────────────────────────
 
-export function StatusBadge({ status }) {
-  const cfg = statusConfig(status)
+export function StatusBadge({ status, invoice }) {
+  // Composite: overdue invoice that has received a partial payment.
+  // Does NOT introduce a new DB status — purely a display-layer derivation.
+  if (invoice?.status === 'overdue' && Number(invoice?.amount_paid_so_far) > 0) {
+    return (
+      <span
+        className="badge"
+        style={{ background: '#FEF2F2', color: '#F87171', border: '1px solid #FECACA' }}
+      >
+        <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#F87171' }} />
+        Partial / Overdue
+      </span>
+    )
+  }
+
+  // Backward-compatible: accepts either an invoice object or a plain status string.
+  // Allocation result rows (which only have a status string) continue to work unchanged.
+  const resolvedStatus = invoice ? invoice.status : status
+  const cfg = statusConfig(resolvedStatus)
   return (
     <span className={cfg.class}>
       <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: cfg.dot }} />
@@ -210,7 +227,6 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confi
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
-// Module-level registry so toast() can be called from anywhere without a hook
 
 let _addToast = null
 

@@ -1,13 +1,17 @@
 """
 Storage Service
 ---------------
-Handles Supabase Storage for payable invoice PDFs.
+Handles Supabase Storage for invoice PDFs and company branding assets.
 
-Bucket: "invoices" (private)
-Path:   {company_id}/{invoice_id}.pdf
+Buckets:
+  - "invoices"  (private)  → invoice PDFs, accessed via signed URLs
+  - "branding"  (public)   → company logos, accessed via permanent public URLs
+                             (signed URLs would expire and break embedded
+                              images in already-rendered PDFs)
 
-upload_invoice_pdf() — uploads a payable PDF, keyed by invoice_id
-get_signed_url()     — generates a 5-minute signed URL for retrieval
+Paths:
+  invoices: {company_id}/{invoice_id}.pdf
+  branding: {company_id}/logo.{ext}
 """
 
 import logging
@@ -16,7 +20,8 @@ from supabase import Client
 
 log = logging.getLogger(__name__)
 
-BUCKET = "invoices"
+BUCKET          = "invoices"
+BRANDING_BUCKET = "branding"
 
 
 def upload_invoice_pdf(
@@ -95,5 +100,69 @@ def get_signed_url(
     except ValueError:
         raise
     except Exception as e:
-        log.error ( f"get_signed_url failed  path={storage_path}  error={e}")
+        log.error(f"get_signed_url failed  path={storage_path}  error={e}")
         raise ValueError(f"Failed to generate signed URL: {e}")
+
+
+def upload_branding_logo(
+    db: Client,
+    company_id: str,
+    file_bytes: bytes,
+    ext: str,
+) -> str:
+    """
+    Upload a company logo to the public "branding" bucket.
+
+    Path: {company_id}/logo.{ext}
+    Uses upsert=True — replaces previous logo cleanly.
+
+    Args:
+        db:         Supabase client.
+        company_id: Tenant UUID.
+        file_bytes: Raw image bytes.
+        ext:        File extension without dot (png, jpg, jpeg, webp).
+
+    Returns:
+        Permanent public URL string.
+
+    Raises:
+        ValueError on upload failure or URL build failure.
+    """
+    content_type_map = {
+        "png":  "image/png",
+        "jpg":  "image/jpeg",
+        "jpeg": "image/jpeg",
+        "webp": "image/webp",
+    }
+    storage_path = f"{company_id}/logo.{ext}"
+
+    # ── Upload to storage ──
+    try:
+        db.storage.from_(BRANDING_BUCKET).upload(
+            path=storage_path,
+            file=file_bytes,
+            file_options={
+                "content-type": content_type_map.get(ext, "image/png"),
+                "upsert":       "true",
+            },
+        )
+        log.info(f"Logo uploaded  bucket={BRANDING_BUCKET}  path={storage_path}")
+    except Exception as e:
+        log.error(f"upload_branding_logo failed  company_id={company_id}  error={e}")
+        raise ValueError(f"Failed to upload logo: {e}")
+
+    # ── Build permanent public URL ──
+    # supabase-py may expose `supabase_url` as a httpx URL object rather than a
+    # plain str. Wrap in str() so .rstrip() (and any other string method) works
+    # regardless of the installed client version.
+    try:
+        supabase_url = str(db.supabase_url).rstrip("/")
+        public_url = (
+            f"{supabase_url}/storage/v1/object/public/"
+            f"{BRANDING_BUCKET}/{storage_path}"
+        )
+    except Exception as e:
+        log.error(f"upload_branding_logo url_build_failed  company_id={company_id}  error={e}")
+        raise ValueError(f"Logo uploaded but URL build failed: {e}")
+
+    return public_url

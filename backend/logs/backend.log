@@ -1,43 +1,222 @@
-2026-06-01 21:11:26,839 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-01 21:11:29,874 INFO app.main Supabase connection verified at startup
-2026-06-01 21:11:29,874 INFO app.main Storage active bucket: invoices
-2026-06-01 22:26:19,605 INFO app.services.invoice_service receivable_create  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d  invoice_number='INV-122333'  client_id=7ac61c7d-1289-4482-a396-be3b4841952e
-2026-06-01 22:26:19,908 INFO app.services.invoice_service receivable_create  line_items_inserted=2  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d
-2026-06-01 22:26:20,603 INFO app.services.invoice_service receivable_create  stage=pdf_rendered  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d  size_bytes=3053
-2026-06-01 22:26:22,261 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/31a93330-577e-49e2-86a1-0e754b68c43d.pdf
-2026-06-01 22:26:22,566 INFO app.services.invoice_service receivable_create  stage=storage_uploaded  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d  path=7bf697fc-7220-40c7-9678-542d624d22ad/31a93330-577e-49e2-86a1-0e754b68c43d.pdf
-2026-06-01 22:26:28,616 INFO app.services.invoice_service receivable_create  stage=embeddings_stored  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d  chunks=3
-2026-06-01 22:26:29,463 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d  error=name '_check_low_confidence' is not defined
-2026-06-01 22:26:29,463 INFO app.services.invoice_service receivable_create_complete  invoice_id=31a93330-577e-49e2-86a1-0e754b68c43d  invoice_number='INV-122333'
-2026-06-02 00:49:25,185 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 00:49:28,550 INFO app.main Supabase connection verified at startup
-2026-06-02 00:49:28,550 INFO app.main Storage active bucket: invoices
-2026-06-02 00:51:58,136 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 00:51:59,488 INFO app.main Supabase connection verified at startup
-2026-06-02 00:51:59,488 INFO app.main Storage active bucket: invoices
-2026-06-02 00:53:15,656 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 00:53:17,281 INFO app.main Supabase connection verified at startup
-2026-06-02 00:53:17,281 INFO app.main Storage active bucket: invoices
-2026-06-02 00:53:45,997 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 00:53:47,667 INFO app.main Supabase connection verified at startup
-2026-06-02 00:53:47,667 INFO app.main Storage active bucket: invoices
-2026-06-02 02:55:01,605 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 02:55:04,877 INFO app.main Supabase connection verified at startup
-2026-06-02 02:55:04,877 INFO app.main Storage active bucket: invoices
-2026-06-02 02:55:54,913 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 02:55:56,788 INFO app.main Supabase connection verified at startup
-2026-06-02 02:55:56,788 INFO app.main Storage active bucket: invoices
-2026-06-02 03:03:39,703 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 03:03:41,586 INFO app.main Supabase connection verified at startup
-2026-06-02 03:03:41,586 INFO app.main Storage active bucket: invoices
-2026-06-02 03:03:47,533 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\CP_PROJ\backend\logs\backend.log
-2026-06-02 03:03:48,731 INFO app.main Supabase connection verified at startup
-2026-06-02 03:03:48,731 INFO app.main Storage active bucket: invoices
-2026-06-02 03:15:41,518 INFO app.services.invoice_service receivable_create  invoice_id=6437567a-dfef-4736-a558-132c635c5aab  invoice_number='9999'  client_id=050a366a-98ef-43f8-9d11-1ee0edfb1adb
-2026-06-02 03:15:41,822 INFO app.services.invoice_service receivable_create  line_items_inserted=1  invoice_id=6437567a-dfef-4736-a558-132c635c5aab
-2026-06-02 03:15:42,437 INFO app.services.invoice_service receivable_create  stage=pdf_rendered  invoice_id=6437567a-dfef-4736-a558-132c635c5aab  size_bytes=2964
-2026-06-02 03:15:44,171 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/6437567a-dfef-4736-a558-132c635c5aab.pdf
-2026-06-02 03:15:44,481 INFO app.services.invoice_service receivable_create  stage=storage_uploaded  invoice_id=6437567a-dfef-4736-a558-132c635c5aab  path=7bf697fc-7220-40c7-9678-542d624d22ad/6437567a-dfef-4736-a558-132c635c5aab.pdf
-2026-06-02 03:15:49,405 INFO app.services.invoice_service receivable_create  stage=embeddings_stored  invoice_id=6437567a-dfef-4736-a558-132c635c5aab  chunks=3
-2026-06-02 03:15:50,318 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  invoice_id=6437567a-dfef-4736-a558-132c635c5aab  error=name '_check_low_confidence' is not defined
-2026-06-02 03:15:50,319 INFO app.services.invoice_service receivable_create_complete  invoice_id=6437567a-dfef-4736-a558-132c635c5aab  invoice_number='9999'
+2026-06-06 03:10:19,401 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_header_value with data[63:130]
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_header_field with data[132:144]
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_header_value with data[146:155]
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_part_data with data[159:65536]
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_part_data with data[0:158489]
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:10:19,402 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:10:21,794 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:13:40,032 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:13:40,032 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:13:40,032 DEBUG python_multipart.multipart Calling on_header_value with data[63:130]
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_header_field with data[132:144]
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_header_value with data[146:155]
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_part_data with data[159:65536]
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_part_data with data[0:158489]
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:13:40,033 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:13:41,420 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:19:00,237 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-06 03:19:00,241 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 03:19:00,243 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-06 03:19:00,244 INFO app.main [overdue_check] scheduler stopped
+2026-06-06 03:19:08,553 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\backend\logs\backend.log
+2026-06-06 03:19:09,897 INFO app.main Supabase connection verified at startup
+2026-06-06 03:19:09,897 INFO app.main Storage active bucket: invoices
+2026-06-06 03:19:09,897 DEBUG tzlocal Looking up time zone info from registry
+2026-06-06 03:19:09,918 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-06 03:19:09,918 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-06 03:19:09,918 INFO apscheduler.scheduler Scheduler started
+2026-06-06 03:19:09,919 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 03:19:09,919 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-07 00:00:00+03:00 (in 74450.080405 seconds)
+2026-06-06 03:19:09,919 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-06 03:19:13,719 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_header_value with data[63:110]
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_header_field with data[112:124]
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_header_value with data[126:135]
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_part_data with data[139:17758]
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:19:13,720 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:19:15,008 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:20:13,394 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:20:13,394 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_header_value with data[63:130]
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_header_field with data[132:144]
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_header_value with data[146:155]
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_part_data with data[159:32768]
+2026-06-06 03:20:13,395 DEBUG python_multipart.multipart Calling on_part_data with data[0:81920]
+2026-06-06 03:20:13,396 DEBUG python_multipart.multipart Calling on_part_data with data[0:16383]
+2026-06-06 03:20:13,396 DEBUG python_multipart.multipart Calling on_part_data with data[0:1]
+2026-06-06 03:20:13,396 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
+2026-06-06 03:20:13,396 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
+2026-06-06 03:20:13,397 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
+2026-06-06 03:20:13,397 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
+2026-06-06 03:20:13,397 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
+2026-06-06 03:20:13,397 DEBUG python_multipart.multipart Calling on_part_data with data[0:11033]
+2026-06-06 03:20:13,398 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:20:13,398 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:20:15,466 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:25:03,584 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_header_value with data[63:103]
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_header_field with data[105:117]
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_header_value with data[119:128]
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_part_data with data[132:33324]
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:25:03,585 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:25:04,846 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_header_value with data[63:110]
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_header_field with data[112:124]
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_header_value with data[126:135]
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_part_data with data[139:17758]
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:31:42,239 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:31:43,649 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_header_value with data[63:110]
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_header_field with data[112:124]
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_header_value with data[126:135]
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:32:40,201 DEBUG python_multipart.multipart Calling on_part_data with data[139:17758]
+2026-06-06 03:32:40,202 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:32:40,202 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:32:41,793 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:33:00,933 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:33:00,933 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:33:00,933 DEBUG python_multipart.multipart Calling on_header_value with data[63:103]
+2026-06-06 03:33:00,933 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_header_field with data[105:117]
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_header_value with data[119:128]
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_part_data with data[132:33324]
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:33:00,934 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:33:02,710 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:33:59,219 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:33:59,219 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:33:59,219 DEBUG python_multipart.multipart Calling on_header_value with data[63:130]
+2026-06-06 03:33:59,219 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:33:59,219 DEBUG python_multipart.multipart Calling on_header_field with data[132:144]
+2026-06-06 03:33:59,219 DEBUG python_multipart.multipart Calling on_header_value with data[146:155]
+2026-06-06 03:33:59,220 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:33:59,220 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:33:59,220 DEBUG python_multipart.multipart Calling on_part_data with data[159:65536]
+2026-06-06 03:33:59,220 DEBUG python_multipart.multipart Calling on_part_data with data[0:158489]
+2026-06-06 03:33:59,220 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:33:59,220 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:34:01,016 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:35:09,184 DEBUG python_multipart.multipart Calling on_part_begin with no data
+2026-06-06 03:35:09,184 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
+2026-06-06 03:35:09,184 DEBUG python_multipart.multipart Calling on_header_value with data[63:103]
+2026-06-06 03:35:09,184 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:35:09,184 DEBUG python_multipart.multipart Calling on_header_field with data[105:117]
+2026-06-06 03:35:09,184 DEBUG python_multipart.multipart Calling on_header_value with data[119:128]
+2026-06-06 03:35:09,185 DEBUG python_multipart.multipart Calling on_header_end with no data
+2026-06-06 03:35:09,185 DEBUG python_multipart.multipart Calling on_headers_finished with no data
+2026-06-06 03:35:09,185 DEBUG python_multipart.multipart Calling on_part_data with data[132:33324]
+2026-06-06 03:35:09,185 DEBUG python_multipart.multipart Calling on_part_end with no data
+2026-06-06 03:35:09,185 DEBUG python_multipart.multipart Calling on_end with no data
+2026-06-06 03:35:10,779 INFO app.services.storage_service Logo uploaded  bucket=branding  path=7bf697fc-7220-40c7-9678-542d624d22ad/logo.png
+2026-06-06 03:37:37,571 INFO app.services.invoice_service receivable_create  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea  invoice_number='KZ-NULL'  client_id=6c7944a5-8d20-42ad-8548-94012d1c44ab
+2026-06-06 03:37:37,790 INFO app.services.invoice_service receivable_create  line_items_inserted=1  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea
+2026-06-06 03:37:39,862 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-06 03:37:39,863 DEBUG PIL.PngImagePlugin STREAM b'sRGB' 41 1
+2026-06-06 03:37:39,863 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 54 4
+2026-06-06 03:37:39,863 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 70 9
+2026-06-06 03:37:39,863 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 91 33085
+2026-06-06 03:37:39,902 INFO app.services.invoice_service receivable_create  stage=pdf_rendered  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea  size_bytes=54341
+2026-06-06 03:37:41,321 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/fda30360-f18f-4be3-a498-1472e88aacea.pdf
+2026-06-06 03:37:41,560 INFO app.services.invoice_service receivable_create  stage=storage_uploaded  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea  path=7bf697fc-7220-40c7-9678-542d624d22ad/fda30360-f18f-4be3-a498-1472e88aacea.pdf
+2026-06-06 03:37:46,501 INFO app.services.invoice_service receivable_create  stage=embeddings_stored  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea  chunks=3
+2026-06-06 03:37:47,128 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea  error=name '_check_low_confidence' is not defined
+2026-06-06 03:37:47,128 INFO app.services.invoice_service receivable_create_complete  invoice_id=fda30360-f18f-4be3-a498-1472e88aacea  invoice_number='KZ-NULL'
+2026-06-06 03:47:44,077 INFO app.services.invoice_service receivable_create  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e  invoice_number='KZ-ALPHA'  client_id=6c7944a5-8d20-42ad-8548-94012d1c44ab
+2026-06-06 03:47:44,334 INFO app.services.invoice_service receivable_create  line_items_inserted=1  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e
+2026-06-06 03:47:46,115 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-06 03:47:46,115 DEBUG PIL.PngImagePlugin STREAM b'sRGB' 41 1
+2026-06-06 03:47:46,115 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 54 4
+2026-06-06 03:47:46,115 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 70 9
+2026-06-06 03:47:46,115 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 91 33085
+2026-06-06 03:47:46,162 INFO app.services.invoice_service receivable_create  stage=pdf_rendered  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e  size_bytes=54344
+2026-06-06 03:47:47,736 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/f65d944a-29e7-442a-89e4-c9baa6cf672e.pdf
+2026-06-06 03:47:47,983 INFO app.services.invoice_service receivable_create  stage=storage_uploaded  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e  path=7bf697fc-7220-40c7-9678-542d624d22ad/f65d944a-29e7-442a-89e4-c9baa6cf672e.pdf
+2026-06-06 03:47:52,069 INFO app.services.invoice_service receivable_create  stage=embeddings_stored  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e  chunks=3
+2026-06-06 03:47:52,683 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e  error=name '_check_low_confidence' is not defined
+2026-06-06 03:47:52,684 INFO app.services.invoice_service receivable_create_complete  invoice_id=f65d944a-29e7-442a-89e4-c9baa6cf672e  invoice_number='KZ-ALPHA'
+2026-06-06 03:54:31,190 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-06 03:54:31,193 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 03:54:31,194 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-06 03:54:31,194 INFO app.main [overdue_check] scheduler stopped
+2026-06-06 03:54:38,483 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\backend\logs\backend.log
+2026-06-06 03:54:40,550 INFO app.main Supabase connection verified at startup
+2026-06-06 03:54:40,550 INFO app.main Storage active bucket: invoices
+2026-06-06 03:54:40,551 DEBUG tzlocal Looking up time zone info from registry
+2026-06-06 03:54:40,564 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-06 03:54:40,565 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-06 03:54:40,565 INFO apscheduler.scheduler Scheduler started
+2026-06-06 03:54:40,566 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 03:54:40,566 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-07 00:00:00+03:00 (in 72319.433566 seconds)
+2026-06-06 03:54:40,566 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-06 03:55:10,150 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-06 03:55:10,151 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 03:55:10,151 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-06 03:55:10,151 INFO app.main [overdue_check] scheduler stopped
+2026-06-06 03:55:14,813 INFO app.main Logging configured — file: C:\Users\We\Downloads\CP_proj\backend\logs\backend.log
+2026-06-06 03:55:16,157 INFO app.main Supabase connection verified at startup
+2026-06-06 03:55:16,158 INFO app.main Storage active bucket: invoices
+2026-06-06 03:55:16,158 DEBUG tzlocal Looking up time zone info from registry
+2026-06-06 03:55:16,166 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-06 03:55:16,167 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-06 03:55:16,167 INFO apscheduler.scheduler Scheduler started
+2026-06-06 03:55:16,167 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 03:55:16,168 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-07 00:00:00+03:00 (in 72283.831883 seconds)
+2026-06-06 03:55:16,168 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-06 03:56:51,002 INFO app.services.invoice_service receivable_create  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e  invoice_number='KZ-003'  client_id=050a366a-98ef-43f8-9d11-1ee0edfb1adb
+2026-06-06 03:56:51,221 INFO app.services.invoice_service receivable_create  line_items_inserted=1  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e
+2026-06-06 03:56:53,224 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-06 03:56:53,225 DEBUG PIL.PngImagePlugin STREAM b'sRGB' 41 1
+2026-06-06 03:56:53,225 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 54 4
+2026-06-06 03:56:53,225 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 70 9
+2026-06-06 03:56:53,225 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 91 33085
+2026-06-06 03:56:53,226 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-06 03:56:53,226 DEBUG PIL.PngImagePlugin STREAM b'sRGB' 41 1
+2026-06-06 03:56:53,226 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 54 4
+2026-06-06 03:56:53,226 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 70 9
+2026-06-06 03:56:53,226 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 91 33085
+2026-06-06 03:56:53,258 INFO app.services.invoice_service receivable_create  stage=pdf_rendered  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e  size_bytes=54360
+2026-06-06 03:56:54,649 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/87f8d000-497b-4ff5-b614-7ead8b209e3e.pdf
+2026-06-06 03:56:54,850 INFO app.services.invoice_service receivable_create  stage=storage_uploaded  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e  path=7bf697fc-7220-40c7-9678-542d624d22ad/87f8d000-497b-4ff5-b614-7ead8b209e3e.pdf
+2026-06-06 03:56:59,026 INFO app.services.invoice_service receivable_create  stage=embeddings_stored  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e  chunks=3
+2026-06-06 03:56:59,619 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e  error=name '_check_low_confidence' is not defined
+2026-06-06 03:56:59,619 INFO app.services.invoice_service receivable_create_complete  invoice_id=87f8d000-497b-4ff5-b614-7ead8b209e3e  invoice_number='KZ-003'
+2026-06-06 04:01:41,531 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-06 04:01:41,532 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-06 04:01:41,532 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-06 04:01:41,533 INFO app.main [overdue_check] scheduler stopped

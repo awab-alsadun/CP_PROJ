@@ -475,7 +475,7 @@ def create_receivable_invoice(db: Client, payload) -> dict:
       1. Insert invoice row (fatal on failure)
       2. Insert line_items (best-effort)
       3. Fetch client + address for PDF
-      4. Render PDF (non-fatal → pdf_render_failed flag)
+      4. Render PDF with company profile + branding (non-fatal → pdf_render_failed flag)
       5. Insert raw_doc with storage_path=None (non-fatal)
       6. Upload PDF, update raw_doc.storage_path (non-fatal → storage_upload_failed)
       7. Generate embeddings (non-fatal → embedding_failed)
@@ -540,11 +540,36 @@ def create_receivable_invoice(db: Client, payload) -> dict:
     raw_text        = _build_raw_text(invoice, client_data, line_items_rows)
     extraction_json = _build_extraction_json(invoice, client_data, line_items_rows)
 
-    # ── Step 4: Render PDF (in-memory) ────────────────────────────────────
+    # ── Step 4: Render PDF (in-memory, with company profile + branding) ───
     pdf_bytes: bytes | None = None
     try:
         from app.services.receivable_pdf_renderer import render_receivable_pdf
-        pdf_bytes = render_receivable_pdf(invoice, client_data, line_items_rows)
+
+        # Fetch full company row — profile fields + branding fields.
+        # Non-fatal — renderer falls back to defaults if empty.
+        try:
+            company_row = (
+                db.table("companies")
+                .select(
+                    "name, address, email, phone, tax_id, "
+                    "logo_url, invoice_primary_color, invoice_accent_color, "
+                    "invoice_text_color, invoice_footer_text"
+                )
+                .eq("id", str(company_id))
+                .single()
+                .execute()
+            )
+            company_data = company_row.data or {}
+        except Exception as e:
+            log.warning(
+                f"receivable_create  stage=company_fetch_failed  "
+                f"invoice_id={invoice_id}  error={e}"
+            )
+            company_data = {}
+
+        pdf_bytes = render_receivable_pdf(
+            invoice, client_data, line_items_rows, company_data
+        )
         log.info(
             f"receivable_create  stage=pdf_rendered  "
             f"invoice_id={invoice_id}  size_bytes={len(pdf_bytes)}"

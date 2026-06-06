@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Plus, Trash2, Save, Send } from 'lucide-react'
-import { invoicesApi, clientsApi, getCompanyId } from '../lib/api'
+import { invoicesApi, clientsApi, settingsApi, getCompanyId } from '../lib/api'
 import { cn, formatCurrency } from '../lib/utils'
 import {
   Spinner,
@@ -113,6 +113,18 @@ export default function CreateInvoice() {
   // -------- submit state --------
   const [submitting, setSubmitting] = useState(null) // 'draft' | 'sent' | null
   const [fieldErrors, setFieldErrors] = useState({}) // { 'invoice_number': 'msg', 'line_items.0.description': 'msg' }
+
+  // -------- seed tax % from company default on mount --------
+  useEffect(() => {
+    settingsApi.get()
+      .then((s) => {
+        const rate = s?.default_tax_rate
+        if (rate != null && Number(rate) > 0) {
+          setForm((f) => ({ ...f, taxPercent: String(rate) }))
+        }
+      })
+      .catch(() => {}) // leave taxPercent as '0' on failure
+  }, [])
 
   // -------- load clients on mount --------
   useEffect(() => {

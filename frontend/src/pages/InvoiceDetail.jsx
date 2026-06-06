@@ -99,7 +99,7 @@ function FieldRow({ label, children }) {
   )
 }
 
-// ── Transition config (legacy + new statuses) ──────────────────────────────────
+// ── Transition config ──────────────────────────────────────────────────────────
 const TRANSITIONS_PAYABLE = {
   unpaid:         [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' },
                    { to: 'overdue', label: 'Mark Overdue',   icon: AlertTriangle, color: '#EF4444' }],
@@ -127,7 +127,6 @@ export default function InvoiceDetail() {
   const navigate = useNavigate()
   const { toasts, add: toast, remove: removeToast } = useToast()
 
-  // Determine type from URL path
   const isReceivable = location.pathname.startsWith('/receivables')
   const backPath = isReceivable ? '/receivables' : '/payables'
 
@@ -139,12 +138,10 @@ export default function InvoiceDetail() {
   const [transitioning,   setTransitioning]   = useState(false)
   const [loadingRaw,      setLoadingRaw]      = useState(false)
 
-  // Compliance flags
   const [flags,           setFlags]           = useState([])
   const [flagsOpen,       setFlagsOpen]       = useState(false)
   const [loadingFlags,    setLoadingFlags]    = useState(false)
 
-  // FIFO payment modal
   const [showPayModal,    setShowPayModal]    = useState(false)
   const [payLoading,      setPayLoading]      = useState(false)
   const [allocResult,     setAllocResult]     = useState(null)
@@ -153,7 +150,6 @@ export default function InvoiceDetail() {
     payment_date: new Date().toISOString().split('T')[0],
   })
 
-  // Legacy payment form (direct to invoice)
   const [showDirectPay,   setShowDirectPay]   = useState(false)
   const [savingPayment,   setSavingPayment]   = useState(false)
   const [paymentData,     setPaymentData]     = useState({
@@ -161,17 +157,14 @@ export default function InvoiceDetail() {
     payment_date: new Date().toISOString().split('T')[0],
   })
 
-  // Credit note
   const [showCN,          setShowCN]          = useState(false)
   const [cnData,          setCnData]          = useState({ amount: '', reason: '' })
   const [cnLoading,       setCnLoading]       = useState(false)
 
-  // Refund
-  const [refundTarget,    setRefundTarget]    = useState(null) // { payment_id, amount }
+  const [refundTarget,    setRefundTarget]    = useState(null)
   const [refundAmt,       setRefundAmt]       = useState('')
   const [refundLoading,   setRefundLoading]   = useState(false)
 
-  // Send confirm
   const [confirmSend,     setConfirmSend]     = useState(false)
 
   const loadInvoice = useCallback(async () => {
@@ -244,7 +237,6 @@ export default function InvoiceDetail() {
     }
   }
 
-  // FIFO allocation payment
   const handleAllocate = async () => {
     if (!payData.amount) return
     setPayLoading(true)
@@ -271,7 +263,6 @@ export default function InvoiceDetail() {
     }
   }
 
-  // Direct invoice payment (legacy)
   const handleRecordPayment = async () => {
     setSavingPayment(true)
     try {
@@ -353,7 +344,8 @@ export default function InvoiceDetail() {
                 <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {invoice.invoice_number || 'Invoice'}
                 </h1>
-                <StatusBadge status={invoice.status} />
+                {/* Pass full invoice object so Partial/Overdue composite state renders correctly */}
+                <StatusBadge invoice={invoice} />
                 <InvoiceTypeBadge type={invType} />
               </div>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
@@ -518,7 +510,6 @@ export default function InvoiceDetail() {
             </div>
           </Section>
 
-          {/* Show the other party too if present */}
           {invType === 'receivable' && invoice.vendor && (
             <Section title="Vendor">
               <div className="grid grid-cols-2 gap-4">
@@ -672,6 +663,7 @@ export default function InvoiceDetail() {
                   style={{ background: 'var(--bg-secondary)' }}>
                   <span className="font-mono text-xs">{a.invoice_number}</span>
                   <span>{formatCurrency(a.amount_applied, invoice.currency)}</span>
+                  {/* Allocation result only has a status string — no amount_paid_so_far available here */}
                   <StatusBadge status={a.new_status} />
                 </div>
               ))}

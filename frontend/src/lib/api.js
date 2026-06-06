@@ -223,6 +223,29 @@ export const queryApi = {
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 export const settingsApi = {
+
+    // ── Branding ──────────────────────────────────────────────────────────────
+  getBranding: () => {
+    const q = new URLSearchParams({ company_id: getCompanyId() })
+    return request(`/settings/branding?${q}`)
+  },
+  updateBranding: (data) => request('/settings/branding', {
+    method: 'PATCH',
+    body: JSON.stringify({ ...data, company_id: getCompanyId() }),
+  }),
+  uploadLogo: async (file) => {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${BASE}/settings/branding/logo?company_id=${encodeURIComponent(getCompanyId())}`, {
+      method: 'POST',
+      body: form,
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }))
+      throw new Error(err.detail || err.error || `HTTP ${res.status}`)
+    }
+    return res.json()
+  },
   get: () => {
     const q = new URLSearchParams({ company_id: getCompanyId() })
     return request(`/settings?${q}`)

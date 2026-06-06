@@ -1,6 +1,6 @@
 """
 Application entrypoint.
-Run: uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 """
 
 from contextlib import asynccontextmanager
@@ -8,6 +8,8 @@ import logging
 import logging.handlers
 import os
 from pathlib import Path
+from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -91,11 +93,41 @@ def configure_logging() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
+    log = logging.getLogger(__name__)
+
+    # Supabase startup check
     db = get_supabase()
     db.table("companies").select("id").limit(1).execute()
-    logging.getLogger(__name__).info("Supabase connection verified at startup")
-    logging.getLogger(__name__).info("Storage active bucket: invoices")
+    log.info("Supabase connection verified at startup")
+    log.info("Storage active bucket: invoices")
+
+    # Scheduler
+    scheduler = BackgroundScheduler()
+
+    def _run_overdue_check():
+        from app.services.overdue_service import check_and_mark_overdue
+        log.info(f"[overdue_check] starting scheduled run at {datetime.utcnow()}")
+        try:
+            db = get_supabase()
+            companies = db.table("companies").select("id").execute()
+            total = 0
+            for c in (companies.data or []):
+                result = check_and_mark_overdue(db, c["id"])
+                count = result.get("overdue_count", 0)
+                log.info(f"[overdue_check] flipped {count} invoices for company {c['id']}")
+                total += count
+            log.info(f"[overdue_check] complete: {total} total")
+        except Exception as e:
+            log.error(f"[overdue_check] scheduled run failed: {e}")
+
+    scheduler.add_job(_run_overdue_check, "cron", hour=0, minute=0)
+    scheduler.start()
+    log.info("[overdue_check] scheduler started — job runs daily at 00:00")
+
     yield
+
+    scheduler.shutdown(wait=False)
+    log.info("[overdue_check] scheduler stopped")
 
 
 settings = get_settings()
