@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+supabase
+python-dotenv
+openai
+PyMuPDF
+pytesseract
+Pillow
+img2pdf
+sentence-transformers
+docling
+cohere
+reportlab
+apscheduler>=3.10.0

@@ -10,7 +10,7 @@ APScheduler can call check_and_mark_overdue() nightly without changes.
 """
 
 import logging
-from datetime import date
+from datetime import date, datetime, timezone
 
 from supabase import Client
 
@@ -59,10 +59,9 @@ def check_and_mark_overdue(db: Client, company_id: str) -> dict:
         old_status   = inv.get("status", "unpaid")
 
         try:
-            # Update status
             db.table("invoices").update({
                 "status":     "overdue",
-                "updated_at": date.today().isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
             }).eq("id", invoice_id).execute()
 
             # Audit log

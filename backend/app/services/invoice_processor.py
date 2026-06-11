@@ -1,23 +1,25 @@
 """
-Invoice Processing Pipeline
-----------------------------
-Full ingestion flow: file bytes → structured data in Supabase.
+Invoice Processing Pipeline (Payable-only)
+------------------------------------------
+Full ingestion flow: file bytes -> structured payable invoice in Supabase.
 
-Pipeline:
-  1. OCR         — extract text from image or PDF
-  2. Storage     — upload original file to Supabase Storage
-  3. LLM         — raw text → structured JSON extraction
-  4. Duplicate   — check before inserting
-  5. DB insert   — vendor / client / address / invoice / line_items / payments / raw_doc
-  6. Embeddings  — generate and store pgvector chunks
-  7. Compliance  — run validation checks, insert flags
-  8. Notify      — upload notification
+Pipeline stages (all logged at DEBUG under app.services.invoice_processor):
+  1. OCR         - extract text from image or PDF
+  2. LLM         - raw text -> structured JSON extraction
+  3. Vendor      - resolve / auto-create vendor + address
+  4. Duplicate   - guard before DB insert
+  5. DB write    - invoice / line_items / payments / raw_doc
+  6. PDF storage - upload canonical PDF to private "invoices" bucket
+  7. Embeddings  - generate and store pgvector chunks
+  8. Compliance  - run validation checks
+  9. Notify      - upload notification
 
-All uploaded invoices are treated as PAYABLE (inbound from vendor).
-Receivable invoices are created manually via the API, not uploaded.
+Receivables are NOT created here. They are created via
+POST /api/v1/invoices (structured form input).
 """
 
 import logging
+import time
 
 from supabase import Client
 
@@ -26,11 +28,27 @@ from app.services.extraction_service import extract_structured_data
 from app.services.embedding_service import generate_and_store_embeddings
 from app.services.vendor_service import get_or_create_vendor
 from app.services.address_service import get_or_create_address
-from app.services.storage_service import upload_to_storage
+from app.services.storage_service import upload_invoice_pdf
 from app.services.notification_service import create_notification
 
 log = logging.getLogger(__name__)
 
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _stage(tag: str, invoice_number: str, **kwargs) -> None:
+    """Emit a structured DEBUG line with a stage tag and invoice context."""
+    parts = [f"stage={tag}", f"invoice={invoice_number!r}"]
+    for k, v in kwargs.items():
+        parts.append(f"{k}={v}")
+    log.debug("  ".join(parts))
+
+
+# ---------------------------------------------------------------------------
+# Main pipeline
+# ---------------------------------------------------------------------------
 
 def process_invoice(
     db: Client,
@@ -39,15 +57,19 @@ def process_invoice(
     filename: str,
 ) -> dict:
     """
-    Full pipeline: file bytes → structured data in Supabase.
+    Full pipeline: file bytes -> payable invoice in Supabase.
 
     Returns dict with invoice_id, summary fields, and status.
     Raises ValueError on OCR failure or unsupported file type.
     """
+    tag = filename   # replaced with invoice_number after LLM extraction
 
     # ------------------------------------------------------------------
-    # Step 1: OCR
+    # Stage 1: OCR
     # ------------------------------------------------------------------
+    _stage("ocr_start", tag, filename=filename, size_bytes=len(file_bytes))
+    t0 = time.monotonic()
+
     lower = filename.lower()
     if lower.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tiff")):
         raw_text = extract_text_from_image(file_bytes)
@@ -59,33 +81,45 @@ def process_invoice(
     if not raw_text.strip():
         raise ValueError(f"OCR extracted no text from {filename}")
 
-    log.info(f"OCR complete: {len(raw_text)} chars from {filename}")
+    _stage("ocr_done", tag,
+           duration_s=round(time.monotonic() - t0, 3),
+           chars=len(raw_text))
 
     # ------------------------------------------------------------------
-    # Step 2: Storage upload
+    # Stage 1b: Prepare canonical PDF bytes for storage
+    # PDFs go as-is. Images are converted once here.
     # ------------------------------------------------------------------
-    storage_path = None
-    try:
-        storage_path = upload_to_storage(
-            db, company_id, file_bytes, filename, invoice_number=None,
-        )
-        log.info(f"Storage: {storage_path}")
-    except Exception as e:
-        log.error(f"Storage upload failed for {filename}: {e}")
+    canonical_pdf_bytes: bytes | None = None
+    if lower.endswith(".pdf"):
+        canonical_pdf_bytes = file_bytes
+    else:
+        try:
+            import img2pdf
+            canonical_pdf_bytes = img2pdf.convert(file_bytes)
+        except Exception as e:
+            log.error(f"stage=pdf_conversion_failed  invoice={tag!r}  error={e}")
 
     # ------------------------------------------------------------------
-    # Step 3: LLM extraction
+    # Stage 2: LLM extraction
     # ------------------------------------------------------------------
+    _stage("llm_extract_start", tag)
+    t2 = time.monotonic()
+
     extraction = extract_structured_data(raw_text)
     confidence = extraction.get("document_metadata", {}).get("confidence_score", 0.0)
-    log.info(f"LLM extraction complete: confidence={confidence}")
+
+    _stage("llm_extract_done", tag,
+           duration_s=round(time.monotonic() - t2, 3),
+           confidence=confidence)
+
+    inv = extraction.get("invoice", {})
+    invoice_number = inv.get("invoice_number") or f"UPLOAD-{filename}"
+    tag = invoice_number
 
     # ------------------------------------------------------------------
-    # Step 4: Normalize entities
+    # Stage 3: Vendor normalization
     # ------------------------------------------------------------------
     vendor_data = extraction.get("vendor", {})
-    # client_data is present in the LLM output but ignored for payables —
-    # the company itself is the implicit recipient, not stored as a client.
 
     vendor_addr = vendor_data.get("address", {})
     vendor_address_row = get_or_create_address(
@@ -108,11 +142,10 @@ def process_invoice(
     vendor_id = vendor_row["id"]
 
     # ------------------------------------------------------------------
-    # Step 5: Duplicate check
+    # Stage 4: Duplicate check
+    # Key: (company_id, invoice_number, vendor_id).
+    # Two different vendors can legitimately use the same invoice_number.
     # ------------------------------------------------------------------
-    inv = extraction.get("invoice", {})
-    invoice_number = inv.get("invoice_number") or f"UPLOAD-{filename}"
-
     existing = (
         db.table("invoices").select("id")
         .eq("company_id", company_id)
@@ -123,76 +156,77 @@ def process_invoice(
 
     if existing.data:
         existing_id = existing.data[0]["id"]
-        log.info(f"Duplicate invoice detected: {invoice_number} (existing: {existing_id})")
-
-        # Insert compliance flag for duplicate
+        log.warning(
+            f"stage=duplicate_detected  invoice={tag!r}  existing_id={existing_id}"
+        )
         try:
             db.table("compliance_flags").insert({
                 "company_id": company_id,
                 "invoice_id": existing_id,
                 "flag_type":  "duplicate_invoice",
                 "severity":   "high",
-                "reason":     f"Duplicate upload: invoice {invoice_number} already exists",
+                "reason":     f"Duplicate upload: payable invoice "
+                              f"{invoice_number} already exists",
             }).execute()
         except Exception as e:
-            log.error(f"Failed to insert duplicate compliance flag: {e}")
+            log.error(f"stage=compliance_flag_failed  invoice={tag!r}  error={e}")
 
         try:
             create_notification(
                 db, company_id,
                 type="compliance",
                 title="Duplicate invoice detected",
-                message=f"Invoice {invoice_number} from {vendor_data.get('name', 'Unknown')} already exists in the system.",
+                message=(
+                    f"Payable invoice {invoice_number} "
+                    f"from {vendor_data.get('name') or 'Unknown'} already exists."
+                ),
                 related_invoice_id=existing_id,
             )
         except Exception as e:
-            log.error(f"Duplicate notification failed: {e}")
+            log.error(f"stage=notification_failed  invoice={tag!r}  error={e}")
 
         return {
-            "invoice_id":       existing_id,
-            "invoice_number":   invoice_number,
-            "confidence_score": confidence,
-            "vendor":           vendor_data.get("name", "Unknown"),
-            "client":           None,
-            "grand_total":      inv.get("grand_total", 0),
-            "line_items_count": 0,
+            "invoice_id":        existing_id,
+            "invoice_number":    invoice_number,
+            "status":            "duplicate",
+            "confidence_score":  confidence,
+            "vendor":            vendor_data.get("name"),
+            "grand_total":       inv.get("grand_total", 0),
+            "line_items_count":  0,
             "embeddings_stored": 0,
-            "status":           "duplicate",
-            "message":          f"Invoice {invoice_number} already exists",
+            "message":           f"Invoice {invoice_number} already exists",
         }
 
     # ------------------------------------------------------------------
-    # Step 6: Insert invoice — always payable, always unpaid, no client
+    # Stage 5: DB write
     # ------------------------------------------------------------------
+    _stage("db_write_start", tag, vendor=vendor_data.get("name"))
+    t3 = time.monotonic()
+
     invoice_result = db.table("invoices").insert({
-        "company_id":        company_id,
-        "invoice_number":    invoice_number,
-        "invoice_type":      "payable",       # all uploads are payable
-        "status":            "unpaid",         # payables start as unpaid
-        "issue_date":        inv.get("issue_date") or "1900-01-01",
-        "due_date":          inv.get("due_date"),
-        "currency":          inv.get("currency", "USD"),
-        "tax_percent":       inv.get("tax_percent", 0),
-        "subtotal":          inv.get("subtotal", 0),
-        "total_tax":         inv.get("total_tax", 0),
-        "grand_total":       inv.get("grand_total", 0),
-        "payment_method":    inv.get("payment_method"),
-        "description":       inv.get("description"),
-        "discount":          inv.get("discount", 0),
-        "vendor_id":         vendor_id,
-        "client_id":         None,            # payables have no client
-        "vendor_address_id": vendor_address_id,
-        "client_address_id": None,
-        "confidence_score":  confidence,
+        "company_id":         company_id,
+        "invoice_number":     invoice_number,
+        "invoice_type":       "payable",
+        "status":             "unpaid",
+        "issue_date":         inv.get("issue_date") or "1900-01-01",
+        "due_date":           inv.get("due_date"),
+        "currency":           inv.get("currency", "USD"),
+        "tax_percent":        inv.get("tax_percent", 0),
+        "subtotal":           inv.get("subtotal", 0),
+        "total_tax":          inv.get("total_tax", 0),
+        "grand_total":        inv.get("grand_total", 0),
+        "payment_method":     inv.get("payment_method"),
+        "description":        inv.get("description"),
+        "discount":           inv.get("discount", 0),
+        "vendor_id":          vendor_id,
+        "vendor_address_id":  vendor_address_id,
+        "confidence_score":   confidence,
         "amount_paid_so_far": 0,
     }).execute()
 
     invoice_id = invoice_result.data[0]["id"]
-    log.info(f"Invoice inserted: {invoice_id} ({invoice_number})")
 
-    # ------------------------------------------------------------------
-    # Step 7: Line items
-    # ------------------------------------------------------------------
+    # Line items
     line_items = extraction.get("line_items", [])
     if line_items:
         rows = [{
@@ -206,9 +240,7 @@ def process_invoice(
         } for item in line_items]
         db.table("line_items").insert(rows).execute()
 
-    # ------------------------------------------------------------------
-    # Step 8: Payments extracted from document (rare but possible)
-    # ------------------------------------------------------------------
+    # Payments from document
     payments = extraction.get("payments", [])
     if payments:
         pay_rows = [{
@@ -222,40 +254,104 @@ def process_invoice(
         if pay_rows:
             db.table("payments").insert(pay_rows).execute()
 
-    # ------------------------------------------------------------------
-    # Step 9: Raw document (audit trail)
-    # ------------------------------------------------------------------
-    db.table("invoice_raw_documents").insert({
+    # Raw document — storage_path filled in after upload
+    raw_doc_result = db.table("invoice_raw_documents").insert({
         "company_id":      company_id,
         "invoice_id":      invoice_id,
         "raw_text":        raw_text,
         "extraction_json": extraction,
         "schema_version":  "1.0",
-        "storage_path":    storage_path,
+        "storage_path":    None,
     }).execute()
 
+    raw_doc_id = raw_doc_result.data[0]["id"] if raw_doc_result.data else None
+
+    _stage("db_write_done", tag,
+           invoice_id=invoice_id,
+           line_items=len(line_items),
+           duration_s=round(time.monotonic() - t3, 3))
+
     # ------------------------------------------------------------------
-    # Step 10: Embeddings
+    # Stage 6: PDF upload to private "invoices" bucket
+    # Storage path: {company_id}/{invoice_id}.pdf
     # ------------------------------------------------------------------
+    storage_path = None
+    if canonical_pdf_bytes:
+        _stage("storage_upload_start", tag, invoice_id=invoice_id, bucket="invoices")
+        t4 = time.monotonic()
+        try:
+            storage_path = upload_invoice_pdf(
+                db, company_id, invoice_id, canonical_pdf_bytes
+            )
+            if raw_doc_id:
+                db.table("invoice_raw_documents").update({
+                    "storage_path": storage_path,
+                }).eq("id", raw_doc_id).execute()
+            _stage("storage_upload_done", tag,
+                   path=storage_path,
+                   duration_s=round(time.monotonic() - t4, 3))
+        except Exception as e:
+            log.error(
+                f"stage=storage_upload_failed  invoice={tag!r}  "
+                f"invoice_id={invoice_id}  error={e}"
+            )
+            try:
+                db.table("compliance_flags").insert({
+                    "company_id": company_id,
+                    "invoice_id": invoice_id,
+                    "flag_type":  "storage_upload_failed",
+                    "severity":   "medium",
+                    "reason":     f"PDF upload to private storage failed: {e}",
+                }).execute()
+            except Exception as flag_err:
+                log.error(
+                    f"stage=compliance_flag_failed  invoice={tag!r}  "
+                    f"error={flag_err}"
+                )
+    else:
+        log.warning(
+            f"stage=storage_upload_skipped  invoice={tag!r}  "
+            f"reason=no_canonical_pdf_bytes"
+        )
+
+    # ------------------------------------------------------------------
+    # Stage 7: Embeddings
+    # ------------------------------------------------------------------
+    _stage("embedding_start", tag, invoice_id=invoice_id)
+    t5 = time.monotonic()
     embed_count = 0
     try:
         embed_count = generate_and_store_embeddings(
             db, company_id, invoice_id, raw_text, extraction
         )
+        _stage("embedding_done", tag,
+               chunks=embed_count,
+               duration_s=round(time.monotonic() - t5, 3))
     except Exception as e:
-        log.error(f"Embedding generation failed for {invoice_id}: {e}")
+        log.error(
+            f"stage=embedding_failed  invoice={tag!r}  "
+            f"invoice_id={invoice_id}  error={e}"
+        )
 
     # ------------------------------------------------------------------
-    # Step 11: Compliance validation
+    # Stage 8: Compliance
     # ------------------------------------------------------------------
+    flag_count = 0
     try:
         from app.services.compliance_service import validate_invoice_compliance
-        validate_invoice_compliance(db, company_id, invoice_id)
+        result = validate_invoice_compliance(db, company_id, invoice_id)
+        flag_count = result.get("inserted", 0)
+        _stage("compliance_check_done", tag,
+               flags_inserted=flag_count,
+               flags_resolved=result.get("resolved", 0))
     except Exception as e:
-        log.error(f"Compliance check failed for {invoice_id}: {e}")
+        log.error(
+            f"stage=compliance_failed  invoice={tag!r}  "
+            f"invoice_id={invoice_id}  error={e}"
+        )
 
     # ------------------------------------------------------------------
-    # Step 12: Upload notification
+    # Stage 9: Notification
     # ------------------------------------------------------------------
     try:
         confidence_pct = int(float(confidence) * 100) if confidence else 0
@@ -264,23 +360,31 @@ def process_invoice(
             type="upload",
             title="Invoice extracted",
             message=(
-                f"Invoice {invoice_number} from {vendor_data.get('name', 'Unknown')} "
-                f"extracted successfully (confidence: {confidence_pct}%)"
+                f"Payable invoice {invoice_number} "
+                f"from {vendor_data.get('name', 'Unknown')} extracted successfully "
+                f"(confidence: {confidence_pct}%)"
             ),
             related_invoice_id=invoice_id,
         )
     except Exception as e:
-        log.error(f"Upload notification failed: {e}")
+        log.error(f"stage=notification_failed  invoice={tag!r}  error={e}")
+
+    log.info(
+        f"pipeline_complete  invoice={tag!r}  invoice_id={invoice_id}  "
+        f"vendor={vendor_data.get('name')!r}  "
+        f"grand_total={inv.get('grand_total', 0)}  "
+        f"confidence={confidence}  embeddings={embed_count}  "
+        f"flags={flag_count}  storage_path={storage_path!r}"
+    )
 
     return {
         "invoice_id":        invoice_id,
         "invoice_number":    invoice_number,
-        "invoice_type":      "payable",
         "status":            "unpaid",
         "confidence_score":  confidence,
-        "vendor":            vendor_data.get("name", "Unknown"),
-        "client":            None,
+        "vendor":            vendor_data.get("name"),
         "grand_total":       inv.get("grand_total", 0),
         "line_items_count":  len(line_items),
         "embeddings_stored": embed_count,
+        "storage_path":      storage_path,
     }

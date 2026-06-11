@@ -114,9 +114,17 @@ export const clientsApi = {
   create: (body) => request('/clients/', { method: 'POST', body: JSON.stringify(body) }),
   update: (id, body) => request(`/clients/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (id) => request(`/clients/${id}`, { method: 'DELETE' }),
+  getLatestAddress(clientId) {
+    return request(`/clients/${clientId}/latest-address`)
+  },
 }
 
 // ── Upload ────────────────────────────────────────────────────────────────────
+
+// ADD this method to the existing uploadApi object in src/lib/api.js
+// Place it directly after the existing upload() method
+
+// uploadApi should look like this after the change:
 
 export const uploadApi = {
   upload: async (file) => {
@@ -128,8 +136,19 @@ export const uploadApi = {
       throw new Error(err.detail || err.error || `HTTP ${res.status}`)
     }
     return res.json()
-  }
+  },
+
+  // NEW — batch upload, no Content-Type header (browser sets multipart boundary)
+  uploadBatch: async (formData) => {
+    const res = await fetch(`${BASE}/upload/batch`, { method: 'POST', body: formData })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Batch upload failed' }))
+      throw new Error(err.detail || err.error || `HTTP ${res.status}`)
+    }
+    return res.json()
+  },
 }
+
 
 // ── Documents ─────────────────────────────────────────────────────────────────
 
@@ -204,6 +223,29 @@ export const queryApi = {
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 export const settingsApi = {
+
+    // ── Branding ──────────────────────────────────────────────────────────────
+  getBranding: () => {
+    const q = new URLSearchParams({ company_id: getCompanyId() })
+    return request(`/settings/branding?${q}`)
+  },
+  updateBranding: (data) => request('/settings/branding', {
+    method: 'PATCH',
+    body: JSON.stringify({ ...data, company_id: getCompanyId() }),
+  }),
+  uploadLogo: async (file) => {
+    const form = new FormData()
+    form.append('file', file)
+    const res = await fetch(`${BASE}/settings/branding/logo?company_id=${encodeURIComponent(getCompanyId())}`, {
+      method: 'POST',
+      body: form,
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }))
+      throw new Error(err.detail || err.error || `HTTP ${res.status}`)
+    }
+    return res.json()
+  },
   get: () => {
     const q = new URLSearchParams({ company_id: getCompanyId() })
     return request(`/settings?${q}`)

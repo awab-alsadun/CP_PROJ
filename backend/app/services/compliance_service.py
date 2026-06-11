@@ -67,14 +67,21 @@ def _check_missing_fields(invoice: dict) -> tuple[bool, list[str]]:
     return bool(missing), missing
 
 
-def _check_low_confidence(invoice: dict) -> tuple[bool, str | None]:
-    score = invoice.get("confidence_score")
-    if score is None:
-        return False, None
-    score = float(score)
-    if score < 0.6:
-        return True, f"Extraction confidence {score:.2f} below threshold 0.6"
-    return False, None
+def _check_missing_fields(invoice: dict) -> tuple[bool, list[str]]:
+    missing = []
+
+    if not invoice.get("due_date"):
+        missing.append("due_date")
+    if not invoice.get("invoice_number"):
+        missing.append("invoice_number")
+
+    invoice_type = invoice.get("invoice_type", "payable")
+    if invoice_type == "payable" and not invoice.get("vendor_id"):
+        missing.append("vendor_id")
+    # Receivable client_id absence is handled by invoice_processor's
+    # 'unmatched_client' flag during ingestion. Do not duplicate here.
+
+    return bool(missing), missing
 
 
 def _check_duplicate(

@@ -83,15 +83,19 @@ def get_valid_transitions(invoice_type: str, current_status: str) -> list[str]:
 # ---------------------------------------------------------------------------
 
 class CompanyBase(BaseModel):
-    name:             str
-    domain:           str | None = None
-    country:          str | None = None
-    default_tax_rate: Decimal | None = Decimal("0")
-    address:          str | None = None
-    phone:            str | None = None
-    email:            str | None = None
-    tax_id:           str | None = None
-    logo_url:         str | None = None
+    name:                   str
+    domain:                 str | None = None
+    country:                str | None = None
+    default_tax_rate:       Decimal | None = Decimal("0")
+    address:                str | None = None
+    phone:                  str | None = None
+    email:                  str | None = None
+    tax_id:                 str | None = None
+    logo_url:               str | None = None
+    invoice_primary_color:  str | None = None
+    invoice_accent_color:   str | None = None
+    invoice_text_color:     str | None = None
+    invoice_footer_text:    str | None = None
 
 
 class CompanyCreate(CompanyBase):
@@ -99,15 +103,19 @@ class CompanyCreate(CompanyBase):
 
 
 class CompanyUpdate(BaseModel):
-    name:             str | None = None
-    domain:           str | None = None
-    country:          str | None = None
-    default_tax_rate: Decimal | None = None
-    address:          str | None = None
-    phone:            str | None = None
-    email:            str | None = None
-    tax_id:           str | None = None
-    logo_url:         str | None = None
+    name:                   str | None = None
+    domain:                 str | None = None
+    country:                str | None = None
+    default_tax_rate:       Decimal | None = None
+    address:                str | None = None
+    phone:                  str | None = None
+    email:                  str | None = None
+    tax_id:                 str | None = None
+    logo_url:               str | None = None
+    invoice_primary_color:  str | None = None
+    invoice_accent_color:   str | None = None
+    invoice_text_color:     str | None = None
+    invoice_footer_text:    str | None = None
 
 
 class CompanyRead(CompanyBase):
@@ -130,6 +138,8 @@ class AddressBase(BaseModel):
 
 class AddressCreate(AddressBase):
     company_id: uuid.UUID
+    client_id:  uuid.UUID | None = None
+    vendor_id:  uuid.UUID | None = None
 
 
 class AddressRead(AddressBase):
@@ -203,6 +213,26 @@ class ClientRead(ClientBase):
     deleted_at:     datetime | None = None
     model_config = ConfigDict(from_attributes=True)
 
+
+class ClientCreateWithAddress(BaseModel):
+    """
+    Request model for POST /api/v1/clients.
+    Accepts an optional nested address block.
+    company_id is injected server-side from settings.
+    """
+    name:    str
+    tax_id:  str
+    email:   str | None = None
+    phone:   str | None = None
+    address: AddressBase | None = None
+
+
+class ClientReadWithAddress(ClientRead):
+    """
+    Response model for POST /api/v1/clients.
+    Mirrors ClientRead and appends the created address if one was provided.
+    """
+    address: AddressRead | None = None
 
 # ---------------------------------------------------------------------------
 # Invoices

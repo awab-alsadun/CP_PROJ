@@ -1,174 +1,452 @@
-import React, { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Upload, CheckCircle, AlertTriangle, FileText, ArrowRight } from 'lucide-react';
-import { uploadApi } from '../lib/api';
-import { InvoiceTypeBadge, toast } from '../components/ui';
+import { useState, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Upload, FileText, CheckCircle, AlertCircle, X, Loader2, FolderOpen } from 'lucide-react'
+import { uploadApi, getCompanyId } from '../lib/api'
+import { ConfidenceBar } from '../components/ui'
 
-const STAGES = ['Uploading', 'OCR Extraction', 'LLM Parsing', 'DB Storage', 'Done'];
+const STAGES = [
+  { key: 'ocr',        label: 'OCR Extraction',  desc: 'Reading document text'        },
+  { key: 'parsing',    label: 'LLM Parsing',      desc: 'Extracting structured data'   },
+  { key: 'validating', label: 'Validation',       desc: 'Checking data integrity'      },
+  { key: 'storing',    label: 'Storing',          desc: 'Saving to database'           },
+  { key: 'embedding',  label: 'Embedding',        desc: 'Generating vector embeddings' },
+]
+
+function StageRow({ stage, status }) {
+  return (
+    <div className="flex items-center gap-3 py-2">
+      <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+        {status === 'done'    && <CheckCircle size={16} color="#22C55E" />}
+        {status === 'active'  && <Loader2 size={16} className="animate-spin" style={{ color: 'var(--accent)' }} />}
+        {status === 'error'   && <AlertCircle size={16} color="#EF4444" />}
+        {status === 'pending' && <div className="w-4 h-4 rounded-full border-2" style={{ borderColor: 'var(--border)' }} />}
+      </div>
+      <div className="flex-1">
+        <p className="text-sm font-medium" style={{
+          color: status === 'active' ? 'var(--text-primary)'
+               : status === 'done'   ? '#22C55E'
+               : status === 'error'  ? '#EF4444'
+               : 'var(--text-muted)',
+        }}>
+          {stage.label}
+        </p>
+        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{stage.desc}</p>
+      </div>
+    </div>
+  )
+}
 
 export default function UploadExtract() {
-  const navigate = useNavigate();
-  const fileRef = useRef(null);
-  const [file, setFile] = useState(null);
-  const [dragging, setDragging] = useState(false);
-  const [stage, setStage] = useState(-1); // -1 = idle
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const navigate  = useNavigate()
+  const fileRef   = useRef(null)
+  const folderRef = useRef(null)
 
-  function handleFile(f) {
-    if (!f) return;
-    setFile(f); setResult(null); setError(null); setStage(-1);
+  // ── single upload state ──────────────────────────────────────────────────────
+  const [dragging,    setDragging]    = useState(false)
+  const [file,        setFile]        = useState(null)
+  const [uploading,   setUploading]   = useState(false)
+  const [stageStatus, setStageStatus] = useState({})
+  const [result,      setResult]      = useState(null)
+  const [error,       setError]       = useState(null)
+
+  // ── batch state ──────────────────────────────────────────────────────────────
+  const [batchActive,   setBatchActive]   = useState(false)
+  const [batchTotal,    setBatchTotal]    = useState(0)
+  const [batchDone,     setBatchDone]     = useState(0)
+  const [batchSuccess,  setBatchSuccess]  = useState(0)
+  const [batchFailures, setBatchFailures] = useState([])
+  const [batchToast,    setBatchToast]    = useState(null)
+
+  const cancelRef = useRef(false)
+
+  const busy    = uploading || batchActive
+  const batchPct = batchTotal > 0 ? Math.round((batchDone / batchTotal) * 100) : 0
+
+  // ── single upload helpers ────────────────────────────────────────────────────
+  const setStage = (key, status) =>
+    setStageStatus(prev => ({ ...prev, [key]: status }))
+
+  const handleFile = (f) => {
+    if (!f) return
+    const ext = f.name.split('.').pop().toLowerCase()
+    if (!['pdf', 'png', 'jpg', 'jpeg', 'tiff'].includes(ext)) {
+      setError('Only PDF and image files are supported.')
+      return
+    }
+    setFile(f)
+    setResult(null)
+    setError(null)
+    setStageStatus({})
   }
 
-  async function handleUpload() {
-    if (!file) return;
-    setError(null); setResult(null);
+  const handleDrop = useCallback((e) => {
+    e.preventDefault()
+    setDragging(false)
+    const f = e.dataTransfer.files[0]
+    if (f) handleFile(f)
+  }, [])
 
-    // Animate stages
-    for (let i = 0; i < STAGES.length - 1; i++) {
-      setStage(i);
-      await new Promise(r => setTimeout(r, 400));
+  const simulateProgress = async () => {
+    for (const stage of STAGES) {
+      setStage(stage.key, 'active')
+      await new Promise(r => setTimeout(r, 600))
     }
+  }
 
+  const handleUpload = async () => {
+    if (!file) return
+    setUploading(true)
+    setError(null)
+    setResult(null)
+    setStageStatus(Object.fromEntries(STAGES.map(s => [s.key, 'pending'])))
+    const animPromise = simulateProgress()
     try {
-      const res = await uploadApi.upload(file);
-      setStage(STAGES.length - 1);
-      setResult(res);
-      if (res.duplicate) {
-        toast('Duplicate invoice detected', 'warning');
-      } else {
-        toast('Invoice extracted and stored');
-      }
+      const res = await uploadApi.upload(file, 'payable')
+      await animPromise
+      STAGES.forEach(s => setStage(s.key, 'done'))
+      setResult(res)
     } catch (e) {
-      setStage(-1);
-      setError(e.message);
-      toast(e.message, 'error');
+      await animPromise
+      STAGES.forEach(s => setStage(s.key, prev => prev === 'active' ? 'error' : prev))
+      setError(e.message)
+    } finally {
+      setUploading(false)
     }
   }
 
-  function handleDrop(e) {
-    e.preventDefault(); setDragging(false);
-    const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
+  const reset = () => {
+    setFile(null)
+    setResult(null)
+    setError(null)
+    setStageStatus({})
+    setUploading(false)
   }
 
+  // ── batch: sequential per-file loop ─────────────────────────────────────────
+  const handleFolderChange = async (e) => {
+    const allFiles = Array.from(e.target.files || [])
+    e.target.value = ''
+
+    const pdfs = allFiles.filter(f => f.name.toLowerCase().endsWith('.pdf'))
+
+    if (pdfs.length === 0) {
+      setBatchToast({ message: 'No PDF files found in selected folder', type: 'error' })
+      setTimeout(() => setBatchToast(null), 4000)
+      return
+    }
+
+    cancelRef.current = false
+    setBatchActive(true)
+    setBatchTotal(pdfs.length)
+    setBatchDone(0)
+    setBatchSuccess(0)
+    setBatchFailures([])
+    setBatchToast(null)
+
+    let successCount = 0
+    let doneCount    = 0
+    const failures   = []
+
+    for (const pdf of pdfs) {
+      if (cancelRef.current) {
+        setBatchToast({
+          message: `Cancelled at ${doneCount}/${pdfs.length} — ${successCount} ingested`,
+          type: 'warning',
+        })
+        setTimeout(() => setBatchToast(null), 5000)
+        break
+      }
+
+      try {
+        await uploadApi.upload(pdf, 'payable')
+        successCount++
+      } catch (err) {
+        failures.push({ filename: pdf.name, error: err.message || 'Unknown error' })
+      }
+
+      doneCount++
+      setBatchDone(doneCount)
+      setBatchSuccess(successCount)
+      setBatchFailures([...failures])
+    }
+
+    if (!cancelRef.current) {
+      setBatchToast({
+        message: `${successCount}/${pdfs.length} invoices ingested successfully`,
+        type: failures.length === 0 ? 'success' : 'warning',
+      })
+      setTimeout(() => setBatchToast(null), 5000)
+    }
+
+    setBatchActive(false)
+  }
+
+  // ── render ───────────────────────────────────────────────────────────────────
   return (
-    <div style={{ maxWidth: 640, margin: '0 auto' }}>
-      <div style={{ marginBottom: 16, padding: '10px 14px', background: 'var(--accent-light)', border: '1px solid var(--accent)33', borderRadius: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
-        Uploaded invoices are recorded as <strong>Payables (AP)</strong> — invoices you received from vendors.
+    <div className="p-6 max-w-3xl space-y-5 animate-fade-up">
+      <div>
+        <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+          Upload & Extract
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
+          Upload a PDF or invoice image. The AI pipeline will extract structured data automatically.
+        </p>
       </div>
 
       {/* Drop zone */}
-      <div
-        className="card"
-        onDragOver={e => { e.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => fileRef.current?.click()}
-        style={{
-          padding: '48px 24px', textAlign: 'center', cursor: 'pointer',
-          border: `2px dashed ${dragging ? 'var(--accent)' : file ? '#22C55E' : 'var(--border)'}`,
-          background: dragging ? 'var(--accent-light)' : 'var(--bg-card)',
-          transition: 'all 0.2s', marginBottom: 16,
-        }}>
-        <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: 'none' }} onChange={e => handleFile(e.target.files[0])} />
-        <Upload size={36} color={file ? '#22C55E' : 'var(--text-muted)'} style={{ margin: '0 auto 12px' }} />
-        {file ? (
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: '#22C55E', marginBottom: 4 }}>{file.name}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{(file.size / 1024).toFixed(0)} KB · Click to change</div>
-          </div>
-        ) : (
-          <div>
-            <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 4 }}>Drop invoice here</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>PDF, JPG, PNG · Click to browse</div>
-          </div>
-        )}
-      </div>
-
-      {file && stage === -1 && (
-        <button className="btn-primary" onClick={handleUpload} style={{ width: '100%', padding: '12px', fontSize: 14, marginBottom: 16 }}>
-          Extract Invoice
-        </button>
-      )}
-
-      {/* Pipeline stages */}
-      {stage >= 0 && (
-        <div className="card" style={{ padding: '20px 24px', marginBottom: 16 }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16 }}>Processing</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {STAGES.map((s, i) => {
-              const done = i < stage || (stage === STAGES.length - 1);
-              const active = i === stage && stage < STAGES.length - 1;
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{
-                    width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    background: done ? '#22C55E20' : active ? 'var(--accent-light)' : 'var(--bg-secondary)',
-                    border: `1.5px solid ${done ? '#22C55E' : active ? 'var(--accent)' : 'var(--border)'}`,
-                  }}>
-                    {done ? <CheckCircle size={12} color="#22C55E" /> : active ? <div className="loading-dot" style={{ width: 6, height: 6 }} /> : <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 700 }}>{i + 1}</span>}
-                  </div>
-                  <span style={{ fontSize: 13, color: done ? '#22C55E' : active ? 'var(--accent)' : 'var(--text-muted)', fontWeight: active ? 600 : 400 }}>{s}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div className="card" style={{ padding: 20 }}>
-          {result.duplicate ? (
-            <div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
-                <AlertTriangle size={18} color="#F59E0B" />
-                <span style={{ fontWeight: 600, color: '#F59E0B' }}>Duplicate Invoice Detected</span>
+      {!result && (
+        <div
+          className={`card rounded-2xl flex flex-col items-center justify-center p-12 cursor-pointer border-2 border-dashed transition-all duration-200 ${dragging ? 'scale-[1.01]' : ''}`}
+          style={{
+            borderColor: dragging ? 'var(--accent)' : file ? 'var(--accent)' : 'var(--border)',
+            background:  dragging ? 'var(--accent-light)' : 'var(--bg-card)',
+          }}
+          onClick={() => !busy && fileRef.current?.click()}
+          onDragOver={e => { e.preventDefault(); setDragging(true) }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+        >
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,.tiff"
+            className="hidden"
+            onChange={e => handleFile(e.target.files[0])}
+          />
+          {file ? (
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{ background: 'var(--accent-light)' }}>
+                <FileText size={22} style={{ color: 'var(--accent)' }} />
               </div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-                This invoice already exists in the system.
+              <div className="text-center">
+                <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>{file.name}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                  {(file.size / 1024).toFixed(1)} KB
+                </p>
               </div>
-              {result.existing_id && (
+              {!uploading && (
                 <button
-                  className="btn-secondary"
-                  onClick={() => navigate(`/payables/${result.existing_id}`)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13 }}>
-                  View existing invoice <ArrowRight size={13} />
+                  onClick={e => { e.stopPropagation(); reset() }}
+                  className="text-xs flex items-center gap-1"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <X size={12} /> Remove
                 </button>
               )}
             </div>
           ) : (
-            <div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 14 }}>
-                <CheckCircle size={18} color="#22C55E" />
-                <span style={{ fontWeight: 600, color: '#22C55E' }}>Extraction Complete</span>
-                <InvoiceTypeBadge type="payable" />
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{ background: 'var(--bg-secondary)' }}>
+                <Upload size={22} style={{ color: 'var(--text-muted)' }} strokeWidth={1.5} />
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>
-                {result.invoice_number && <div><span style={{ color: 'var(--text-muted)' }}>Invoice #:</span> <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-primary)' }}>{result.invoice_number}</span></div>}
-                {result.vendor_name && <div><span style={{ color: 'var(--text-muted)' }}>Vendor:</span> {result.vendor_name}</div>}
-                {result.grand_total != null && <div><span style={{ color: 'var(--text-muted)' }}>Total:</span> <span style={{ fontFamily: 'var(--font-mono)' }}>{result.currency} {result.grand_total}</span></div>}
-                {result.confidence_score != null && <div><span style={{ color: 'var(--text-muted)' }}>Confidence:</span> {Math.round(result.confidence_score * 100)}%</div>}
+              <div>
+                <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
+                  Drop a file here or click to browse
+                </p>
+                <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
+                  Supports PDF, PNG, JPG, TIFF
+                </p>
               </div>
-              {result.id && (
-                <button
-                  className="btn-primary"
-                  onClick={() => navigate(`/payables/${result.id}`)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13 }}>
-                  <FileText size={13} /> View Invoice <ArrowRight size={13} />
-                </button>
-              )}
             </div>
           )}
         </div>
       )}
 
+      {/* Error (single upload) */}
       {error && (
-        <div style={{ padding: '14px 16px', background: '#EF444420', border: '1px solid #EF444433', borderRadius: 8, color: '#EF4444', fontSize: 13 }}>
-          {error}
+        <div className="card p-4 flex items-center gap-3" style={{ borderColor: '#FECACA' }}>
+          <AlertCircle size={16} color="#EF4444" />
+          <p className="text-sm" style={{ color: '#EF4444' }}>{error}</p>
+        </div>
+      )}
+
+      {/* Pipeline stages (single upload) */}
+      {Object.keys(stageStatus).length > 0 && !result && (
+        <div className="card p-5">
+          <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>
+            Processing Pipeline
+          </h2>
+          <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+            {STAGES.map(s => (
+              <StageRow key={s.key} stage={s} status={stageStatus[s.key] || 'pending'} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Result (single upload) */}
+      {result && (
+        <div className="space-y-4 animate-fade-up">
+          <div className="card p-4 flex items-center gap-3" style={{ borderColor: '#BBF7D0' }}>
+            <CheckCircle size={16} color="#22C55E" />
+            <div className="flex-1">
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                Invoice extracted successfully
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                Stored as {result.invoice_number || result.invoice?.invoice_number || 'new invoice'}
+              </p>
+            </div>
+            {(result.confidence_score || result.invoice?.confidence_score) != null && (
+              <ConfidenceBar score={result.confidence_score || result.invoice?.confidence_score} />
+            )}
+          </div>
+          <div className="card overflow-hidden">
+            <div className="px-5 py-3.5 border-b" style={{ borderColor: 'var(--border)' }}>
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Extracted Data</h2>
+            </div>
+            <pre className="p-5 text-xs font-mono overflow-x-auto leading-relaxed"
+              style={{ color: 'var(--text-secondary)', background: 'var(--bg-secondary)', maxHeight: 400 }}>
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          </div>
+          <div className="flex gap-3">
+            <button onClick={reset} className="btn-secondary">Upload Another</button>
+            {(result.id || result.invoice?.id) && (
+              <button
+                onClick={() => navigate(`/payables/${result.id || result.invoice?.id}`)}
+                className="btn-primary"
+              >
+                View Invoice
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Action buttons */}
+      {!result && (
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Single upload */}
+          {file && !uploading && (
+            <button onClick={handleUpload} disabled={busy} className="btn-primary disabled:opacity-50">
+              <Upload size={15} /> Extract Invoice
+            </button>
+          )}
+
+          {/* Folder ingest */}
+          <button
+            onClick={() => folderRef.current?.click()}
+            disabled={busy}
+            className="btn-secondary disabled:opacity-50"
+          >
+            {batchActive
+              ? <><Loader2 size={14} className="animate-spin" /> Ingesting…</>
+              : <><FolderOpen size={14} /> Ingest Folder</>
+            }
+          </button>
+
+          {/* Cancel — only during batch */}
+          {batchActive && (
+            <button
+              onClick={() => { cancelRef.current = true }}
+              className="btn-ghost text-xs h-8 px-3"
+              style={{ color: '#EF4444' }}
+            >
+              <X size={13} /> Cancel
+            </button>
+          )}
+
+          <input
+            ref={folderRef}
+            type="file"
+            webkitdirectory=""
+            directory=""
+            multiple
+            className="hidden"
+            onChange={handleFolderChange}
+          />
+        </div>
+      )}
+
+      {/* Batch progress */}
+      {batchActive && batchTotal > 0 && (
+        <div className="card p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Ingesting folder
+            </h2>
+            <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+              {batchDone} / {batchTotal}
+            </span>
+          </div>
+          <div className="w-full rounded-full overflow-hidden" style={{ height: 6, background: 'var(--border)' }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${batchPct}%`, background: 'var(--accent)' }}
+            />
+          </div>
+          <div className="flex gap-4 text-xs">
+            <span style={{ color: '#22C55E' }}>✓ {batchSuccess} succeeded</span>
+            {batchFailures.length > 0 && (
+              <span style={{ color: '#EF4444' }}>✗ {batchFailures.length} failed</span>
+            )}
+            <span style={{ color: 'var(--text-muted)' }}>{batchPct}%</span>
+          </div>
+        </div>
+      )}
+
+      {/* Batch toast */}
+      {batchToast && (
+        <div
+          className="card p-4 flex items-center gap-3"
+          style={{
+            borderColor: batchToast.type === 'error'   ? '#FECACA'
+                       : batchToast.type === 'warning' ? '#FDE68A'
+                       : '#BBF7D0',
+          }}
+        >
+          {batchToast.type === 'success'
+            ? <CheckCircle size={16} color="#22C55E" />
+            : <AlertCircle size={16} color={batchToast.type === 'error' ? '#EF4444' : '#F59E0B'} />
+          }
+          <p className="text-sm flex-1"
+            style={{
+              color: batchToast.type === 'error'   ? '#EF4444'
+                   : batchToast.type === 'warning' ? '#F59E0B'
+                   : '#16A34A',
+            }}>
+            {batchToast.message}
+          </p>
+          <button onClick={() => setBatchToast(null)} className="opacity-50 hover:opacity-100">
+            <X size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Failed files list */}
+      {batchFailures.length > 0 && !batchActive && (
+        <div className="card overflow-hidden">
+          <div className="px-5 py-3.5 border-b flex items-center justify-between"
+            style={{ borderColor: 'var(--border)' }}>
+            <h2 className="text-sm font-semibold" style={{ color: '#EF4444' }}>
+              Failed ({batchFailures.length})
+            </h2>
+            <button
+              onClick={() => setBatchFailures([])}
+              className="btn-ghost p-1.5 rounded-lg flex items-center gap-1 text-xs"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <X size={13} /> Dismiss
+            </button>
+          </div>
+          <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
+            {batchFailures.map((f, i) => (
+              <div key={i} className="flex items-start gap-3 px-5 py-3">
+                <AlertCircle size={14} color="#EF4444" className="flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
+                    {f.filename}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{f.error}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
-  );
+  )
 }

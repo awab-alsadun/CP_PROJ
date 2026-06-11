@@ -1,17 +1,26 @@
 """
 Invoice endpoints.
 Thin routing layer — all logic lives in services/invoice_service.py.
+
+Changes:
+  - POST /api/v1/invoices accepts receivables only (returns 400 for payables).
+    Renders K4Y-branded PDF, persists raw_doc, uploads to Storage, generates
+    embeddings, and runs compliance — all delegated to
+    invoice_service.create_receivable_invoice.
+  - Payload now carries line_items inline; previously they were inserted
+    separately by the frontend.
+  - GET /{invoice_id}/pdf unchanged: 302 redirect to signed Supabase URL.
 """
 
 import uuid
+import logging
 from decimal import Decimal
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 from supabase import Client
-import io
 
 from app.core.config import get_settings
 from app.core.supabase import get_supabase
@@ -20,14 +29,16 @@ from app.models.schemas import (
     InvoiceCreate,
     InvoiceRead,
     InvoiceUpdate,
+    InvoiceType,
     LineItemRead,
     PaymentRead,
     InvoiceRawDocumentRead,
 )
-from app.services import invoice_service, compliance_service, credit_service, pdf_service
+from app.services import invoice_service, compliance_service, credit_service
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 settings = get_settings()
+log = logging.getLogger(__name__)
 
 
 def _handle(func, *args, **kwargs):
@@ -66,13 +77,44 @@ class RefundRequest(BaseModel):
     amount:     Decimal
 
 
+class ReceivableLineItemInput(BaseModel):
+    """Line item shape accepted alongside InvoiceCreate fields on POST /invoices."""
+    description:   str
+    quantity:      Decimal
+    unit_price:    Decimal
+    line_subtotal: Decimal
+    discount:      Decimal = Decimal("0")
+
+
+class CreateInvoicePayload(InvoiceCreate):
+    """InvoiceCreate + inline line_items. Receivables only."""
+    line_items: list[ReceivableLineItemInput] = Field(default_factory=list)
+
+
 # ---------------------------------------------------------------------------
 # CRUD
 # ---------------------------------------------------------------------------
 
 @router.post("/", response_model=InvoiceRead, status_code=201)
-def create_invoice(payload: InvoiceCreate, db: Client = Depends(get_supabase)):
-    return _handle(invoice_service.create_invoice, db, payload)
+def create_invoice(
+    payload: CreateInvoicePayload,
+    db: Client = Depends(get_supabase),
+):
+    """
+    Create a receivable invoice from structured form input.
+
+    The endpoint renders a K4Y-branded PDF, persists a raw_document row,
+    uploads the PDF to private Supabase Storage, generates pgvector
+    embeddings, and runs compliance — all in invoice_service.
+
+    Payables are NOT created here. Send PDFs to POST /api/v1/upload instead.
+    """
+    if payload.invoice_type == InvoiceType.payable:
+        raise HTTPException(
+            400,
+            "Payables must be created via /upload endpoint",
+        )
+    return _handle(invoice_service.create_receivable_invoice, db, payload)
 
 
 @router.get("/")
@@ -135,7 +177,6 @@ def get_raw_document(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
 
 @router.get("/{invoice_id}/compliance-flags")
 def get_compliance_flags(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
-    """List all compliance flags for a specific invoice."""
     return _handle(
         compliance_service.get_invoice_flags,
         db,
@@ -146,10 +187,6 @@ def get_compliance_flags(invoice_id: uuid.UUID, db: Client = Depends(get_supabas
 
 @router.post("/{invoice_id}/validate")
 def validate_invoice(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
-    """
-    Manually trigger compliance validation for a single invoice.
-    Useful after manual edits.
-    """
     return _handle(
         compliance_service.validate_invoice_compliance,
         db,
@@ -160,7 +197,6 @@ def validate_invoice(invoice_id: uuid.UUID, db: Client = Depends(get_supabase)):
 
 # ---------------------------------------------------------------------------
 # Lifecycle — Status Transition
-# Wires: embedding refresh after every successful transition
 # ---------------------------------------------------------------------------
 
 @router.post("/{invoice_id}/transition")
@@ -173,13 +209,14 @@ def transition_status(
     Transition invoice status according to type-aware state machine.
 
     Payable:    unpaid → partially_paid | paid | overdue → paid
-    Receivable: draft → sent → unpaid → partially_paid | paid | overdue → paid
+    Receivable: draft → sent → unpaid | partially_paid | paid | overdue → paid
 
     After transition:
       - Audit log written
       - Notification created
-      - Header embedding refreshed (keeps RAG current)
+      - Header embedding refreshed
       - Compliance re-validated
+      - For receivable draft → sent: email send (PDF already in storage)
     """
     result = _handle(
         invoice_service.transition_invoice_status,
@@ -189,19 +226,14 @@ def transition_status(
         body.new_status,
     )
 
-    # Refresh header embedding — non-fatal, runs after successful transition
     try:
         from app.services.embedding_service import refresh_header_embedding
         refresh_header_embedding(
-            db,
-            settings.MVP_COMPANY_ID,
-            str(invoice_id),
-            body.new_status,
+            db, settings.MVP_COMPANY_ID, str(invoice_id), body.new_status,
         )
     except Exception:
-        pass  # embedding refresh failure never blocks the response
+        pass
 
-    # Re-run compliance after transition (e.g. overdue_no_action may apply)
     try:
         compliance_service.validate_invoice_compliance(
             db, settings.MVP_COMPANY_ID, str(invoice_id)
@@ -209,18 +241,10 @@ def transition_status(
     except Exception:
         pass
 
-    # For receivable draft → sent: generate PDF + send email
     if body.new_status == "sent":
         try:
             invoice_data = invoice_service.get_invoice(db, invoice_id)
             if invoice_data.get("invoice_type") == "receivable":
-                try:
-                    pdf_service.generate_invoice_pdf(
-                        db, settings.MVP_COMPANY_ID, str(invoice_id)
-                    )
-                except Exception as e:
-                    log.error(f"PDF generation failed after transition to sent: {e}")
-                # Fire email (non-fatal)
                 try:
                     from app.services.notification_delivery_service import send_invoice_email
                     client = invoice_data.get("client") or {}
@@ -241,12 +265,8 @@ def transition_status(
 
 
 # ---------------------------------------------------------------------------
-# PDF endpoint
+# PDF endpoint — unified signed-URL redirect
 # ---------------------------------------------------------------------------
-
-import logging
-log = logging.getLogger(__name__)
-
 
 @router.get("/{invoice_id}/pdf")
 def get_invoice_pdf(
@@ -254,52 +274,45 @@ def get_invoice_pdf(
     db: Client = Depends(get_supabase),
 ):
     """
-    Returns the invoice PDF as a downloadable file.
+    Returns a 302 redirect to a 5-minute signed URL for the PDF in
+    private Supabase Storage. Works for both payables (uploaded via
+    /upload) and receivables (rendered + uploaded on create).
 
-    Receivables: returns generated PDF (auto-creates if not yet stored).
-    Payables:    400 — use GET /invoices/{id}/raw for the original upload.
+    Returns 404 if the invoice has no storage_path.
     """
-    invoice = _handle(invoice_service.get_invoice, db, invoice_id)
-    if invoice.get("invoice_type") == "payable":
-        raise HTTPException(
-            status_code=400,
-            detail="PDF download not available for payable invoices. "
-                   "Use GET /invoices/{id}/raw for the original uploaded document.",
-        )
+    _handle(invoice_service.get_invoice, db, invoice_id)
 
-    # Try stored PDF first
-    pdf_bytes = None
+    raw_doc = None
     try:
-        pdf_bytes = pdf_service.get_stored_pdf(
-            db, settings.MVP_COMPANY_ID, str(invoice_id)
-        )
+        raw_doc = invoice_service.get_raw_document(db, invoice_id)
     except Exception:
         pass
 
-    # Generate on demand if not stored
-    if not pdf_bytes:
-        try:
-            pdf_bytes = pdf_service.generate_invoice_pdf(
-                db, settings.MVP_COMPANY_ID, str(invoice_id)
-            )
-        except ValidationError as e:
-            raise HTTPException(400, e.message)
-        except NotFoundError as e:
-            raise HTTPException(404, e.message)
-        except DatabaseError as e:
-            raise HTTPException(502, f"{e.message}: {e.detail}")
+    if not raw_doc or not raw_doc.get("storage_path"):
+        raise HTTPException(
+            status_code=404,
+            detail="PDF not available for this invoice. "
+                   "The file may not have been uploaded.",
+        )
 
-    if not pdf_bytes:
-        raise HTTPException(404, "No PDF available for this invoice.")
+    try:
+        from app.services.storage_service import get_signed_url
+        signed_url = get_signed_url(
+            db, raw_doc["storage_path"], expires_in=300,
+        )
+    except Exception as e:
+        log.error(f"Failed to generate signed URL for invoice {invoice_id}: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail="Failed to generate PDF download URL.",
+        )
 
-    inv_number = invoice.get("invoice_number", "invoice")
-    filename   = f"invoice_{inv_number}.pdf".replace("/", "-").replace(" ", "_")
+    return RedirectResponse(url=signed_url, status_code=302)
 
-    return StreamingResponse(
-        io.BytesIO(pdf_bytes),
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+
+# ---------------------------------------------------------------------------
+# Payments
+# ---------------------------------------------------------------------------
 
 @router.post("/{invoice_id}/payments")
 def record_payment(
@@ -307,11 +320,6 @@ def record_payment(
     body: PaymentRequest,
     db: Client = Depends(get_supabase),
 ):
-    """
-    Record a manual payment against a specific invoice.
-    Updates amount_paid_so_far and auto-transitions status if fully paid.
-    For bulk FIFO allocation use POST /api/v1/payments/allocate instead.
-    """
     result = _handle(
         invoice_service.record_payment,
         db,
@@ -325,16 +333,12 @@ def record_payment(
         },
     )
 
-    # Refresh embedding after payment (status may have changed)
     try:
         from app.services.embedding_service import refresh_header_embedding
         new_status = result.get("invoice_status")
         if new_status:
             refresh_header_embedding(
-                db,
-                settings.MVP_COMPANY_ID,
-                str(invoice_id),
-                new_status,
+                db, settings.MVP_COMPANY_ID, str(invoice_id), new_status,
             )
     except Exception:
         pass
@@ -352,10 +356,6 @@ def apply_credit_note(
     body: CreditNoteRequest,
     db: Client = Depends(get_supabase),
 ):
-    """
-    Apply a credit note to an invoice.
-    Amount must not exceed amount_paid_so_far.
-    """
     return _handle(
         credit_service.apply_credit_note,
         db,
@@ -372,10 +372,6 @@ def process_refund(
     body: RefundRequest,
     db: Client = Depends(get_supabase),
 ):
-    """
-    Process a refund against a specific payment on this invoice.
-    Amount must not exceed the original payment amount.
-    """
     return _handle(
         credit_service.process_refund,
         db,

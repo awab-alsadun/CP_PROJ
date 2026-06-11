@@ -2,7 +2,7 @@
 Address service — DB operations for addresses.
 
 Addresses are looked up or created during invoice extraction,
-not typically CRUD'd directly by users.
+not typically CRUD'd directly by users for now .
 """
 
 import uuid
@@ -20,11 +20,14 @@ def get_or_create_address(
     city: str | None,
     postal_code: str | None,
     country: str | None,
-    state: str | None
+    state: str | None,
+    client_id: uuid.UUID | None = None,
+    vendor_id: uuid.UUID | None = None,
 ) -> dict | None:
     """
     Find existing address by exact field match, or create new.
-    Returns None if all fields are None (nothing to store).
+    client_id / vendor_id are stored on the address row for reverse lookup.
+    Returns None if all address fields are None (nothing to store).
     """
     if not any([street, city, postal_code, country]):
         return None
@@ -47,6 +50,10 @@ def get_or_create_address(
             query = query.eq("country", country)
         if state:
             query = query.eq("state", state)
+        if client_id:
+            query = query.eq("client_id", str(client_id))
+        if vendor_id:
+            query = query.eq("vendor_id", str(vendor_id))
 
         result = query.limit(1).execute()
     except Exception as e:
@@ -62,7 +69,9 @@ def get_or_create_address(
         city=city,
         postal_code=postal_code,
         country=country,
-        state=state
+        state=state,
+        client_id=client_id,
+        vendor_id=vendor_id,
     )
     try:
         data = payload.model_dump(mode="json")
