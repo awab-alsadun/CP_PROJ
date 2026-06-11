@@ -68,18 +68,29 @@ class RefundRequest(BaseModel):
 # FIFO allocation
 # ---------------------------------------------------------------------------
 
+ 
+"""
+Patch for backend/app/routers/payments.py
+
+In the allocate_payment endpoint, replace:
+
+    return _handle(
+        payment_allocation_service.allocate_payment,
+        ...
+    )
+
+With the code below. The FIFO allocator can touch multiple invoices,
+so we refresh headers for each one.
+"""
+
+# --- Replace the allocate_payment endpoint body with: ---
+
 @router.post("/allocate")
 def allocate_payment(
     body: AllocateRequest,
     db: Client = Depends(get_supabase),
 ):
-    """
-    Allocate a lump-sum payment across open invoices using FIFO.
-    entity_type must be 'client' (receivables) or 'vendor' (payables).
-    Currency must match invoice currency exactly.
-    Overpayment is credited to entity credit_balance.
-    """
-    return _handle(
+    result = _handle(
         payment_allocation_service.allocate_payment,
         db,
         settings.MVP_COMPANY_ID,
@@ -92,6 +103,21 @@ def allocate_payment(
         body.payment_date.isoformat(),
     )
 
+    # Refresh header embeddings for all invoices touched by FIFO allocation
+    try:
+        from app.services.embedding_service import refresh_header_embedding
+        allocations = result.get("allocations", []) if isinstance(result, dict) else []
+        for alloc in allocations:
+            inv_id = alloc.get("invoice_id")
+            new_status = alloc.get("new_status") or alloc.get("status")
+            if inv_id and new_status:
+                refresh_header_embedding(
+                    db, settings.MVP_COMPANY_ID, str(inv_id), new_status
+                )
+    except Exception:
+        pass  # embedding refresh never blocks payment response
+
+    return result
 
 # ---------------------------------------------------------------------------
 # Webhook (future bank integration)

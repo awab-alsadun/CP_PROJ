@@ -1,74 +1,560 @@
 """
-Query Service (v3)
+Query Service (v4)
 ------------------
-Full RAG pipeline with:
-  - LLM-based intent classification (with keyword pre-filter)
-  - Soft pre-filtering: boosts chunks from relevant document types
-    without excluding other types (scale-ready, no tunnel vision)
-  - Multi-query rewriting (3 query variants for broader recall)
-  - Source registry retrieval (invoices + regulations, extensible)
-  - Cohere cross-encoder reranking
-  - Contextual compression (extract only relevant sentences)
-  - Provider-agnostic (OpenAI / Ollama toggle via .env)
+Full RAG pipeline with Option C SQL routing:
 
-Query paths:
-  - sql_aggregation  → template SQL → LLM formatting
-  - rag_invoice      → retrieve from invoices only
-  - rag_compliance   → retrieve from regulations only (with soft doc type boost)
-  - hybrid           → retrieve from both, merge context (with soft doc type boost)
+  SQL path:
+    - Intent classifier detects sql_aggregation (keyword pre-filter, no LLM call)
+    - LLM template selector picks template + extracts parameters (dates, filters)
+    - Template executor runs safe Supabase query builder calls — LLM never writes SQL
+    - Python-side aggregation (Counter, sum) — LLM only formats the result
+    - Fallback to RAG if no template matches
 
-Soft pre-filtering strategy:
-  - Retrieve from ALL document types (no hard exclusion)
-  - If the classifier detected relevant_doc_types, boost similarity scores
-    of matching chunks by a configurable factor
-  - Cohere reranking runs on the full set, so genuinely relevant chunks
-    from other types still surface if they matter
-  - At 5 documents: negligible difference
-  - At 100+ documents: reduces noise significantly without missing cross-type answers
+  RAG path (unchanged from v3):
+    - Multi-query rewriting -> embed -> retrieve -> soft boost -> rerank -> compress -> answer
+    - Hybrid split reranking for compliance queries
+    - Provider-agnostic (OpenAI / Ollama toggle via .env)
+
+  Date awareness:
+    - Today's date injected into LLM template selector prompt
+    - LLM resolves "yesterday", "last month", "this quarter" -> ISO date strings
+
+  Templates (15):
+    Regular (Supabase query builder):
+      invoice_count, invoice_list, total_spending, vendor_spending,
+      vendor_count, vendor_balances, client_count, client_balances,
+      overdue_invoices, monthly_breakdown, payment_history,
+      compliance_summary, top_vendors
+    RPC (Supabase functions):
+      avg_payment_delay, invoice_aging
 """
 
 import json
 import logging
+from collections import Counter
 from dataclasses import dataclass, field
+from datetime import date
 
 from supabase import Client
 
 from app.core.config import get_settings
 from app.providers import get_embedding_provider, get_llm_provider
 from app.providers.cohere_provider import rerank_chunks
-from app.services.intent_classifier import classify_intent, ClassificationResult
-from app.services.retrieval import get_all_sources, get_source, RetrievedChunk
+from app.services.intent_classifier import classify_intent
+from app.services.retrieval import get_source, RetrievedChunk
 
 log = logging.getLogger(__name__)
 
-# ── Soft boost config ─────────────────────────────────────────────────────────
-# Chunks from relevant doc types get their similarity multiplied by this factor
-# before reranking. 1.15 = 15% boost. Enough to prefer them in close calls,
-# not enough to override a genuinely more relevant chunk from another type.
 _DOC_TYPE_BOOST_FACTOR = 1.15
 
 
-# ── Types ────────────────────────────────────────────────────────────────────
+# ── Result types ──────────────────────────────────────────────────────────────
 
 @dataclass
 class QuerySource:
-    invoice_id: str           # or document_id for regulations
-    invoice_number: str       # or document_name for regulations
-    chunk_text: str
-    similarity: float
-    source_type: str          # "invoice" or "regulation"
-    citation: str             # human-readable citation
-    metadata: dict = field(default_factory=dict)
+    invoice_id:     str
+    invoice_number: str
+    chunk_text:     str
+    similarity:     float
+    source_type:    str
+    citation:       str
+    metadata:       dict = field(default_factory=dict)
 
 
 @dataclass
 class QueryResult:
-    answer: str
-    sources: list[QuerySource]
-    query_type: str           # "sql" | "rag_invoice" | "rag_compliance" | "hybrid"
+    answer:     str
+    sources:    list[QuerySource]
+    query_type: str
 
 
-# ── Multi-query rewriting ────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# SQL PATH — Option C
+# ══════════════════════════════════════════════════════════════════════════════
+
+_TEMPLATE_SELECTOR_PROMPT = """You are a query parameter extractor for a financial invoicing system.
+Today's date is {today}.
+
+Given a user question, return a JSON object with:
+  "template"  : the best matching template name (string)
+  "filters"   : extracted filter parameters (object)
+
+Available templates and what they answer:
+  invoice_count       - how many invoices exist, optionally by status/type/vendor/date
+  invoice_list        - list invoices, optionally filtered
+  total_spending      - total amount spent, optionally by vendor/date/status/type
+  vendor_spending     - spending broken down by vendor, optionally filtered by date
+  vendor_count        - how many vendors exist
+  vendor_balances     - outstanding (unpaid/overdue) balance per vendor
+  client_count        - how many clients exist
+  client_balances     - outstanding receivable balance per client
+  overdue_invoices    - list overdue invoices, optionally filtered by date/vendor/client
+  monthly_breakdown   - invoice count and spend per calendar month
+  payment_history     - list payments, optionally filtered by date/vendor
+  compliance_summary  - compliance flag counts by type and severity
+  top_vendors         - vendors ranked by total spend, optionally filtered by date
+  avg_payment_delay   - average days between due_date and payment per vendor
+  invoice_aging       - outstanding invoices grouped into aging buckets (0-30, 31-60, 61-90, 90+ days)
+
+Filter parameters (all optional, use null if not applicable):
+  date_from     : ISO date string (YYYY-MM-DD) - start of date range on issue_date
+  date_to       : ISO date string (YYYY-MM-DD) - end of date range on issue_date
+  vendor_name   : vendor name string (partial match ok)
+  client_name   : client name string (partial match ok)
+  status        : one of: draft, sent, unpaid, partially_paid, paid, overdue
+  invoice_type  : "payable" or "receivable"
+  currency      : ISO currency code e.g. "USD"
+  limit         : integer, max rows to return (default null = all)
+
+Date resolution rules (today is {today}):
+  "yesterday"       -> date_from and date_to = yesterday's date
+  "last week"       -> Monday to Sunday of last week
+  "this week"       -> Monday of current week to today
+  "last month"      -> first to last day of previous calendar month
+  "this month"      -> first day of current month to today
+  "last quarter"    -> first to last day of previous calendar quarter
+  "this quarter"    -> first day of current quarter to today
+  "this year"       -> January 1 of current year to today
+  "last year"       -> January 1 to December 31 of previous year
+  Month name only ("in March", "March 2026") -> first to last day of that month
+
+If no template matches, return: {"template": "none", "filters": {}}
+
+Return ONLY the JSON object. No explanation. No markdown. No extra text."""
+
+
+def _select_template(question: str) -> dict:
+    today  = date.today().isoformat()
+    prompt = _TEMPLATE_SELECTOR_PROMPT.format(today=today)
+
+    try:
+        llm      = get_llm_provider()
+        response = llm.chat(
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user",   "content": question},
+            ],
+            temperature=0.0,
+            max_tokens=200,
+        )
+
+        cleaned = response.strip().strip("`")
+        if cleaned.startswith("json"):
+            cleaned = cleaned[4:].strip()
+
+        parsed = json.loads(cleaned)
+
+        valid_templates = {
+            "invoice_count", "invoice_list", "total_spending", "vendor_spending",
+            "vendor_count", "vendor_balances", "client_count", "client_balances",
+            "overdue_invoices", "monthly_breakdown", "payment_history",
+            "compliance_summary", "top_vendors", "avg_payment_delay",
+            "invoice_aging", "none",
+        }
+        if parsed.get("template") not in valid_templates:
+            log.warning(f"LLM returned unknown template '{parsed.get('template')}', defaulting to none")
+            return {"template": "none", "filters": {}}
+
+        log.info(f"Template: {parsed.get('template')}, filters: {parsed.get('filters')}")
+        return parsed
+
+    except Exception as e:
+        log.error(f"Template selector failed: {e}")
+        return {"template": "none", "filters": {}}
+
+
+# ── Filter helpers ────────────────────────────────────────────────────────────
+
+def _apply_date_filters(query, filters: dict, date_column: str = "issue_date"):
+    if filters.get("date_from"):
+        query = query.gte(date_column, filters["date_from"])
+    if filters.get("date_to"):
+        query = query.lte(date_column, filters["date_to"])
+    return query
+
+
+def _resolve_vendor_ids(db: Client, company_id: str, vendor_name: str) -> list[str]:
+    try:
+        result = (
+            db.table("vendors")
+            .select("id")
+            .eq("company_id", company_id)
+            .ilike("name", f"%{vendor_name}%")
+            .execute()
+        )
+        return [r["id"] for r in (result.data or [])]
+    except Exception:
+        return []
+
+
+def _resolve_client_ids(db: Client, company_id: str, client_name: str) -> list[str]:
+    try:
+        result = (
+            db.table("clients")
+            .select("id")
+            .eq("company_id", company_id)
+            .ilike("name", f"%{client_name}%")
+            .execute()
+        )
+        return [r["id"] for r in (result.data or [])]
+    except Exception:
+        return []
+
+
+# ── Template executors ────────────────────────────────────────────────────────
+
+def _exec_invoice_count(db: Client, company_id: str, filters: dict) -> dict:
+    q = (
+        db.table("invoices")
+        .select("id, status, invoice_type")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("invoice_type"):
+        q = q.eq("invoice_type", filters["invoice_type"])
+    if filters.get("vendor_name"):
+        ids = _resolve_vendor_ids(db, company_id, filters["vendor_name"])
+        if ids:
+            q = q.in_("vendor_id", ids)
+    rows = q.execute().data or []
+    return {
+        "total":     len(rows),
+        "by_status": dict(Counter(r["status"] for r in rows)),
+        "by_type":   dict(Counter(r["invoice_type"] for r in rows)),
+    }
+
+
+def _exec_invoice_list(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("invoices")
+        .select("invoice_number, status, invoice_type, grand_total, currency, "
+                "issue_date, due_date, vendors(name), clients(name)")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("invoice_type"):
+        q = q.eq("invoice_type", filters["invoice_type"])
+    if filters.get("vendor_name"):
+        ids = _resolve_vendor_ids(db, company_id, filters["vendor_name"])
+        if ids:
+            q = q.in_("vendor_id", ids)
+    if filters.get("client_name"):
+        ids = _resolve_client_ids(db, company_id, filters["client_name"])
+        if ids:
+            q = q.in_("client_id", ids)
+    limit = filters.get("limit") or 50
+    return q.order("issue_date", desc=True).limit(limit).execute().data or []
+
+
+def _exec_total_spending(db: Client, company_id: str, filters: dict) -> dict:
+    q = (
+        db.table("invoices")
+        .select("grand_total, currency, status, invoice_type")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("invoice_type"):
+        q = q.eq("invoice_type", filters["invoice_type"])
+    if filters.get("currency"):
+        q = q.eq("currency", filters["currency"])
+    if filters.get("vendor_name"):
+        ids = _resolve_vendor_ids(db, company_id, filters["vendor_name"])
+        if ids:
+            q = q.in_("vendor_id", ids)
+    rows = q.execute().data or []
+    totals: dict[str, float] = {}
+    for r in rows:
+        cur = r.get("currency") or "USD"
+        totals[cur] = round(totals.get(cur, 0.0) + float(r.get("grand_total") or 0), 2)
+    return {"total_by_currency": totals, "invoice_count": len(rows)}
+
+
+def _exec_vendor_spending(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("invoices")
+        .select("grand_total, currency, status, issue_date, vendors(name)")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+        .eq("invoice_type", "payable")
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("vendor_name"):
+        ids = _resolve_vendor_ids(db, company_id, filters["vendor_name"])
+        if ids:
+            q = q.in_("vendor_id", ids)
+    rows = q.execute().data or []
+    vendor_totals: dict[str, float] = {}
+    for r in rows:
+        name = (r.get("vendors") or {}).get("name") or "Unknown"
+        vendor_totals[name] = round(
+            vendor_totals.get(name, 0.0) + float(r.get("grand_total") or 0), 2
+        )
+    return [
+        {"vendor_name": k, "total_spent": v}
+        for k, v in sorted(vendor_totals.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+
+def _exec_vendor_count(db: Client, company_id: str, filters: dict) -> dict:
+    result = (
+        db.table("vendors")
+        .select("id", count="exact")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+        .execute()
+    )
+    return {"vendor_count": result.count or 0}
+
+
+def _exec_vendor_balances(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("invoices")
+        .select("grand_total, amount_paid_so_far, currency, vendors(name)")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+        .eq("invoice_type", "payable")
+        .in_("status", ["unpaid", "overdue", "partially_paid", "sent"])
+    )
+    q = _apply_date_filters(q, filters)
+    rows = q.execute().data or []
+    balances: dict[str, float] = {}
+    for r in rows:
+        name = (r.get("vendors") or {}).get("name") or "Unknown"
+        owed = float(r.get("grand_total") or 0) - float(r.get("amount_paid_so_far") or 0)
+        balances[name] = round(balances.get(name, 0.0) + owed, 2)
+    return [
+        {"vendor_name": k, "outstanding_balance": v}
+        for k, v in sorted(balances.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+
+def _exec_client_count(db: Client, company_id: str, filters: dict) -> dict:
+    result = (
+        db.table("clients")
+        .select("id", count="exact")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+        .execute()
+    )
+    return {"client_count": result.count or 0}
+
+
+def _exec_client_balances(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("invoices")
+        .select("grand_total, amount_paid_so_far, currency, clients(name)")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+        .eq("invoice_type", "receivable")
+        .in_("status", ["sent", "unpaid", "overdue", "partially_paid"])
+    )
+    q = _apply_date_filters(q, filters)
+    rows = q.execute().data or []
+    balances: dict[str, float] = {}
+    for r in rows:
+        name = (r.get("clients") or {}).get("name") or "Unknown"
+        owed = float(r.get("grand_total") or 0) - float(r.get("amount_paid_so_far") or 0)
+        balances[name] = round(balances.get(name, 0.0) + owed, 2)
+    return [
+        {"client_name": k, "outstanding_balance": v}
+        for k, v in sorted(balances.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+
+def _exec_overdue_invoices(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("invoices")
+        .select("invoice_number, grand_total, amount_paid_so_far, currency, "
+                "due_date, issue_date, invoice_type, vendors(name), clients(name)")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+        .eq("status", "overdue")
+    )
+    # Overdue date filters apply to due_date
+    if filters.get("date_from"):
+        q = q.gte("due_date", filters["date_from"])
+    if filters.get("date_to"):
+        q = q.lte("due_date", filters["date_to"])
+    if filters.get("invoice_type"):
+        q = q.eq("invoice_type", filters["invoice_type"])
+    if filters.get("vendor_name"):
+        ids = _resolve_vendor_ids(db, company_id, filters["vendor_name"])
+        if ids:
+            q = q.in_("vendor_id", ids)
+    if filters.get("client_name"):
+        ids = _resolve_client_ids(db, company_id, filters["client_name"])
+        if ids:
+            q = q.in_("client_id", ids)
+    return q.order("due_date", desc=False).execute().data or []
+
+
+def _exec_monthly_breakdown(db: Client, company_id: str, filters: dict) -> dict:
+    q = (
+        db.table("invoices")
+        .select("issue_date, grand_total, status, invoice_type")
+        .eq("company_id", company_id)
+        .is_("deleted_at", "null")
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("invoice_type"):
+        q = q.eq("invoice_type", filters["invoice_type"])
+    rows = q.execute().data or []
+    monthly_count  = Counter()
+    monthly_amount = Counter()
+    for r in rows:
+        d         = (r.get("issue_date") or "")
+        month_key = d[:7] if len(d) >= 7 else "unknown"
+        monthly_count[month_key]  += 1
+        monthly_amount[month_key] += float(r.get("grand_total") or 0)
+    return {
+        "total_invoices":     len(rows),
+        "invoices_per_month": dict(sorted(monthly_count.items())),
+        "spending_per_month": {
+            k: round(v, 2) for k, v in sorted(monthly_amount.items())
+        },
+    }
+
+
+def _exec_payment_history(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("payments")
+        .select("payment_date, amount, method, reference, "
+                "invoices(invoice_number, vendors(name), clients(name))")
+        .eq("company_id", company_id)
+    )
+    if filters.get("date_from"):
+        q = q.gte("payment_date", filters["date_from"])
+    if filters.get("date_to"):
+        q = q.lte("payment_date", filters["date_to"])
+    limit = filters.get("limit") or 50
+    return q.order("payment_date", desc=True).limit(limit).execute().data or []
+
+
+def _exec_compliance_summary(db: Client, company_id: str, filters: dict) -> dict:
+    rows = (
+        db.table("compliance_flags")
+        .select("flag_type, severity")
+        .eq("company_id", company_id)
+        .execute()
+        .data or []
+    )
+    return {
+        "total_flags": len(rows),
+        "by_type":     dict(Counter(r["flag_type"] for r in rows)),
+        "by_severity": dict(Counter(r["severity"]  for r in rows)),
+    }
+
+
+def _exec_top_vendors(db: Client, company_id: str, filters: dict) -> list[dict]:
+    return _exec_vendor_spending(db, company_id, filters)
+
+
+def _exec_avg_payment_delay(db: Client, company_id: str, filters: dict) -> list[dict]:
+    try:
+        return db.rpc("avg_payment_delay", {"filter_company_id": company_id}).execute().data or []
+    except Exception as e:
+        log.error(f"avg_payment_delay RPC failed: {e}")
+        return []
+
+
+def _exec_invoice_aging(db: Client, company_id: str, filters: dict) -> list[dict]:
+    try:
+        return db.rpc("invoice_aging", {"filter_company_id": company_id}).execute().data or []
+    except Exception as e:
+        log.error(f"invoice_aging RPC failed: {e}")
+        return []
+
+
+# ── Template dispatcher ───────────────────────────────────────────────────────
+
+_TEMPLATE_EXECUTORS = {
+    "invoice_count":      _exec_invoice_count,
+    "invoice_list":       _exec_invoice_list,
+    "total_spending":     _exec_total_spending,
+    "vendor_spending":    _exec_vendor_spending,
+    "vendor_count":       _exec_vendor_count,
+    "vendor_balances":    _exec_vendor_balances,
+    "client_count":       _exec_client_count,
+    "client_balances":    _exec_client_balances,
+    "overdue_invoices":   _exec_overdue_invoices,
+    "monthly_breakdown":  _exec_monthly_breakdown,
+    "payment_history":    _exec_payment_history,
+    "compliance_summary": _exec_compliance_summary,
+    "top_vendors":        _exec_top_vendors,
+    "avg_payment_delay":  _exec_avg_payment_delay,
+    "invoice_aging":      _exec_invoice_aging,
+}
+
+
+def _run_sql_query(db: Client, company_id: str, question: str) -> tuple:
+    """Option C: LLM selects template + extracts filters, executor runs safe query.
+    Returns ("__fallback__", "none") when no template matches.
+    """
+    selection = _select_template(question)
+    template  = selection.get("template", "none")
+    filters   = selection.get("filters") or {}
+
+    if template == "none":
+        log.info("No template matched — falling back to RAG")
+        return "__fallback__", "none"
+
+    executor = _TEMPLATE_EXECUTORS.get(template)
+    if not executor:
+        log.warning(f"No executor for '{template}' — falling back to RAG")
+        return "__fallback__", "none"
+
+    try:
+        data = executor(db, company_id, filters)
+        log.info(f"Template '{template}' executed successfully")
+        return data, template
+    except Exception as e:
+        log.error(f"Template '{template}' failed: {e}")
+        return "__fallback__", "none"
+
+
+def _answer_sql(question: str, data, template: str) -> str:
+    """LLM formats pre-aggregated data — never counts or computes."""
+    llm       = get_llm_provider()
+    data_str  = json.dumps(data, indent=2)
+    row_label = "aggregated summary" if isinstance(data, dict) else f"{len(data)} rows"
+
+    return llm.chat(
+        messages=[
+            {"role": "system", "content": (
+                "You are a financial analyst assistant. "
+                "Answer the user's question based ONLY on the provided data. "
+                "Be concise and precise. Use exact numbers from the data. "
+                "For lists, show the top results clearly. "
+                "If the data includes pre-computed counts or aggregations, "
+                "use those numbers directly — do not re-count or re-aggregate. "
+                "If data is empty, say no results were found."
+            )},
+            {"role": "user", "content": (
+                f"Question: {question}\n\n"
+                f"Query type: {template}\n"
+                f"Data ({row_label}):\n{data_str}\n\n"
+                "Answer based on this data only."
+            )},
+        ],
+        temperature=0.0,
+        max_tokens=512,
+    )
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RAG PATH (unchanged from v3)
+# ══════════════════════════════════════════════════════════════════════════════
 
 _MULTI_QUERY_PROMPT = """You are a query rewriter for a financial invoicing system.
 
@@ -88,85 +574,56 @@ Output: ["What invoices reference IT hardware?", "Find invoices containing serve
 
 
 def _generate_query_variants(question: str) -> list[str]:
-    """
-    Generate 3 alternative phrasings of the question for broader recall.
-    Always includes the original question as the first variant.
-    """
     try:
-        llm = get_llm_provider()
+        llm      = get_llm_provider()
         response = llm.chat(
             messages=[
                 {"role": "system", "content": _MULTI_QUERY_PROMPT},
-                {"role": "user", "content": question},
+                {"role": "user",   "content": question},
             ],
             temperature=0.3,
             max_tokens=200,
         )
-
         cleaned = response.strip().strip("`")
         if cleaned.startswith("json"):
             cleaned = cleaned[4:].strip()
-
         variants = json.loads(cleaned)
         if isinstance(variants, list) and len(variants) >= 2:
             return [question] + [v for v in variants[:2]]
-
     except Exception as e:
-        log.warning(f"Multi-query generation failed: {e}. Using original question only.")
-
+        log.warning(f"Multi-query generation failed: {e}")
     return [question]
 
-
-# ── Soft pre-filtering ────────────────────────────────────────────────────────
 
 def _apply_doc_type_boost(
     chunks: list[RetrievedChunk],
     relevant_doc_types: list[str],
 ) -> list[RetrievedChunk]:
-    """
-    Boost similarity scores of chunks whose document_type matches
-    the classifier's detected relevant types.
-
-    This is SOFT pre-filtering:
-    - Matching chunks get a 15% similarity boost
-    - Non-matching chunks keep their original score
-    - Nothing is excluded — Cohere reranking makes the final call
-
-    Only applies to regulation/document chunks (source_type != "invoice").
-    Invoice chunks are never boosted or penalized by doc type.
-    """
     if not relevant_doc_types:
         return chunks
-
     boosted_types = set(relevant_doc_types)
     boosted_count = 0
-
     for chunk in chunks:
         if chunk.source_type == "invoice":
             continue
-
         chunk_doc_type = chunk.metadata.get("document_type", "")
         if chunk_doc_type in boosted_types:
             original = chunk.similarity
             chunk.similarity = min(chunk.similarity * _DOC_TYPE_BOOST_FACTOR, 1.0)
-            chunk.metadata["soft_boost_applied"] = True
+            chunk.metadata["soft_boost_applied"]  = True
             chunk.metadata["original_similarity"] = round(original, 4)
             boosted_count += 1
-
     if boosted_count > 0:
-        log.info(f"Soft boost applied to {boosted_count} chunks matching types: {relevant_doc_types}")
-
+        log.info(f"Soft boost: {boosted_count} chunks matched {relevant_doc_types}")
     return chunks
 
-
-# ── Contextual compression ────────────────────────────────────────────────────
 
 _COMPRESSION_PROMPT = """You are a precision text extractor. Given a user question and retrieved document chunks,
 extract ONLY the sentences that are directly relevant to answering the question.
 
 Rules:
 - Remove irrelevant sentences entirely
-- Keep relevant sentences verbatim — do not paraphrase
+- Keep relevant sentences verbatim - do not paraphrase
 - Maintain the source labels [Source N] so citations still work
 - If a chunk has no relevant content, omit it entirely
 - IMPORTANT: Invoice data chunks (containing invoice numbers, amounts, dates, vendor names,
@@ -174,27 +631,20 @@ Rules:
   verification, or cross-referencing against regulations. Keep them.
 - Return the compressed text only, no explanation"""
 
+
 def _compress_context(question: str, chunks: list[RetrievedChunk]) -> str:
-    """
-    Contextual compression: extract only relevant sentences from retrieved chunks.
-    Single LLM call with all chunks concatenated.
-    """
     if not chunks:
         return ""
-
-    context_parts = []
-    for i, chunk in enumerate(chunks, 1):
-        context_parts.append(
-            f"[Source {i} — {chunk.citation}]:\n{chunk.chunk_text}"
-        )
-    raw_context = "\n\n".join(context_parts)
-
+    raw_context = "\n\n".join(
+        f"[Source {i} - {c.citation}]:\n{c.chunk_text}"
+        for i, c in enumerate(chunks, 1)
+    )
     try:
         llm = get_llm_provider()
-        compressed = llm.chat(
+        return llm.chat(
             messages=[
                 {"role": "system", "content": _COMPRESSION_PROMPT},
-                {"role": "user", "content": (
+                {"role": "user",   "content": (
                     f"Question: {question}\n\n"
                     f"Chunks:\n{raw_context}\n\n"
                     "Extract only relevant sentences."
@@ -202,119 +652,19 @@ def _compress_context(question: str, chunks: list[RetrievedChunk]) -> str:
             ],
             temperature=0.0,
             max_tokens=1024,
-        )
-        return compressed.strip()
-
+        ).strip()
     except Exception as e:
-        log.warning(f"Contextual compression failed: {e}. Using raw context.")
+        log.warning(f"Compression failed: {e}. Using raw context.")
         return raw_context
 
 
-# ── SQL path ─────────────────────────────────────────────────────────────────
-
-def _run_sql_query(db: Client, company_id: str, question: str) -> tuple[list[dict], str]:
-    """Match question to SQL template and execute."""
-    q = question.lower()
-
-    if any(k in q for k in ["vendor", "supplier", "spent on"]):
-        rows = (
-            db.table("invoices")
-            .select("vendors(name), grand_total, status, issue_date")
-            .eq("company_id", company_id)
-            .execute()
-            .data
-        )
-        return rows, "vendor_spending"
-
-    if "overdue" in q:
-        rows = (
-            db.table("invoices")
-            .select("invoice_number, grand_total, due_date, vendors(name)")
-            .eq("company_id", company_id)
-            .eq("status", "overdue")
-            .execute()
-            .data
-        )
-        return rows, "overdue_invoices"
-
-    if "unpaid" in q or "not paid" in q:
-        rows = (
-            db.table("invoices")
-            .select("invoice_number, grand_total, due_date, vendors(name)")
-            .eq("company_id", company_id)
-            .in_("status", ["draft", "sent", "overdue"])
-            .execute()
-            .data
-        )
-        return rows, "unpaid_invoices"
-
-    if any(k in q for k in ["total", "sum", "how much", "spent"]):
-        rows = (
-            db.table("invoices")
-            .select("grand_total, currency, status, issue_date")
-            .eq("company_id", company_id)
-            .execute()
-            .data
-        )
-        return rows, "total_spending"
-
-    if any(k in q for k in ["how many", "count", "number of"]):
-        rows = (
-            db.table("invoices")
-            .select("id, status")
-            .eq("company_id", company_id)
-            .execute()
-            .data
-        )
-        return rows, "invoice_count"
-
-    rows = (
-        db.table("invoices")
-        .select("invoice_number, grand_total, currency, status, issue_date, vendors(name)")
-        .eq("company_id", company_id)
-        .limit(50)
-        .execute()
-        .data
-    )
-    return rows, "general"
-
-
-def _answer_sql(question: str, rows: list[dict], intent: str) -> str:
-    """Format SQL results into natural language via LLM."""
-    llm = get_llm_provider()
-
-    return llm.chat(
-        messages=[
-            {"role": "system", "content": (
-                "You are a financial analyst assistant. "
-                "Answer the user's question based ONLY on the provided data. "
-                "Be concise and precise. Use numbers. "
-                "If data is empty, say so clearly."
-            )},
-            {"role": "user", "content": (
-                f"Question: {question}\n\n"
-                f"Query intent: {intent}\n"
-                f"Data ({len(rows)} rows):\n{rows}\n\n"
-                "Answer based on this data."
-            )},
-        ],
-        temperature=0.0,
-        max_tokens=512,
-    )
-
-
-# ── RAG answer generation ────────────────────────────────────────────────────
-
 def _generate_answer(question: str, compressed_context: str, query_type: str) -> str:
-    """Generate final answer from compressed context."""
     if not compressed_context.strip():
         return (
             "I could not find relevant information to answer your question. "
             "Try rephrasing or providing more specific details."
         )
-
     llm = get_llm_provider()
-
     system_prompts = {
         "rag_invoice": (
             "You are a financial document analyst. "
@@ -326,27 +676,24 @@ def _generate_answer(question: str, compressed_context: str, query_type: str) ->
             "You are a regulatory compliance analyst. "
             "Answer using ONLY the regulation excerpts provided. "
             "Cite the document name, section number, and page when referencing specific rules. "
-            "Do not give legal advice — present the regulations as written."
+            "Do not give legal advice - present the regulations as written."
         ),
         "hybrid": (
-    "You are a financial compliance analyst. "
-    "You are given REAL invoice data and regulatory document excerpts. "
-    "Answer the question by cross-referencing the invoices against the regulations. "
-    "CRITICAL: Only reference invoice numbers that appear in the context below. "
-    "Never invent or fabricate invoice numbers, amounts, or details. "
-    "If the context contains invoice data, list the ACTUAL invoice numbers and their details. "
-    "If the context does not contain enough invoice data to answer, say so explicitly. "
-    "Cite both invoice numbers and regulation sections with page numbers. "
-    "Flag any potential compliance issues you detect based on the actual data."
-),
+            "You are a financial compliance analyst. "
+            "You are given REAL invoice data and regulatory document excerpts. "
+            "Answer the question by cross-referencing the invoices against the regulations. "
+            "CRITICAL: Only reference invoice numbers that appear in the context below. "
+            "Never invent or fabricate invoice numbers, amounts, or details. "
+            "If the context contains invoice data, list the ACTUAL invoice numbers and their details. "
+            "If the context does not contain enough invoice data to answer, say so explicitly. "
+            "Cite both invoice numbers and regulation sections with page numbers. "
+            "Flag any potential compliance issues you detect based on the actual data."
+        ),
     }
-
-    system = system_prompts.get(query_type, system_prompts["rag_invoice"])
-
     return llm.chat(
         messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": (
+            {"role": "system", "content": system_prompts.get(query_type, system_prompts["rag_invoice"])},
+            {"role": "user",   "content": (
                 f"Question: {question}\n\n"
                 f"Context:\n{compressed_context}\n\n"
                 "Answer based on the above context only."
@@ -357,61 +704,58 @@ def _generate_answer(question: str, compressed_context: str, query_type: str) ->
     )
 
 
-# ── Main entry point ─────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# MAIN ENTRY POINT
+# ══════════════════════════════════════════════════════════════════════════════
 
 def handle_query(db: Client, company_id: str, question: str) -> QueryResult:
     """
     Full query pipeline:
-    1. Classify intent + extract relevant doc types
-    2. Route to SQL or RAG
-    3. (RAG) Multi-query rewrite → embed → retrieve → soft boost → rerank → compress → answer
+    1. Classify intent (keyword pre-filter, no LLM call for obvious cases)
+    2. SQL path: LLM picks template + extracts filters -> executor runs safe query
+       Falls through to RAG if no template matches
+    3. RAG path: multi-query -> embed -> retrieve -> boost -> rerank -> compress -> answer
     """
     question = question.strip()
     if not question:
         return QueryResult(answer="Please provide a question.", sources=[], query_type="none")
 
-    # ── Step 1: Classify intent ───────────────────────────────────────────────
-    classification = classify_intent(question)
-    intent = classification.intent
+    # Step 1: Classify intent
+    classification     = classify_intent(question)
+    intent             = classification.intent
     relevant_doc_types = classification.relevant_doc_types
-    log.info(f"Intent: {intent}, relevant_doc_types: {relevant_doc_types}")
+    log.info(f"Intent: {intent}, doc_types: {relevant_doc_types}")
 
-    # ── Step 2: SQL path ──────────────────────────────────────────────────────
+    # Step 2: SQL path
     if intent == "sql_aggregation":
-        try:
-            rows, sql_intent = _run_sql_query(db, company_id, question)
-            answer = _answer_sql(question, rows, sql_intent)
+        data, template = _run_sql_query(db, company_id, question)
+        if data != "__fallback__":
+            answer = _answer_sql(question, data, template)
             return QueryResult(answer=answer, sources=[], query_type="sql")
-        except Exception as e:
-            log.error(f"SQL path failed: {e}. Falling back to RAG.")
-            intent = "rag_invoice"
+        log.info("SQL fallback: routing to RAG")
+        intent = "rag_invoice"
 
-    # ── Step 3: Multi-query rewrite ───────────────────────────────────────────
-    variants = _generate_query_variants(question)
+    # Step 3: Multi-query rewrite
+    variants      = _generate_query_variants(question)
     log.info(f"Query variants: {variants}")
 
-    # ── Step 4: Embed all variants ────────────────────────────────────────────
-    embedder = get_embedding_provider()
+    # Step 4: Embed
+    embedder      = get_embedding_provider()
     query_vectors = embedder.embed(variants)
 
-    # ── Step 5: Retrieve from relevant sources ────────────────────────────────
+    # Step 5: Retrieve
     all_chunks: list[RetrievedChunk] = []
-
-    if intent == "rag_invoice":
-        source_names = ["invoices"]
-    elif intent == "rag_compliance":
-        source_names = ["regulations"]
-    elif intent == "hybrid":
-        source_names = ["invoices", "regulations"]
-    else:
-        source_names = ["invoices", "regulations"]
+    source_names = {
+        "rag_invoice":    ["invoices"],
+        "rag_compliance": ["regulations"],
+        "hybrid":         ["invoices", "regulations"],
+    }.get(intent, ["invoices", "regulations"])
 
     for source_name in source_names:
         source = get_source(source_name)
         if source is None:
-            log.warning(f"Source '{source_name}' not found in registry")
+            log.warning(f"Source '{source_name}' not in registry")
             continue
-
         chunks = source.retrieve(
             db=db,
             company_id=company_id,
@@ -423,42 +767,31 @@ def handle_query(db: Client, company_id: str, question: str) -> QueryResult:
         all_chunks.extend(chunks)
         log.info(f"Retrieved {len(chunks)} chunks from {source.display_name}")
 
-    log.info(f"Total chunks before boosting: {len(all_chunks)}")
-
-    # ── Step 6: Soft pre-filtering (doc type boost) ───────────────────────────
+    # Step 6: Soft doc-type boost
     all_chunks = _apply_doc_type_boost(all_chunks, relevant_doc_types)
-
-    # Re-sort by boosted similarity before reranking
     all_chunks.sort(key=lambda c: c.similarity, reverse=True)
 
-    # ── Step 7: Rerank with Cohere ────────────────────────────────────────────
-    # ── Step 7: Rerank with Cohere ────────────────────────────────────────────
+    # Step 7: Rerank
     if intent == "hybrid" and len(source_names) > 1:
-        # Hybrid: rerank each source separately, then merge
-        # Guarantees both invoice and regulation chunks appear in context
-        invoice_chunks = [c for c in all_chunks if c.source_type == "invoice"]
+        invoice_chunks    = [c for c in all_chunks if c.source_type == "invoice"]
         regulation_chunks = [c for c in all_chunks if c.source_type != "invoice"]
-
-        slots_per_source = max(2, 6 // len(source_names))  # 3 each for 2 sources
-
-        reranked_invoices = rerank_chunks(question, invoice_chunks, top_n=slots_per_source)
-        reranked_regulations = rerank_chunks(question, regulation_chunks, top_n=slots_per_source)
-
-        reranked = reranked_invoices + reranked_regulations
+        slots             = max(2, 6 // len(source_names))
+        reranked = (
+            rerank_chunks(question, invoice_chunks,    top_n=slots) +
+            rerank_chunks(question, regulation_chunks, top_n=slots)
+        )
         reranked.sort(key=lambda c: c.similarity, reverse=True)
-        log.info(f"Hybrid rerank: {len(reranked_invoices)} invoice + {len(reranked_regulations)} regulation chunks")
     else:
         reranked = rerank_chunks(question, all_chunks, top_n=6)
 
     log.info(f"Chunks after reranking: {len(reranked)}")
 
-    # ── Step 8: Contextual compression ────────────────────────────────────────
+    # Step 8: Compress
     compressed = _compress_context(question, reranked)
 
-    # ── Step 9: Generate answer ───────────────────────────────────────────────
+    # Step 9: Answer
     answer = _generate_answer(question, compressed, intent)
 
-    # ── Build sources for frontend ────────────────────────────────────────────
     sources = [
         QuerySource(
             invoice_id=c.source_id,
