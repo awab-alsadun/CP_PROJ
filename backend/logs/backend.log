@@ -1049,3 +1049,665 @@ TypeError: object of type 'NoneType' has no len()
 2026-06-14 20:57:09,560 DEBUG apscheduler.scheduler Looking for jobs to run
 2026-06-14 20:57:09,560 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
 2026-06-14 20:57:09,560 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 21:45:46,488 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 21:45:47,965 INFO app.main Supabase connection verified at startup
+2026-06-14 21:45:47,966 INFO app.main Storage active bucket: invoices
+2026-06-14 21:45:47,966 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 21:45:47,983 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 21:45:47,983 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 21:45:47,983 INFO apscheduler.scheduler Scheduler started
+2026-06-14 21:45:47,984 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 21:45:47,984 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 8052.015275 seconds)
+2026-06-14 21:45:47,984 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 22:03:44,586 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 22:03:44,586 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 22:03:44,586 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 22:03:44,587 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 22:03:48,733 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 22:03:49,768 INFO app.main Supabase connection verified at startup
+2026-06-14 22:03:49,768 INFO app.main Storage active bucket: invoices
+2026-06-14 22:03:49,768 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 22:03:49,777 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 22:03:49,778 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 22:03:49,778 INFO apscheduler.scheduler Scheduler started
+2026-06-14 22:03:49,778 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 22:03:49,779 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 6970.220983 seconds)
+2026-06-14 22:03:49,778 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 22:03:49,883 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 22:03:49,884 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 22:03:49,884 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 22:03:49,884 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 22:03:54,469 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 22:03:55,684 INFO app.main Supabase connection verified at startup
+2026-06-14 22:03:55,684 INFO app.main Storage active bucket: invoices
+2026-06-14 22:03:55,684 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 22:03:55,691 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 22:03:55,691 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 22:03:55,692 INFO apscheduler.scheduler Scheduler started
+2026-06-14 22:03:55,696 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 22:03:55,696 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 6964.303344 seconds)
+2026-06-14 22:03:55,696 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 22:29:08,227 INFO app.routers.query Query received: give me the net income for jun
+2026-06-14 22:29:08,227 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:29:10,699 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 22:29:10,699 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 22:29:12,423 INFO app.services.query_service Template selector raw response: '{\n  "template": "net_income",\n  "filters": {\n    "date_from": "2026-06-01",\n    "date_to": "2026-06-30"\n  }\n}'
+2026-06-14 22:29:12,423 INFO app.services.query_service Template: net_income, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-30'}
+2026-06-14 22:29:13,033 INFO app.services.query_service Template 'net_income' executed successfully
+2026-06-14 22:33:31,971 INFO app.routers.query Query received: which clients overdou
+2026-06-14 22:33:31,971 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:33:33,261 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 22:33:33,262 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 22:33:34,145 INFO app.services.query_service Template selector raw response: '{"template": "client_balances", "filters": {}}'
+2026-06-14 22:33:34,145 INFO app.services.query_service Template: client_balances, filters: {}
+2026-06-14 22:33:34,802 INFO app.services.query_service Template 'client_balances' executed successfully
+2026-06-14 22:34:01,986 INFO app.routers.query Query received: which clients have overdue invoices
+2026-06-14 22:34:01,987 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:34:03,460 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 22:34:03,460 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 22:34:04,628 INFO app.services.query_service Template selector raw response: '{"template": "overdue_invoices", "filters": {}}'
+2026-06-14 22:34:04,628 INFO app.services.query_service Template: overdue_invoices, filters: {}
+2026-06-14 22:34:08,186 INFO app.services.query_service overdue raw count: 36, filters applied: {}
+2026-06-14 22:34:08,186 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-14 22:37:55,685 INFO app.routers.query Query received: show it all
+2026-06-14 22:37:55,685 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:37:56,741 INFO app.services.intent_classifier Intent classified by LLM: rag_invoice, doc_types: []
+2026-06-14 22:37:56,741 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-14 22:37:57,777 INFO app.services.query_service Query variants: ['show it all', 'Display the entire report', 'Reveal the complete dataset']
+2026-06-14 22:38:01,038 INFO app.services.query_service Retrieved 0 chunks from Invoice Data
+2026-06-14 22:38:01,038 INFO app.services.query_service Chunks after reranking: 0
+2026-06-14 22:38:44,279 INFO app.routers.query Query received: which clients have overdue invoices show it all
+2026-06-14 22:38:44,280 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:38:45,504 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 22:38:45,504 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 22:38:46,783 INFO app.services.query_service Template selector raw response: '{"template": "overdue_invoices", "filters": {"client_name": null, "date_from": null, "date_to": null, "vendor_name": null}}'
+2026-06-14 22:38:46,783 INFO app.services.query_service Template: overdue_invoices, filters: {'client_name': None, 'date_from': None, 'date_to': None, 'vendor_name': None}
+2026-06-14 22:38:47,624 INFO app.services.query_service overdue raw count: 36, filters applied: {'client_name': None, 'date_from': None, 'date_to': None, 'vendor_name': None}
+2026-06-14 22:38:47,624 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-14 22:39:06,799 INFO app.routers.query Query received: which clients have overdue invoices, show it all to me
+2026-06-14 22:39:06,799 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:39:08,806 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 22:39:08,806 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 22:39:10,114 INFO app.services.query_service Template selector raw response: '{"template":"overdue_invoices","filters":{"client_name":null,"date_from":null,"date_to":null}}'
+2026-06-14 22:39:10,114 INFO app.services.query_service Template: overdue_invoices, filters: {'client_name': None, 'date_from': None, 'date_to': None}
+2026-06-14 22:39:11,019 INFO app.services.query_service overdue raw count: 36, filters applied: {'client_name': None, 'date_from': None, 'date_to': None}
+2026-06-14 22:39:11,019 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-14 22:41:55,297 INFO app.routers.query Query received: which clients have overdue invoices show it all
+2026-06-14 22:41:55,297 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 22:41:56,469 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 22:41:56,469 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 22:41:57,371 INFO app.services.query_service Template selector raw response: '{"template":"overdue_invoices","filters":{"client_name":null,"date_from":null,"date_to":null}}'
+2026-06-14 22:41:57,372 INFO app.services.query_service Template: overdue_invoices, filters: {'client_name': None, 'date_from': None, 'date_to': None}
+2026-06-14 22:41:58,152 INFO app.services.query_service overdue raw count: 36, filters applied: {'client_name': None, 'date_from': None, 'date_to': None}
+2026-06-14 22:41:58,153 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-14 23:29:36,652 INFO app.routers.query Query received: give me the cash flow of june 2026
+2026-06-14 23:29:36,652 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 23:29:39,020 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 23:29:39,021 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 23:29:40,612 INFO app.services.query_service Template selector raw response: '{"template": "net_income", "filters": {"date_from": "2026-06-01", "date_to": "2026-06-30"}}'
+2026-06-14 23:29:40,613 INFO app.services.query_service Template: net_income, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-30'}
+2026-06-14 23:29:41,195 INFO app.services.query_service Template 'net_income' executed successfully
+2026-06-14 23:31:07,444 INFO app.routers.query Query received: give me total spending of june 2026
+2026-06-14 23:31:07,444 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-14 23:31:07,444 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 23:31:08,883 INFO app.services.query_service Template selector raw response: '{\n  "template": "total_spending",\n  "filters": {\n    "date_from": "2026-06-01",\n    "date_to": "2026-06-30",\n    "vendor_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null\n  }\n}'
+2026-06-14 23:31:08,883 INFO app.services.query_service Template: total_spending, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-30', 'vendor_name': None, 'status': None, 'invoice_type': None, 'currency': None}
+2026-06-14 23:31:09,502 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-14 23:45:40,157 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 23:45:40,157 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 23:45:40,157 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 23:45:40,158 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 23:45:45,041 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 23:45:46,401 INFO app.main Supabase connection verified at startup
+2026-06-14 23:45:46,401 INFO app.main Storage active bucket: invoices
+2026-06-14 23:45:46,402 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 23:45:46,411 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 23:45:46,411 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 23:45:46,411 INFO apscheduler.scheduler Scheduler started
+2026-06-14 23:45:46,412 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 23:45:46,412 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 23:45:46,412 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 853.587543 seconds)
+2026-06-15 00:00:00,012 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 00:00:00,014 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 86399.985411 seconds)
+2026-06-15 00:00:00,014 INFO apscheduler.executors.default Running job "lifespan.<locals>._run_overdue_check (trigger: cron[hour='0', minute='0'], next run at: 2026-06-16 00:00:00 +04)" (scheduled at 2026-06-15 00:00:00+04:00)
+2026-06-15 00:00:00,015 INFO app.main [overdue_check] starting scheduled run at 2026-06-14 20:00:00.015038
+2026-06-15 00:00:02,060 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (000) 555-0001 | Body: OVERDUE: Invoice K4Y-INV-0467 N/A from Invoice System was due 2026-04-09. Pay now.
+2026-06-15 00:00:02,623 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c7a2d248-68e5-4a6b-8e70-4d1865d38f1b: name '_check_low_confidence' is not defined
+2026-06-15 00:00:07,321 INFO app.services.overdue_service Marked overdue: K4Y-INV-0467 (c7a2d248-68e5-4a6b-8e70-4d1865d38f1b)
+2026-06-15 00:00:08,486 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1005 — N/A was due 2025-09-02
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1005 for N/A was due on 2025-09-02 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:08,486 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1005 N/A from Invoice System was due 2025-09-02. Pay now.
+2026-06-15 00:00:09,317 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c6eda822-7f09-4935-9fd9-1e36c28a44ac: name '_check_low_confidence' is not defined
+2026-06-15 00:00:12,094 INFO app.services.overdue_service Marked overdue: K4Y-INV-1005 (c6eda822-7f09-4935-9fd9-1e36c28a44ac)
+2026-06-15 00:00:12,858 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1011 — N/A was due 2025-12-07
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1011 for N/A was due on 2025-12-07 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:12,858 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1011 N/A from Invoice System was due 2025-12-07. Pay now.
+2026-06-15 00:00:13,427 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice a71e5a01-bc4e-48e3-a22b-ba8ad694f63c: name '_check_low_confidence' is not defined
+2026-06-15 00:00:14,628 INFO app.services.overdue_service Marked overdue: K4Y-INV-1011 (a71e5a01-bc4e-48e3-a22b-ba8ad694f63c)
+2026-06-15 00:00:15,397 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1025 — N/A was due 2026-05-06
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1025 for N/A was due on 2026-05-06 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:15,397 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1025 N/A from Invoice System was due 2026-05-06. Pay now.
+2026-06-15 00:00:15,962 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 6049db01-68a7-4c17-b09f-5f9c264147c8: name '_check_low_confidence' is not defined
+2026-06-15 00:00:17,146 INFO app.services.overdue_service Marked overdue: K4Y-INV-1025 (6049db01-68a7-4c17-b09f-5f9c264147c8)
+2026-06-15 00:00:17,901 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1027 — N/A was due 2026-06-08
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1027 for N/A was due on 2026-06-08 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:17,901 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1027 N/A from Invoice System was due 2026-06-08. Pay now.
+2026-06-15 00:00:18,467 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 150ae2d0-09bc-4e9e-b3aa-bbffebc104d6: name '_check_low_confidence' is not defined
+2026-06-15 00:00:19,614 INFO app.services.overdue_service Marked overdue: K4Y-INV-1027 (150ae2d0-09bc-4e9e-b3aa-bbffebc104d6)
+2026-06-15 00:00:20,407 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1028 — N/A was due 2026-06-02
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1028 for N/A was due on 2026-06-02 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:20,407 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1028 N/A from Invoice System was due 2026-06-02. Pay now.
+2026-06-15 00:00:21,004 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 9ffdd761-22a4-46e9-b872-f737a40cf9ac: name '_check_low_confidence' is not defined
+2026-06-15 00:00:22,190 INFO app.services.overdue_service Marked overdue: K4Y-INV-1028 (9ffdd761-22a4-46e9-b872-f737a40cf9ac)
+2026-06-15 00:00:22,966 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1001 — N/A was due 2025-07-09
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1001 for N/A was due on 2025-07-09 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:22,966 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1001 N/A from Invoice System was due 2025-07-09. Pay now.
+2026-06-15 00:00:23,541 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 0a2d82ea-dbb4-4063-b533-3a472a288b61: name '_check_low_confidence' is not defined
+2026-06-15 00:00:24,718 INFO app.services.overdue_service Marked overdue: K4Y-INV-1001 (0a2d82ea-dbb4-4063-b533-3a472a288b61)
+2026-06-15 00:00:25,634 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1002 — N/A was due 2025-08-16
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1002 for N/A was due on 2025-08-16 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:25,634 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1002 N/A from Invoice System was due 2025-08-16. Pay now.
+2026-06-15 00:00:26,201 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice f8e3d4e2-9adb-4f83-8a62-0f636c1af247: name '_check_low_confidence' is not defined
+2026-06-15 00:00:27,369 INFO app.services.overdue_service Marked overdue: K4Y-INV-1002 (f8e3d4e2-9adb-4f83-8a62-0f636c1af247)
+2026-06-15 00:00:28,135 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1006 — N/A was due 2025-09-14
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1006 for N/A was due on 2025-09-14 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:28,136 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1006 N/A from Invoice System was due 2025-09-14. Pay now.
+2026-06-15 00:00:28,729 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice aacbf08e-0945-4a52-bf47-72001e51015f: name '_check_low_confidence' is not defined
+2026-06-15 00:00:29,953 INFO app.services.overdue_service Marked overdue: K4Y-INV-1006 (aacbf08e-0945-4a52-bf47-72001e51015f)
+2026-06-15 00:00:30,730 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1012 — N/A was due 2025-12-03
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1012 for N/A was due on 2025-12-03 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:30,730 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1012 N/A from Invoice System was due 2025-12-03. Pay now.
+2026-06-15 00:00:31,334 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 73cbcd31-9f91-419e-9fff-0d9aa8c34e0f: name '_check_low_confidence' is not defined
+2026-06-15 00:00:32,650 INFO app.services.overdue_service Marked overdue: K4Y-INV-1012 (73cbcd31-9f91-419e-9fff-0d9aa8c34e0f)
+2026-06-15 00:00:33,475 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1014 — N/A was due 2025-12-28
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1014 for N/A was due on 2025-12-28 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:33,475 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1014 N/A from Invoice System was due 2025-12-28. Pay now.
+2026-06-15 00:00:34,045 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 57a69a21-4be1-4ad2-8f69-157cf2bb1bfd: name '_check_low_confidence' is not defined
+2026-06-15 00:00:35,267 INFO app.services.overdue_service Marked overdue: K4Y-INV-1014 (57a69a21-4be1-4ad2-8f69-157cf2bb1bfd)
+2026-06-15 00:00:36,038 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1021 — N/A was due 2026-04-06
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1021 for N/A was due on 2026-04-06 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:36,039 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1021 N/A from Invoice System was due 2026-04-06. Pay now.
+2026-06-15 00:00:36,605 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice f7dd5205-061e-49dc-8a13-6ca25b7e1b64: name '_check_low_confidence' is not defined
+2026-06-15 00:00:37,816 INFO app.services.overdue_service Marked overdue: K4Y-INV-1021 (f7dd5205-061e-49dc-8a13-6ca25b7e1b64)
+2026-06-15 00:00:38,569 INFO app.services.notification_delivery_service [MOCK EMAIL] To: accounting@halcyonmedia.com
+  Subject: OVERDUE: Invoice K4Y-INV-1044 — N/A was due 2026-03-07
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1044 for N/A was due on 2026-03-07 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:38,569 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (310) 555-2102 | Body: OVERDUE: Invoice K4Y-INV-1044 N/A from Invoice System was due 2026-03-07. Pay now.
+2026-06-15 00:00:39,139 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 9301c59c-814d-42d9-ba86-d696c3ebad13: name '_check_low_confidence' is not defined
+2026-06-15 00:00:40,282 INFO app.services.overdue_service Marked overdue: K4Y-INV-1044 (9301c59c-814d-42d9-ba86-d696c3ebad13)
+2026-06-15 00:00:41,204 INFO app.services.notification_delivery_service [MOCK EMAIL] To: accounting@halcyonmedia.com
+  Subject: OVERDUE: Invoice K4Y-INV-1046 — N/A was due 2026-04-20
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1046 for N/A was due on 2026-04-20 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:41,204 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (310) 555-2102 | Body: OVERDUE: Invoice K4Y-INV-1046 N/A from Invoice System was due 2026-04-20. Pay now.
+2026-06-15 00:00:41,768 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 7866449d-afb6-4ea9-97dc-f68d5295343f: name '_check_low_confidence' is not defined
+2026-06-15 00:00:42,903 INFO app.services.overdue_service Marked overdue: K4Y-INV-1046 (7866449d-afb6-4ea9-97dc-f68d5295343f)
+2026-06-15 00:00:43,659 INFO app.services.notification_delivery_service [MOCK EMAIL] To: accounting@halcyonmedia.com
+  Subject: OVERDUE: Invoice K4Y-INV-1048 — N/A was due 2026-05-07
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1048 for N/A was due on 2026-05-07 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:43,659 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (310) 555-2102 | Body: OVERDUE: Invoice K4Y-INV-1048 N/A from Invoice System was due 2026-05-07. Pay now.
+2026-06-15 00:00:44,216 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 2d2e712e-03ea-4226-b097-62ef49b5794c: name '_check_low_confidence' is not defined
+2026-06-15 00:00:45,434 INFO app.services.overdue_service Marked overdue: K4Y-INV-1048 (2d2e712e-03ea-4226-b097-62ef49b5794c)
+2026-06-15 00:00:46,191 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@steelbridgecap.com
+  Subject: OVERDUE: Invoice K4Y-INV-1054 — N/A was due 2025-09-29
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1054 for N/A was due on 2025-09-29 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:46,191 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (212) 555-2203 | Body: OVERDUE: Invoice K4Y-INV-1054 N/A from Invoice System was due 2025-09-29. Pay now.
+2026-06-15 00:00:46,763 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 9dfeb04f-df99-496d-90fb-c465cf0b665f: name '_check_low_confidence' is not defined
+2026-06-15 00:00:47,928 INFO app.services.overdue_service Marked overdue: K4Y-INV-1054 (9dfeb04f-df99-496d-90fb-c465cf0b665f)
+2026-06-15 00:00:48,678 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@steelbridgecap.com
+  Subject: OVERDUE: Invoice K4Y-INV-1056 — N/A was due 2025-11-15
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1056 for N/A was due on 2025-11-15 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:48,678 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (212) 555-2203 | Body: OVERDUE: Invoice K4Y-INV-1056 N/A from Invoice System was due 2025-11-15. Pay now.
+2026-06-15 00:00:49,239 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 016acd47-4af7-44bc-a6bc-1f523ea6d6f3: name '_check_low_confidence' is not defined
+2026-06-15 00:00:50,406 INFO app.services.overdue_service Marked overdue: K4Y-INV-1056 (016acd47-4af7-44bc-a6bc-1f523ea6d6f3)
+2026-06-15 00:00:51,154 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@steelbridgecap.com
+  Subject: OVERDUE: Invoice K4Y-INV-1059 — N/A was due 2026-02-12
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1059 for N/A was due on 2026-02-12 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:51,154 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (212) 555-2203 | Body: OVERDUE: Invoice K4Y-INV-1059 N/A from Invoice System was due 2026-02-12. Pay now.
+2026-06-15 00:00:51,707 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice e69a5740-4527-4c91-a492-6b0b7bd01d10: name '_check_low_confidence' is not defined
+2026-06-15 00:00:52,852 INFO app.services.overdue_service Marked overdue: K4Y-INV-1059 (e69a5740-4527-4c91-a492-6b0b7bd01d10)
+2026-06-15 00:00:53,619 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@steelbridgecap.com
+  Subject: OVERDUE: Invoice K4Y-INV-1062 — N/A was due 2026-03-22
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1062 for N/A was due on 2026-03-22 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:53,619 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (212) 555-2203 | Body: OVERDUE: Invoice K4Y-INV-1062 N/A from Invoice System was due 2026-03-22. Pay now.
+2026-06-15 00:00:54,187 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 23364445-66d2-4e7d-80c1-cae325c863de: name '_check_low_confidence' is not defined
+2026-06-15 00:00:55,348 INFO app.services.overdue_service Marked overdue: K4Y-INV-1062 (23364445-66d2-4e7d-80c1-cae325c863de)
+2026-06-15 00:00:56,096 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@steelbridgecap.com
+  Subject: OVERDUE: Invoice K4Y-INV-1065 — N/A was due 2026-06-04
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1065 for N/A was due on 2026-06-04 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:56,096 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (212) 555-2203 | Body: OVERDUE: Invoice K4Y-INV-1065 N/A from Invoice System was due 2026-06-04. Pay now.
+2026-06-15 00:00:56,662 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice e31e6200-5fc6-4576-b79e-5eaa4f14ed8a: name '_check_low_confidence' is not defined
+2026-06-15 00:00:57,799 INFO app.services.overdue_service Marked overdue: K4Y-INV-1065 (e31e6200-5fc6-4576-b79e-5eaa4f14ed8a)
+2026-06-15 00:00:58,562 INFO app.services.notification_delivery_service [MOCK EMAIL] To: payables@vertexhealth.org
+  Subject: OVERDUE: Invoice K4Y-INV-1072 — N/A was due 2025-10-20
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1072 for N/A was due on 2025-10-20 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:00:58,562 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (713) 555-2304 | Body: OVERDUE: Invoice K4Y-INV-1072 N/A from Invoice System was due 2025-10-20. Pay now.
+2026-06-15 00:00:59,118 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice ead24047-cd9a-4d5b-96bd-bd59cc67870b: name '_check_low_confidence' is not defined
+2026-06-15 00:01:00,247 INFO app.services.overdue_service Marked overdue: K4Y-INV-1072 (ead24047-cd9a-4d5b-96bd-bd59cc67870b)
+2026-06-15 00:01:01,017 INFO app.services.notification_delivery_service [MOCK EMAIL] To: payables@vertexhealth.org
+  Subject: OVERDUE: Invoice K4Y-INV-1074 — N/A was due 2025-11-23
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1074 for N/A was due on 2025-11-23 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:01,018 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (713) 555-2304 | Body: OVERDUE: Invoice K4Y-INV-1074 N/A from Invoice System was due 2025-11-23. Pay now.
+2026-06-15 00:01:01,576 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice cce8acf0-e860-45fa-bd94-c0cc52c0a3f4: name '_check_low_confidence' is not defined
+2026-06-15 00:01:02,691 INFO app.services.overdue_service Marked overdue: K4Y-INV-1074 (cce8acf0-e860-45fa-bd94-c0cc52c0a3f4)
+2026-06-15 00:01:03,432 INFO app.services.notification_delivery_service [MOCK EMAIL] To: payables@vertexhealth.org
+  Subject: OVERDUE: Invoice K4Y-INV-1081 — N/A was due 2026-01-30
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1081 for N/A was due on 2026-01-30 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:03,432 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (713) 555-2304 | Body: OVERDUE: Invoice K4Y-INV-1081 N/A from Invoice System was due 2026-01-30. Pay now.
+2026-06-15 00:01:04,022 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice d92c1fc8-f7ae-41a5-9567-62d892882f4f: name '_check_low_confidence' is not defined
+2026-06-15 00:01:05,260 INFO app.services.overdue_service Marked overdue: K4Y-INV-1081 (d92c1fc8-f7ae-41a5-9567-62d892882f4f)
+2026-06-15 00:01:06,016 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@cascadelogistics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1094 — N/A was due 2026-03-16
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1094 for N/A was due on 2026-03-16 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:06,017 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (206) 555-2405 | Body: OVERDUE: Invoice K4Y-INV-1094 N/A from Invoice System was due 2026-03-16. Pay now.
+2026-06-15 00:01:06,575 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 363a5ea4-75d0-4d8b-a131-f081e1bab72d: name '_check_low_confidence' is not defined
+2026-06-15 00:01:07,713 INFO app.services.overdue_service Marked overdue: K4Y-INV-1094 (363a5ea4-75d0-4d8b-a131-f081e1bab72d)
+2026-06-15 00:01:08,460 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@cascadelogistics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1095 — N/A was due 2026-04-15
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1095 for N/A was due on 2026-04-15 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:08,460 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (206) 555-2405 | Body: OVERDUE: Invoice K4Y-INV-1095 N/A from Invoice System was due 2026-04-15. Pay now.
+2026-06-15 00:01:09,020 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 2c38a4a6-7f7f-42de-b05c-93f5df78a41d: name '_check_low_confidence' is not defined
+2026-06-15 00:01:10,290 INFO app.services.overdue_service Marked overdue: K4Y-INV-1095 (2c38a4a6-7f7f-42de-b05c-93f5df78a41d)
+2026-06-15 00:01:11,045 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@cascadelogistics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1096 — N/A was due 2026-06-14
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1096 for N/A was due on 2026-06-14 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:11,046 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (206) 555-2405 | Body: OVERDUE: Invoice K4Y-INV-1096 N/A from Invoice System was due 2026-06-14. Pay now.
+2026-06-15 00:01:11,629 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 88e6ec22-b6b2-4ecf-af44-2255a5f95b64: name '_check_low_confidence' is not defined
+2026-06-15 00:01:12,781 INFO app.services.overdue_service Marked overdue: K4Y-INV-1096 (88e6ec22-b6b2-4ecf-af44-2255a5f95b64)
+2026-06-15 00:01:13,550 INFO app.services.notification_delivery_service [MOCK EMAIL] To: payables@vertexhealth.org
+  Subject: OVERDUE: Invoice K4Y-INV-1071 — N/A was due 2025-09-24
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1071 for N/A was due on 2025-09-24 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:13,550 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (713) 555-2304 | Body: OVERDUE: Invoice K4Y-INV-1071 N/A from Invoice System was due 2025-09-24. Pay now.
+2026-06-15 00:01:14,112 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 42f9472e-58f8-4729-8339-4ef3436e12a3: name '_check_low_confidence' is not defined
+2026-06-15 00:01:15,250 INFO app.services.overdue_service Marked overdue: K4Y-INV-1071 (42f9472e-58f8-4729-8339-4ef3436e12a3)
+2026-06-15 00:01:16,040 INFO app.services.notification_delivery_service [MOCK EMAIL] To: payables@vertexhealth.org
+  Subject: OVERDUE: Invoice K4Y-INV-1076 — N/A was due 2025-12-17
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1076 for N/A was due on 2025-12-17 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:16,040 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (713) 555-2304 | Body: OVERDUE: Invoice K4Y-INV-1076 N/A from Invoice System was due 2025-12-17. Pay now.
+2026-06-15 00:01:16,599 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 4b6818c6-cc2a-43b8-85f7-7a77f10cc09d: name '_check_low_confidence' is not defined
+2026-06-15 00:01:17,717 INFO app.services.overdue_service Marked overdue: K4Y-INV-1076 (4b6818c6-cc2a-43b8-85f7-7a77f10cc09d)
+2026-06-15 00:01:18,497 INFO app.services.notification_delivery_service [MOCK EMAIL] To: payables@vertexhealth.org
+  Subject: OVERDUE: Invoice K4Y-INV-1083 — N/A was due 2026-03-17
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1083 for N/A was due on 2026-03-17 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:18,498 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (713) 555-2304 | Body: OVERDUE: Invoice K4Y-INV-1083 N/A from Invoice System was due 2026-03-17. Pay now.
+2026-06-15 00:01:19,058 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 4e3f9e35-f5be-4694-acf0-b674a34dcd21: name '_check_low_confidence' is not defined
+2026-06-15 00:01:20,240 INFO app.services.overdue_service Marked overdue: K4Y-INV-1083 (4e3f9e35-f5be-4694-acf0-b674a34dcd21)
+2026-06-15 00:01:20,993 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@cascadelogistics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1091 — N/A was due 2025-10-03
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1091 for N/A was due on 2025-10-03 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:20,993 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (206) 555-2405 | Body: OVERDUE: Invoice K4Y-INV-1091 N/A from Invoice System was due 2025-10-03. Pay now.
+2026-06-15 00:01:21,561 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 63886f5a-d6e5-4b23-a0b2-cad05c953999: name '_check_low_confidence' is not defined
+2026-06-15 00:01:22,720 INFO app.services.overdue_service Marked overdue: K4Y-INV-1091 (63886f5a-d6e5-4b23-a0b2-cad05c953999)
+2026-06-15 00:01:23,482 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@redwoodanalytics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1111 — N/A was due 2026-05-22
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1111 for N/A was due on 2026-05-22 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:23,482 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (408) 555-2506 | Body: OVERDUE: Invoice K4Y-INV-1111 N/A from Invoice System was due 2026-05-22. Pay now.
+2026-06-15 00:01:24,047 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice cfd49100-bda0-48af-9b88-45e0eb103e71: name '_check_low_confidence' is not defined
+2026-06-15 00:01:25,198 INFO app.services.overdue_service Marked overdue: K4Y-INV-1111 (cfd49100-bda0-48af-9b88-45e0eb103e71)
+2026-06-15 00:01:25,951 INFO app.services.notification_delivery_service [MOCK EMAIL] To: procurement@bluestaredu.org
+  Subject: OVERDUE: Invoice K4Y-INV-1114 — N/A was due 2026-03-22
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1114 for N/A was due on 2026-03-22 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:25,952 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (617) 555-2607 | Body: OVERDUE: Invoice K4Y-INV-1114 N/A from Invoice System was due 2026-03-22. Pay now.
+2026-06-15 00:01:26,508 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice dd9f7321-c1f1-4ba1-aa97-8b536aaa5a4a: name '_check_low_confidence' is not defined
+2026-06-15 00:01:27,725 INFO app.services.overdue_service Marked overdue: K4Y-INV-1114 (dd9f7321-c1f1-4ba1-aa97-8b536aaa5a4a)
+2026-06-15 00:01:28,477 INFO app.services.notification_delivery_service [MOCK EMAIL] To: procurement@bluestaredu.org
+  Subject: OVERDUE: Invoice K4Y-INV-1115 — N/A was due 2026-04-10
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1115 for N/A was due on 2026-04-10 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:28,477 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (617) 555-2607 | Body: OVERDUE: Invoice K4Y-INV-1115 N/A from Invoice System was due 2026-04-10. Pay now.
+2026-06-15 00:01:29,031 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice d709e70a-f13e-471a-9fe1-e892e9e5da0f: name '_check_low_confidence' is not defined
+2026-06-15 00:01:30,438 INFO app.services.overdue_service Marked overdue: K4Y-INV-1115 (d709e70a-f13e-471a-9fe1-e892e9e5da0f)
+2026-06-15 00:01:31,204 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@pinnaclere.com
+  Subject: OVERDUE: Invoice K4Y-INV-1127 — N/A was due 2025-12-11
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1127 for N/A was due on 2025-12-11 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:31,204 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (305) 555-2708 | Body: OVERDUE: Invoice K4Y-INV-1127 N/A from Invoice System was due 2025-12-11. Pay now.
+2026-06-15 00:01:31,763 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c9395153-8a48-4d61-8ca0-d2e4adbe9bfe: name '_check_low_confidence' is not defined
+2026-06-15 00:01:33,000 INFO app.services.overdue_service Marked overdue: K4Y-INV-1127 (c9395153-8a48-4d61-8ca0-d2e4adbe9bfe)
+2026-06-15 00:01:33,753 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@pinnaclere.com
+  Subject: OVERDUE: Invoice K4Y-INV-1131 — N/A was due 2026-01-30
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1131 for N/A was due on 2026-01-30 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:33,753 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (305) 555-2708 | Body: OVERDUE: Invoice K4Y-INV-1131 N/A from Invoice System was due 2026-01-30. Pay now.
+2026-06-15 00:01:34,304 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 560d3134-4cb4-4d63-a182-ef9bbcb0dfc3: name '_check_low_confidence' is not defined
+2026-06-15 00:01:35,438 INFO app.services.overdue_service Marked overdue: K4Y-INV-1131 (560d3134-4cb4-4d63-a182-ef9bbcb0dfc3)
+2026-06-15 00:01:36,187 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@pinnaclere.com
+  Subject: OVERDUE: Invoice K4Y-INV-1136 — N/A was due 2026-06-11
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1136 for N/A was due on 2026-06-11 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:36,187 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (305) 555-2708 | Body: OVERDUE: Invoice K4Y-INV-1136 N/A from Invoice System was due 2026-06-11. Pay now.
+2026-06-15 00:01:36,760 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice d10cef88-afea-43eb-aae9-a30f1b482407: name '_check_low_confidence' is not defined
+2026-06-15 00:01:37,949 INFO app.services.overdue_service Marked overdue: K4Y-INV-1136 (d10cef88-afea-43eb-aae9-a30f1b482407)
+2026-06-15 00:01:38,507 INFO app.services.overdue_service Payable invoice AO-2025-0014 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:39,107 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 53eab310-2141-4dc9-bb6e-832b2522058a: name '_check_low_confidence' is not defined
+2026-06-15 00:01:40,495 INFO app.services.overdue_service Marked overdue: AO-2025-0014 (53eab310-2141-4dc9-bb6e-832b2522058a)
+2026-06-15 00:01:41,702 INFO app.services.overdue_service Payable invoice AO-2025-0017 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:42,305 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice e7cf540e-fc17-4c3d-983d-cafbe9caddb3: name '_check_low_confidence' is not defined
+2026-06-15 00:01:43,642 INFO app.services.overdue_service Marked overdue: AO-2025-0017 (e7cf540e-fc17-4c3d-983d-cafbe9caddb3)
+2026-06-15 00:01:44,219 INFO app.services.overdue_service Payable invoice AO-2025-0167 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:45,089 INFO app.services.compliance_service Compliance flag inserted: tax_mismatch (high) on c4af12e3-a3e6-4eae-90f8-ec23eac6e248
+2026-06-15 00:01:45,277 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c4af12e3-a3e6-4eae-90f8-ec23eac6e248: name '_check_low_confidence' is not defined
+2026-06-15 00:01:46,427 INFO app.services.overdue_service Marked overdue: AO-2025-0167 (c4af12e3-a3e6-4eae-90f8-ec23eac6e248)
+2026-06-15 00:01:47,002 INFO app.services.overdue_service Payable invoice AO-2026-0021 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:47,563 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice b6535978-a7e3-4da6-9451-549b8e0f5f5b: name '_check_low_confidence' is not defined
+2026-06-15 00:01:48,733 INFO app.services.overdue_service Marked overdue: AO-2026-0021 (b6535978-a7e3-4da6-9451-549b8e0f5f5b)
+2026-06-15 00:01:49,293 INFO app.services.overdue_service Payable invoice AO-2026-0023 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:49,855 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 250eedec-7d98-4315-bd99-5e0e8a355008: name '_check_low_confidence' is not defined
+2026-06-15 00:01:50,989 INFO app.services.overdue_service Marked overdue: AO-2026-0023 (250eedec-7d98-4315-bd99-5e0e8a355008)
+2026-06-15 00:01:51,554 INFO app.services.overdue_service Payable invoice BM-2025-0074 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:52,124 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 05c3f279-8071-457e-9c6e-422607e2dc5a: name '_check_low_confidence' is not defined
+2026-06-15 00:01:53,346 INFO app.services.overdue_service Marked overdue: BM-2025-0074 (05c3f279-8071-457e-9c6e-422607e2dc5a)
+2026-06-15 00:01:54,099 INFO app.services.notification_delivery_service [MOCK EMAIL] To: finance@pinnaclere.com
+  Subject: OVERDUE: Invoice K4Y-INV-1133 — N/A was due 2026-04-06
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1133 for N/A was due on 2026-04-06 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:01:54,100 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (305) 555-2708 | Body: OVERDUE: Invoice K4Y-INV-1133 N/A from Invoice System was due 2026-04-06. Pay now.
+2026-06-15 00:01:54,657 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 52c3dbe0-e664-4d8f-abe2-0fe740bb348f: name '_check_low_confidence' is not defined
+2026-06-15 00:01:55,902 INFO app.services.overdue_service Marked overdue: K4Y-INV-1133 (52c3dbe0-e664-4d8f-abe2-0fe740bb348f)
+2026-06-15 00:01:56,475 INFO app.services.overdue_service Payable invoice DS-2026-0086 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:57,025 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 7996557f-bf4b-4581-9c51-efb82fe7e9af: name '_check_low_confidence' is not defined
+2026-06-15 00:01:58,205 INFO app.services.overdue_service Marked overdue: DS-2026-0086 (7996557f-bf4b-4581-9c51-efb82fe7e9af)
+2026-06-15 00:01:58,764 INFO app.services.overdue_service Payable invoice BM-2025-0077 overdue — internal notification created, no external email sent.
+2026-06-15 00:01:59,326 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 8a46b52f-312b-49ad-b3ef-b44b514f16e7: name '_check_low_confidence' is not defined
+2026-06-15 00:02:00,564 INFO app.services.overdue_service Marked overdue: BM-2025-0077 (8a46b52f-312b-49ad-b3ef-b44b514f16e7)
+2026-06-15 00:02:01,124 INFO app.services.overdue_service Payable invoice DS-2025-0081 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:01,687 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 3c46e4a5-5441-4446-8486-29ed8bf2a63f: name '_check_low_confidence' is not defined
+2026-06-15 00:02:02,919 INFO app.services.overdue_service Marked overdue: DS-2025-0081 (3c46e4a5-5441-4446-8486-29ed8bf2a63f)
+2026-06-15 00:02:03,487 INFO app.services.overdue_service Payable invoice DS-2025-0083 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:04,045 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice b5fa3e0f-1b49-4dd3-a85e-04d3c87a71b0: name '_check_low_confidence' is not defined
+2026-06-15 00:02:05,475 INFO app.services.overdue_service Marked overdue: DS-2025-0083 (b5fa3e0f-1b49-4dd3-a85e-04d3c87a71b0)
+2026-06-15 00:02:06,081 INFO app.services.overdue_service Payable invoice CC-2026-0043 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:06,672 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 3eefccb7-94e1-4b62-a09a-fe24c484cb7b: name '_check_low_confidence' is not defined
+2026-06-15 00:02:07,962 INFO app.services.overdue_service Marked overdue: CC-2026-0043 (3eefccb7-94e1-4b62-a09a-fe24c484cb7b)
+2026-06-15 00:02:08,521 INFO app.services.overdue_service Payable invoice DS-2025-0084 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:09,397 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice e9aec88f-a1d0-4ca4-b8d5-b3651be9d920: name '_check_low_confidence' is not defined
+2026-06-15 00:02:10,560 INFO app.services.overdue_service Marked overdue: DS-2025-0084 (e9aec88f-a1d0-4ca4-b8d5-b3651be9d920)
+2026-06-15 00:02:11,171 INFO app.services.overdue_service Payable invoice GF-2025-0094 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:11,831 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 65a6942e-d5fe-4316-b57f-065bda55e02b: name '_check_low_confidence' is not defined
+2026-06-15 00:02:12,995 INFO app.services.overdue_service Marked overdue: GF-2025-0094 (65a6942e-d5fe-4316-b57f-065bda55e02b)
+2026-06-15 00:02:13,573 INFO app.services.overdue_service Payable invoice GF-2026-0100 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:14,121 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 8728299b-49a8-4389-8e4b-92698155ec67: name '_check_low_confidence' is not defined
+2026-06-15 00:02:15,261 INFO app.services.overdue_service Marked overdue: GF-2026-0100 (8728299b-49a8-4389-8e4b-92698155ec67)
+2026-06-15 00:02:15,828 INFO app.services.overdue_service Payable invoice CC-2025-0035 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:16,379 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 11366998-fc4b-47af-964d-17e628d71a4b: name '_check_low_confidence' is not defined
+2026-06-15 00:02:17,565 INFO app.services.overdue_service Marked overdue: CC-2025-0035 (11366998-fc4b-47af-964d-17e628d71a4b)
+2026-06-15 00:02:18,121 INFO app.services.overdue_service Payable invoice BM-2026-0078 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:18,671 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 763ccc47-0d63-4776-b754-7eb2210a113b: name '_check_low_confidence' is not defined
+2026-06-15 00:02:19,824 INFO app.services.overdue_service Marked overdue: BM-2026-0078 (763ccc47-0d63-4776-b754-7eb2210a113b)
+2026-06-15 00:02:20,381 INFO app.services.overdue_service Payable invoice CC-2025-0033 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:20,994 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 782a0a1f-9c15-4f2a-b505-b8c5102c9476: name '_check_low_confidence' is not defined
+2026-06-15 00:02:22,217 INFO app.services.overdue_service Marked overdue: CC-2025-0033 (782a0a1f-9c15-4f2a-b505-b8c5102c9476)
+2026-06-15 00:02:22,821 INFO app.services.overdue_service Payable invoice DS-2025-0085 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:23,400 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c3f92cee-db5b-46d3-94af-8a9cb95ea57f: name '_check_low_confidence' is not defined
+2026-06-15 00:02:24,586 INFO app.services.overdue_service Marked overdue: DS-2025-0085 (c3f92cee-db5b-46d3-94af-8a9cb95ea57f)
+2026-06-15 00:02:25,199 INFO app.services.overdue_service Payable invoice IH-2026-0057 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:25,834 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 0a9647d8-aeae-4275-9602-0d2183d6eaa6: name '_check_low_confidence' is not defined
+2026-06-15 00:02:27,022 INFO app.services.overdue_service Marked overdue: IH-2026-0057 (0a9647d8-aeae-4275-9602-0d2183d6eaa6)
+2026-06-15 00:02:27,606 INFO app.services.overdue_service Payable invoice CC-2026-0041 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:28,169 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 4be6c10d-8fb6-4ad3-9feb-f86b0a04446a: name '_check_low_confidence' is not defined
+2026-06-15 00:02:29,310 INFO app.services.overdue_service Marked overdue: CC-2026-0041 (4be6c10d-8fb6-4ad3-9feb-f86b0a04446a)
+2026-06-15 00:02:29,873 INFO app.services.overdue_service Payable invoice IH-2026-0058 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:30,437 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 970cc456-c639-46f8-b182-39afdb99a95c: name '_check_low_confidence' is not defined
+2026-06-15 00:02:31,618 INFO app.services.overdue_service Marked overdue: IH-2026-0058 (970cc456-c639-46f8-b182-39afdb99a95c)
+2026-06-15 00:02:32,183 INFO app.services.overdue_service Payable invoice GF-2026-0102 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:32,748 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 52451278-ff53-4434-a105-248ccbadf271: name '_check_low_confidence' is not defined
+2026-06-15 00:02:34,006 INFO app.services.overdue_service Marked overdue: GF-2026-0102 (52451278-ff53-4434-a105-248ccbadf271)
+2026-06-15 00:02:34,576 INFO app.services.overdue_service Payable invoice JJ-2026-0867 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:35,154 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c4bb5d41-c035-44bb-93e6-abc4ae408205: name '_check_low_confidence' is not defined
+2026-06-15 00:02:36,362 INFO app.services.overdue_service Marked overdue: JJ-2026-0867 (c4bb5d41-c035-44bb-93e6-abc4ae408205)
+2026-06-15 00:02:36,942 INFO app.services.overdue_service Payable invoice MW-2026-0070 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:37,500 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 48197e81-2e0b-4c31-be29-ff4fbe7f610d: name '_check_low_confidence' is not defined
+2026-06-15 00:02:38,669 INFO app.services.overdue_service Marked overdue: MW-2026-0070 (48197e81-2e0b-4c31-be29-ff4fbe7f610d)
+2026-06-15 00:02:39,225 INFO app.services.overdue_service Payable invoice NS-2025-0006 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:39,798 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 7f00010b-d766-4d10-a8fa-e97ccc2ce099: name '_check_low_confidence' is not defined
+2026-06-15 00:02:40,971 INFO app.services.overdue_service Marked overdue: NS-2025-0006 (7f00010b-d766-4d10-a8fa-e97ccc2ce099)
+2026-06-15 00:02:41,538 INFO app.services.overdue_service Payable invoice NS-2026-0010 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:42,110 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 4c628c4e-821e-4f26-845b-129262ef44be: name '_check_low_confidence' is not defined
+2026-06-15 00:02:43,272 INFO app.services.overdue_service Marked overdue: NS-2026-0010 (4c628c4e-821e-4f26-845b-129262ef44be)
+2026-06-15 00:02:43,835 INFO app.services.overdue_service Payable invoice NS-2026-0011 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:44,396 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 40e5da6c-d6b4-4e52-8a66-9c2b96bf8ef2: name '_check_low_confidence' is not defined
+2026-06-15 00:02:45,559 INFO app.services.overdue_service Marked overdue: NS-2026-0011 (40e5da6c-d6b4-4e52-8a66-9c2b96bf8ef2)
+2026-06-15 00:02:46,146 INFO app.services.overdue_service Payable invoice PS-2025-0025 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:46,704 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice c42800fd-37bc-4873-bd9b-77277c2b2db4: name '_check_low_confidence' is not defined
+2026-06-15 00:02:47,886 INFO app.services.overdue_service Marked overdue: PS-2025-0025 (c42800fd-37bc-4873-bd9b-77277c2b2db4)
+2026-06-15 00:02:48,444 INFO app.services.overdue_service Payable invoice PS-2025-0967 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:49,038 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 81892c93-3a07-4c4a-8902-ed39aae80f00: name '_check_low_confidence' is not defined
+2026-06-15 00:02:50,277 INFO app.services.overdue_service Marked overdue: PS-2025-0967 (81892c93-3a07-4c4a-8902-ed39aae80f00)
+2026-06-15 00:02:50,842 INFO app.services.overdue_service Payable invoice PS-2026-0029 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:51,409 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 9bdd02f1-e21d-4ac0-983b-fc8857c577a4: name '_check_low_confidence' is not defined
+2026-06-15 00:02:52,618 INFO app.services.overdue_service Marked overdue: PS-2026-0029 (9bdd02f1-e21d-4ac0-983b-fc8857c577a4)
+2026-06-15 00:02:53,211 INFO app.services.overdue_service Payable invoice PS-2026-0030 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:53,768 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 6f53240d-83c8-44e3-a32e-3648054d909c: name '_check_low_confidence' is not defined
+2026-06-15 00:02:54,956 INFO app.services.overdue_service Marked overdue: PS-2026-0030 (6f53240d-83c8-44e3-a32e-3648054d909c)
+2026-06-15 00:02:55,511 INFO app.services.overdue_service Payable invoice PS-2025-0027 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:56,069 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 75235eb7-0c2f-4c4d-af8b-902e34fa98d9: name '_check_low_confidence' is not defined
+2026-06-15 00:02:57,247 INFO app.services.overdue_service Marked overdue: PS-2025-0027 (75235eb7-0c2f-4c4d-af8b-902e34fa98d9)
+2026-06-15 00:02:57,813 INFO app.services.overdue_service Payable invoice GF-2025-0092 overdue — internal notification created, no external email sent.
+2026-06-15 00:02:58,362 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice f70fb0b9-fb7c-4280-8ac9-b44d0076a3d2: name '_check_low_confidence' is not defined
+2026-06-15 00:02:59,536 INFO app.services.overdue_service Marked overdue: GF-2025-0092 (f70fb0b9-fb7c-4280-8ac9-b44d0076a3d2)
+2026-06-15 00:03:00,093 INFO app.services.overdue_service Payable invoice SL-2026-0051 overdue — internal notification created, no external email sent.
+2026-06-15 00:03:00,653 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 437ff579-3a99-4a95-a2ad-51aa68fd7511: name '_check_low_confidence' is not defined
+2026-06-15 00:03:01,824 INFO app.services.overdue_service Marked overdue: SL-2026-0051 (437ff579-3a99-4a95-a2ad-51aa68fd7511)
+2026-06-15 00:03:02,383 INFO app.services.overdue_service Payable invoice SL-2025-0048 overdue — internal notification created, no external email sent.
+2026-06-15 00:03:02,965 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 125811cf-ad6a-47cc-a3d9-246e7d45cf27: name '_check_low_confidence' is not defined
+2026-06-15 00:03:04,170 INFO app.services.overdue_service Marked overdue: SL-2025-0048 (125811cf-ad6a-47cc-a3d9-246e7d45cf27)
+2026-06-15 00:03:04,760 INFO app.services.overdue_service Payable invoice SL-2025-0049 overdue — internal notification created, no external email sent.
+2026-06-15 00:03:05,324 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice bbae9552-52cd-40cb-a02a-180f83dc0b24: name '_check_low_confidence' is not defined
+2026-06-15 00:03:06,683 INFO app.services.overdue_service Marked overdue: SL-2025-0049 (bbae9552-52cd-40cb-a02a-180f83dc0b24)
+2026-06-15 00:03:07,245 INFO app.services.overdue_service Payable invoice SL-2025-0047 overdue — internal notification created, no external email sent.
+2026-06-15 00:03:07,802 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 3c4f7b8c-666f-4a24-8dc8-254395eafafb: name '_check_low_confidence' is not defined
+2026-06-15 00:03:09,038 INFO app.services.overdue_service Marked overdue: SL-2025-0047 (3c4f7b8c-666f-4a24-8dc8-254395eafafb)
+2026-06-15 00:03:09,791 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1000 — N/A was due 2025-07-09
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1000 for N/A was due on 2025-07-09 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:03:09,791 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1000 N/A from Invoice System was due 2025-07-09. Pay now.
+2026-06-15 00:03:10,354 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 51e65046-cec3-4ea2-983e-46bd26c0cb2a: name '_check_low_confidence' is not defined
+2026-06-15 00:03:11,541 INFO app.services.overdue_service Marked overdue: K4Y-INV-1000 (51e65046-cec3-4ea2-983e-46bd26c0cb2a)
+2026-06-15 00:03:12,317 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@oriondynamics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1017 — N/A was due 2026-01-29
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1017 for N/A was due on 2026-01-29 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:03:12,318 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (650) 555-2001 | Body: OVERDUE: Invoice K4Y-INV-1017 N/A from Invoice System was due 2026-01-29. Pay now.
+2026-06-15 00:03:12,899 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 6f0d6ac7-1044-42b1-b311-a92def5e4869: name '_check_low_confidence' is not defined
+2026-06-15 00:03:14,084 INFO app.services.overdue_service Marked overdue: K4Y-INV-1017 (6f0d6ac7-1044-42b1-b311-a92def5e4869)
+2026-06-15 00:03:14,841 INFO app.services.notification_delivery_service [MOCK EMAIL] To: ap@redwoodanalytics.com
+  Subject: OVERDUE: Invoice K4Y-INV-1100 — N/A was due 2025-09-12
+  Body: Dear Customer,
+
+Invoice K4Y-INV-1100 for N/A was due on 2025-09-12 and remains unpaid.
+
+Please arrange payment at your e...
+2026-06-15 00:03:14,841 INFO app.services.notification_delivery_service [MOCK SMS] To: +1 (408) 555-2506 | Body: OVERDUE: Invoice K4Y-INV-1100 N/A from Invoice System was due 2025-09-12. Pay now.
+2026-06-15 00:03:15,394 ERROR app.services.overdue_service Compliance recheck failed for overdue invoice 856ac1f2-62f3-43f7-9d1b-3735e47b7675: name '_check_low_confidence' is not defined
+2026-06-15 00:03:16,619 INFO app.services.overdue_service Marked overdue: K4Y-INV-1100 (856ac1f2-62f3-43f7-9d1b-3735e47b7675)
+2026-06-15 00:03:16,620 INFO app.main [overdue_check] flipped 77 invoices for company 7bf697fc-7220-40c7-9678-542d624d22ad
+2026-06-15 00:03:16,620 INFO app.main [overdue_check] complete: 77 total
+2026-06-15 00:03:16,621 INFO apscheduler.executors.default Job "lifespan.<locals>._run_overdue_check (trigger: cron[hour='0', minute='0'], next run at: 2026-06-16 00:00:00 +04)" executed successfully
+2026-06-15 00:05:38,549 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 00:05:38,549 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 00:05:38,549 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 00:05:38,550 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 00:05:42,621 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 00:05:43,750 INFO app.main Supabase connection verified at startup
+2026-06-15 00:05:43,750 INFO app.main Storage active bucket: invoices
+2026-06-15 00:05:43,750 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 00:05:43,759 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 00:05:43,759 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 00:05:43,760 INFO apscheduler.scheduler Scheduler started
+2026-06-15 00:05:43,760 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 00:05:43,761 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 86056.238957 seconds)
+2026-06-15 00:05:43,760 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 00:05:54,463 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 00:05:54,463 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 00:05:54,463 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 00:05:54,464 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 00:05:58,471 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 00:05:59,673 INFO app.main Supabase connection verified at startup
+2026-06-15 00:05:59,674 INFO app.main Storage active bucket: invoices
+2026-06-15 00:05:59,674 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 00:05:59,690 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 00:05:59,690 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 00:05:59,691 INFO apscheduler.scheduler Scheduler started
+2026-06-15 00:05:59,691 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 00:05:59,691 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 86040.308100 seconds)
+2026-06-15 00:05:59,692 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 00:08:21,538 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 00:08:21,539 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 00:08:21,539 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 00:08:21,539 INFO app.main [overdue_check] scheduler stopped

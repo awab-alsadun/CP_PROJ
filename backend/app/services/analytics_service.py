@@ -63,7 +63,8 @@ def get_dashboard(db: Client, company_id: str) -> dict:
     total_receivables_outstanding = 0.0
     overdue_count = 0
     paid_this_month = 0.0
-    monthly_revenue: dict[str, float] = defaultdict(float)
+    monthly_payable:    dict[str, float] = defaultdict(float)
+    monthly_receivable: dict[str, float] = defaultdict(float)
 
     # For net income
     total_income   = 0.0
@@ -99,7 +100,11 @@ def get_dashboard(db: Client, company_id: str) -> dict:
         if issue_date:
             cutoff = today - timedelta(days=365)
             if issue_date >= cutoff:
-                monthly_revenue[_month_key(issue_date)] += grand_total
+                key = _month_key(issue_date)
+                if inv_type == "payable":
+                    monthly_payable[key] += grand_total
+                else:
+                    monthly_receivable[key] += grand_total
 
         # Net income tracking
         if inv_type == "receivable":
@@ -112,9 +117,14 @@ def get_dashboard(db: Client, company_id: str) -> dict:
 
     net_income = round(total_income - total_spending, 2)
 
-    sorted_months = sorted(monthly_revenue.items())
+    all_months = sorted(set(list(monthly_payable.keys()) + list(monthly_receivable.keys())))
     monthly_revenue_list = [
-        {"month": m, "amount": round(a, 2)} for m, a in sorted_months
+        {
+            "month":              m,
+            "payable_amount":     round(monthly_payable.get(m, 0.0), 2),
+            "receivable_amount":  round(monthly_receivable.get(m, 0.0), 2),
+        }
+        for m in all_months
     ]
 
     # Recent invoices
@@ -657,3 +667,62 @@ def get_system_stats(db: Client, company_id: str) -> dict:
     counts["document_count"]  = counts.get("total_documents", 0)
 
     return counts
+
+
+def get_page_metrics(db: Client, company_id: str, invoice_type: str) -> dict:
+    """
+    Stable metric card values for Payables or Receivables page.
+    Aggregated server-side — never changes with filter/search/page.
+    invoice_type: 'payable' | 'receivable'
+    """
+    try:
+        result = (
+            db.table("invoices")
+            .select("status, grand_total, amount_paid_so_far")
+            .eq("company_id", company_id)
+            .eq("invoice_type", invoice_type)
+            .is_("deleted_at", None)
+            .execute()
+        )
+    except Exception as e:
+        raise DatabaseError("Failed to fetch page metrics", detail=str(e))
+
+    rows = result.data or []
+
+    total_count    = len(rows)
+    overdue_count  = 0
+    draft_count    = 0
+    outstanding    = 0.0
+    sent_amt       = 0.0
+    unpaid_amt     = 0.0
+
+    for r in rows:
+        status      = r.get("status", "")
+        grand_total = float(r.get("grand_total") or 0)
+        paid        = float(r.get("amount_paid_so_far") or 0)
+        remaining   = max(0.0, grand_total - paid)
+
+        if status == "overdue":
+            overdue_count += 1
+        if status == "draft":
+            draft_count += 1
+        if status in ("sent", "unpaid", "partially_paid", "overdue"):
+            outstanding += remaining
+        if status == "sent":
+            sent_amt += grand_total
+        if status in ("unpaid", "partially_paid", "overdue"):
+            unpaid_amt += remaining
+
+    result = {
+        "total_count":   total_count,
+        "overdue_count": overdue_count,
+        "outstanding":   round(outstanding, 2),
+    }
+
+    if invoice_type == "receivable":
+        result["draft_count"] = draft_count
+        result["sent_amt"]    = round(sent_amt, 2)
+    else:
+        result["unpaid_amt"] = round(unpaid_amt, 2)
+
+    return result
