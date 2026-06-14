@@ -382,18 +382,3 @@ def process_refund(
     )
 
 
-# ---------------------------------------------------------------------------
-# Raw document
-# ---------------------------------------------------------------------------
-
-@router.get("/{invoice_id}/raw")
-def get_raw(
-    invoice_id: uuid.UUID,
-    db: Client = Depends(get_supabase),
-):
-    return _handle(
-        invoice_service.get_raw_document_for_company,
-        db,
-        settings.MVP_COMPANY_ID,
-        invoice_id,
-    )

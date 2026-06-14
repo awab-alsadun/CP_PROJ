@@ -88,7 +88,8 @@ async def query_invoices(
     try:
         result = handle_query(db=db, company_id=company_id, question=body.question)
     except Exception as e:
-        log.error(f"Query failed: {e}")
+        import traceback
+        log.error(f"Query failed: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Query processing failed: {str(e)}")
 
     return QueryResponse(

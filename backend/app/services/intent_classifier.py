@@ -46,7 +46,8 @@ _SQL_KEYWORDS = re.compile(
     r"per month|per week|per year|monthly|yearly|weekly|"
     r"most expensive|cheapest|"
     r"breakdown|aggregate|"
-    r"number of invoices|number of payments"
+    r"number of invoices|number of payments|"
+    r"compliance summary|compliance issues|flag summary|compliance flags"
     r")\b",
     re.IGNORECASE,
 )

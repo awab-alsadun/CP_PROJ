@@ -1,20 +1,6 @@
 """
 Analytics service.
 Fetches data from Supabase, aggregates in Python.
-
-invoice_type awareness:
-  - payables  (AP): vendor_id populated, client_id=NULL
-  - receivables (AR): client_id populated, vendor_id=NULL
-  - get_spending  → payables only  (what you owe vendors)
-  - get_revenue   → receivables only (what clients owe you)
-  - get_dashboard → both, reported with type breakdown
-  - get_trends    → both, separated by type
-  - get_payment_timing → receivables only (measures client payment speed)
-  - get_overdue   → both, with type label per invoice
-
-Status values in use:
-  payables:    unpaid | partially_paid | paid | overdue
-  receivables: draft | sent | unpaid | partially_paid | paid | overdue
 """
 
 import uuid
@@ -25,10 +11,6 @@ from statistics import median
 from supabase import Client
 from app.core.exceptions import DatabaseError
 
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 def _parse_date(d) -> date | None:
     if d is None:
@@ -48,7 +30,6 @@ def _month_key(d: date) -> str:
 
 
 def _is_outstanding(status: str) -> bool:
-    """True if the invoice has an unpaid balance."""
     return status in ("sent", "unpaid", "partially_paid", "overdue")
 
 
@@ -56,12 +37,7 @@ def _is_paid(status: str) -> bool:
     return status == "paid"
 
 
-# ---------------------------------------------------------------------------
-# Dashboard
-# ---------------------------------------------------------------------------
-
 def get_dashboard(db: Client, company_id: str) -> dict:
-    """Everything the dashboard page needs in one response."""
     try:
         invoices_result = (
             db.table("invoices")
@@ -69,7 +45,7 @@ def get_dashboard(db: Client, company_id: str) -> dict:
                     "invoice_type, amount_paid_so_far, confidence_score, "
                     "vendor_id, client_id, created_at")
             .eq("company_id", company_id)
-            .is_("deleted_at", "null")
+            .is_("deleted_at", None)
             .order("created_at", desc=True)
             .execute()
         )
@@ -80,28 +56,39 @@ def get_dashboard(db: Client, company_id: str) -> dict:
     today = date.today()
     first_of_month = today.replace(day=1)
 
-    # Full status breakdown including new statuses
     status_breakdown: dict[str, int] = {}
     type_breakdown = {"payable": 0, "receivable": 0}
 
-    total_outstanding = 0.0
+    total_payables_outstanding  = 0.0
+    total_receivables_outstanding = 0.0
     overdue_count = 0
     paid_this_month = 0.0
     monthly_revenue: dict[str, float] = defaultdict(float)
 
+    # For net income
+    total_income   = 0.0
+    total_spending = 0.0
+
+    # For top client
+    client_totals: dict[str, float] = defaultdict(float)
+
     for inv in invoices:
-        status = inv.get("status", "unpaid")
+        status   = inv.get("status", "unpaid")
         inv_type = inv.get("invoice_type", "payable")
         grand_total = float(inv.get("grand_total") or 0)
+        paid = float(inv.get("amount_paid_so_far") or 0)
         issue_date = _parse_date(inv.get("issue_date"))
 
         status_breakdown[status] = status_breakdown.get(status, 0) + 1
         type_breakdown[inv_type] = type_breakdown.get(inv_type, 0) + 1
 
+        # Split outstanding by type
         if _is_outstanding(status):
-            # Outstanding = grand_total minus what's been paid
-            paid = float(inv.get("amount_paid_so_far") or 0)
-            total_outstanding += max(0.0, grand_total - paid)
+            remaining = max(0.0, grand_total - paid)
+            if inv_type == "payable":
+                total_payables_outstanding += remaining
+            else:
+                total_receivables_outstanding += remaining
 
         if status == "overdue":
             overdue_count += 1
@@ -114,12 +101,23 @@ def get_dashboard(db: Client, company_id: str) -> dict:
             if issue_date >= cutoff:
                 monthly_revenue[_month_key(issue_date)] += grand_total
 
+        # Net income tracking
+        if inv_type == "receivable":
+            total_income += grand_total
+            client_id = inv.get("client_id")
+            if client_id:
+                client_totals[client_id] += grand_total
+        else:
+            total_spending += grand_total
+
+    net_income = round(total_income - total_spending, 2)
+
     sorted_months = sorted(monthly_revenue.items())
     monthly_revenue_list = [
         {"month": m, "amount": round(a, 2)} for m, a in sorted_months
     ]
 
-    # Recent invoices — join entity name based on type
+    # Recent invoices
     recent = invoices[:10]
     vendor_ids = list(set(i["vendor_id"] for i in recent if i.get("vendor_id")))
     client_ids = list(set(i["client_id"] for i in recent if i.get("client_id")))
@@ -144,55 +142,85 @@ def get_dashboard(db: Client, company_id: str) -> dict:
     recent_invoices = []
     for inv in recent:
         inv_type = inv.get("invoice_type", "payable")
-        # Show the relevant entity name based on type
         if inv_type == "payable":
             entity_name = vendor_names.get(inv.get("vendor_id"), "Unknown Vendor")
         else:
             entity_name = client_names.get(inv.get("client_id"), "Unknown Client")
 
         recent_invoices.append({
-            "id":              inv["id"],
-            "invoice_number":  inv["invoice_number"],
-            "invoice_type":    inv_type,
-            "entity_name":     entity_name,
-            "grand_total":     float(inv.get("grand_total") or 0),
+            "id":               inv["id"],
+            "invoice_number":   inv["invoice_number"],
+            "invoice_type":     inv_type,
+            "entity_name":      entity_name,
+            "vendor_name":      vendor_names.get(inv.get("vendor_id")),
+            "client_name":      client_names.get(inv.get("client_id")),
+            "grand_total":      float(inv.get("grand_total") or 0),
             "amount_paid_so_far": float(inv.get("amount_paid_so_far") or 0),
-            "status":          inv.get("status"),
-            "issue_date":      str(inv.get("issue_date", "")),
+            "status":           inv.get("status"),
+            "issue_date":       str(inv.get("issue_date", "")),
             "confidence_score": float(inv.get("confidence_score") or 0),
         })
 
+    # Top client by total receivable invoiced
+    top_client = None
+    if client_totals:
+        top_client_id = max(client_totals, key=client_totals.get)
+        top_client_name = client_names.get(top_client_id)
+        if not top_client_name:
+            try:
+                cr = db.table("clients").select("name").eq("id", top_client_id).single().execute()
+                top_client_name = (cr.data or {}).get("name", "Unknown")
+            except Exception:
+                top_client_name = "Unknown"
+        top_client = {
+            "client_id":    top_client_id,
+            "client_name":  top_client_name,
+            "total_billed": round(client_totals[top_client_id], 2),
+        }
+
+    # Vendor / client counts
+    vendor_count = 0
+    client_count = 0
+    try:
+        vcount = db.table("vendors").select("id", count="exact").eq("company_id", company_id).is_("deleted_at", None).execute()
+        vendor_count = vcount.count or 0
+    except Exception:
+        pass
+    try:
+        ccount = db.table("clients").select("id", count="exact").eq("company_id", company_id).is_("deleted_at", None).execute()
+        client_count = ccount.count or 0
+    except Exception:
+        pass
+
     return {
-        "total_invoices":     len(invoices),
-        "total_outstanding":  round(total_outstanding, 2),
-        "overdue_count":      overdue_count,
-        "paid_this_month":    round(paid_this_month, 2),
-        "status_breakdown":   status_breakdown,
-        "type_breakdown":     type_breakdown,
-        "monthly_revenue":    monthly_revenue_list,
-        "recent_invoices":    recent_invoices,
+        "total_invoices":                  len(invoices),
+        "total_payables_outstanding":      round(total_payables_outstanding, 2),
+        "total_receivables_outstanding":   round(total_receivables_outstanding, 2),
+        "total_outstanding":               round(total_payables_outstanding + total_receivables_outstanding, 2),
+        "overdue_count":                   overdue_count,
+        "paid_this_month":                 round(paid_this_month, 2),
+        "total_income":                    round(total_income, 2),
+        "total_spending":                  round(total_spending, 2),
+        "net_income":                      net_income,
+        "top_client":                      top_client,
+        "vendor_count":                    vendor_count,
+        "client_count":                    client_count,
+        "status_breakdown":                status_breakdown,
+        "type_breakdown":                  type_breakdown,
+        "monthly_revenue":                 monthly_revenue_list,
+        "recent_invoices":                 recent_invoices,
     }
 
 
-# ---------------------------------------------------------------------------
-# Spending (AP — payables only)
-# ---------------------------------------------------------------------------
-
-def get_spending(
-    db: Client,
-    company_id: str,
-    months: int = 6,
-) -> dict:
-    """Top 10 vendors by total spending. Payables only."""
+def get_spending(db: Client, company_id: str, months: int = 6) -> dict:
     cutoff = date.today() - timedelta(days=months * 30)
-
     try:
         result = (
             db.table("invoices")
             .select("vendor_id, grand_total, issue_date")
             .eq("company_id", company_id)
             .eq("invoice_type", "payable")
-            .is_("deleted_at", "null")
+            .is_("deleted_at", None)
             .gte("issue_date", cutoff.isoformat())
             .execute()
         )
@@ -200,7 +228,6 @@ def get_spending(
         raise DatabaseError("Failed to fetch spending data", detail=str(e))
 
     invoices = result.data or []
-
     vendor_data: dict = defaultdict(lambda: {"total": 0.0, "count": 0, "last_date": None})
     for inv in invoices:
         vid = inv.get("vendor_id")
@@ -213,10 +240,7 @@ def get_spending(
         if inv_date and (vd["last_date"] is None or inv_date > vd["last_date"]):
             vd["last_date"] = inv_date
 
-    sorted_vendors = sorted(
-        vendor_data.items(), key=lambda x: x[1]["total"], reverse=True
-    )[:10]
-
+    sorted_vendors = sorted(vendor_data.items(), key=lambda x: x[1]["total"], reverse=True)[:10]
     vendor_ids = [v[0] for v in sorted_vendors]
     vendor_names: dict[str, str] = {}
     if vendor_ids:
@@ -230,36 +254,26 @@ def get_spending(
     for vid, data in sorted_vendors:
         avg = data["total"] / data["count"] if data["count"] > 0 else 0
         vendors.append({
-            "vendor_id":           vid,
-            "vendor_name":         vendor_names.get(vid, "Unknown"),
-            "total_spent":         round(data["total"], 2),
-            "invoice_count":       data["count"],
-            "avg_invoice_amount":  round(avg, 2),
-            "last_invoice_date":   str(data["last_date"]) if data["last_date"] else None,
+            "vendor_id":          vid,
+            "vendor_name":        vendor_names.get(vid, "Unknown"),
+            "total_spent":        round(data["total"], 2),
+            "invoice_count":      data["count"],
+            "avg_invoice_amount": round(avg, 2),
+            "last_invoice_date":  str(data["last_date"]) if data["last_date"] else None,
         })
 
     return {"period_months": months, "vendors": vendors}
 
 
-# ---------------------------------------------------------------------------
-# Revenue (AR — receivables only)
-# ---------------------------------------------------------------------------
-
-def get_revenue(
-    db: Client,
-    company_id: str,
-    months: int = 6,
-) -> dict:
-    """Top 10 clients by revenue. Receivables only."""
+def get_revenue(db: Client, company_id: str, months: int = 6) -> dict:
     cutoff = date.today() - timedelta(days=months * 30)
-
     try:
         result = (
             db.table("invoices")
             .select("client_id, grand_total, issue_date, status")
             .eq("company_id", company_id)
             .eq("invoice_type", "receivable")
-            .is_("deleted_at", "null")
+            .is_("deleted_at", None)
             .gte("issue_date", cutoff.isoformat())
             .execute()
         )
@@ -267,10 +281,7 @@ def get_revenue(
         raise DatabaseError("Failed to fetch revenue data", detail=str(e))
 
     invoices = result.data or []
-
-    client_data: dict = defaultdict(lambda: {
-        "total": 0.0, "paid": 0.0, "count": 0, "last_date": None
-    })
+    client_data: dict = defaultdict(lambda: {"total": 0.0, "paid": 0.0, "count": 0, "last_date": None})
     for inv in invoices:
         cid = inv.get("client_id")
         if not cid:
@@ -285,10 +296,7 @@ def get_revenue(
         if inv_date and (cd["last_date"] is None or inv_date > cd["last_date"]):
             cd["last_date"] = inv_date
 
-    sorted_clients = sorted(
-        client_data.items(), key=lambda x: x[1]["total"], reverse=True
-    )[:10]
-
+    sorted_clients = sorted(client_data.items(), key=lambda x: x[1]["total"], reverse=True)[:10]
     client_ids = [c[0] for c in sorted_clients]
     client_names: dict[str, str] = {}
     if client_ids:
@@ -301,36 +309,25 @@ def get_revenue(
     clients = []
     for cid, data in sorted_clients:
         clients.append({
-            "client_id":          cid,
-            "client_name":        client_names.get(cid, "Unknown"),
-            "total_invoiced":     round(data["total"], 2),
-            "total_paid":         round(data["paid"], 2),
-            "invoice_count":      data["count"],
-            "last_invoice_date":  str(data["last_date"]) if data["last_date"] else None,
+            "client_id":         cid,
+            "client_name":       client_names.get(cid, "Unknown"),
+            "total_invoiced":    round(data["total"], 2),
+            "total_paid":        round(data["paid"], 2),
+            "invoice_count":     data["count"],
+            "last_invoice_date": str(data["last_date"]) if data["last_date"] else None,
         })
 
     return {"period_months": months, "clients": clients}
 
 
-# ---------------------------------------------------------------------------
-# Trends (both types, separated)
-# ---------------------------------------------------------------------------
-
-def get_trends(
-    db: Client,
-    company_id: str,
-    months: int = 12,
-    invoice_type: str | None = None,
-) -> dict:
-    """Monthly invoice volume and amounts, optionally filtered by type."""
+def get_trends(db: Client, company_id: str, months: int = 12, invoice_type: str | None = None) -> dict:
     cutoff = date.today() - timedelta(days=months * 30)
-
     try:
         q = (
             db.table("invoices")
             .select("issue_date, grand_total, status, invoice_type")
             .eq("company_id", company_id)
-            .is_("deleted_at", "null")
+            .is_("deleted_at", None)
             .gte("issue_date", cutoff.isoformat())
         )
         if invoice_type:
@@ -340,8 +337,6 @@ def get_trends(
         raise DatabaseError("Failed to fetch trends data", detail=str(e))
 
     invoices = result.data or []
-
-    # Separate month buckets per type
     payable_months:    dict = defaultdict(lambda: {"invoice_count": 0, "total_amount": 0.0, "paid_amount": 0.0})
     receivable_months: dict = defaultdict(lambda: {"invoice_count": 0, "total_amount": 0.0, "paid_amount": 0.0})
 
@@ -349,8 +344,8 @@ def get_trends(
         issue_date = _parse_date(inv.get("issue_date"))
         if not issue_date:
             continue
-        key   = _month_key(issue_date)
-        total = float(inv.get("grand_total") or 0)
+        key      = _month_key(issue_date)
+        total    = float(inv.get("grand_total") or 0)
         inv_type = inv.get("invoice_type", "payable")
         status   = inv.get("status", "unpaid")
 
@@ -378,12 +373,7 @@ def get_trends(
     }
 
 
-# ---------------------------------------------------------------------------
-# Payment timing (AR only — measures client payment speed)
-# ---------------------------------------------------------------------------
-
 def get_payment_timing(db: Client, company_id: str) -> dict:
-    """Payment speed analysis for receivable invoices."""
     try:
         inv_result = (
             db.table("invoices")
@@ -391,7 +381,7 @@ def get_payment_timing(db: Client, company_id: str) -> dict:
             .eq("company_id", company_id)
             .eq("invoice_type", "receivable")
             .in_("status", ["paid", "partially_paid"])
-            .is_("deleted_at", "null")
+            .is_("deleted_at", None)
             .execute()
         )
         pay_result = (
@@ -406,7 +396,6 @@ def get_payment_timing(db: Client, company_id: str) -> dict:
     invoices = inv_result.data or []
     payments = pay_result.data or []
 
-    # Earliest payment per invoice
     earliest_payment: dict[str, date] = {}
     for p in payments:
         inv_id = p.get("invoice_id")
@@ -456,11 +445,9 @@ def get_payment_timing(db: Client, company_id: str) -> dict:
         for label, low, high in buckets
     ]
 
-    client_avgs = {
-        cid: sum(dlist) / len(dlist) for cid, dlist in client_days.items()
-    }
-    fastest_id = min(client_avgs, key=client_avgs.get) if client_avgs else None
-    slowest_id = max(client_avgs, key=client_avgs.get) if client_avgs else None
+    client_avgs = {cid: sum(dlist) / len(dlist) for cid, dlist in client_days.items()}
+    fastest_id  = min(client_avgs, key=client_avgs.get) if client_avgs else None
+    slowest_id  = max(client_avgs, key=client_avgs.get) if client_avgs else None
 
     client_ids_to_fetch = [c for c in [fastest_id, slowest_id] if c]
     client_name_map: dict[str, str] = {}
@@ -505,12 +492,7 @@ def get_payment_timing(db: Client, company_id: str) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# Overdue (both types)
-# ---------------------------------------------------------------------------
-
 def get_overdue(db: Client, company_id: str) -> dict:
-    """Overdue invoice analysis — both payables and receivables."""
     try:
         result = (
             db.table("invoices")
@@ -518,7 +500,7 @@ def get_overdue(db: Client, company_id: str) -> dict:
                     "due_date, issue_date, vendor_id, client_id")
             .eq("company_id", company_id)
             .eq("status", "overdue")
-            .is_("deleted_at", "null")
+            .is_("deleted_at", None)
             .execute()
         )
     except Exception as e:
@@ -551,9 +533,9 @@ def get_overdue(db: Client, company_id: str) -> dict:
     overdue_invoices: list[dict] = []
 
     for inv in invoices:
-        grand_total  = float(inv.get("grand_total") or 0)
-        amount_paid  = float(inv.get("amount_paid_so_far") or 0)
-        remaining    = max(0.0, grand_total - amount_paid)
+        grand_total = float(inv.get("grand_total") or 0)
+        amount_paid = float(inv.get("amount_paid_so_far") or 0)
+        remaining   = max(0.0, grand_total - amount_paid)
         total_overdue_amount += remaining
 
         due   = _parse_date(inv.get("due_date"))
@@ -565,22 +547,23 @@ def get_overdue(db: Client, company_id: str) -> dict:
         days_overdue_list.append(days_over)
 
         inv_type = inv.get("invoice_type", "payable")
-        if inv_type == "payable":
-            entity_name = vendor_names.get(inv.get("vendor_id"), "Unknown Vendor")
-        else:
-            entity_name = client_names.get(inv.get("client_id"), "Unknown Client")
+        entity_name = (
+            vendor_names.get(inv.get("vendor_id"), "Unknown Vendor")
+            if inv_type == "payable"
+            else client_names.get(inv.get("client_id"), "Unknown Client")
+        )
 
         overdue_invoices.append({
-            "id":              inv["id"],
-            "invoice_number":  inv["invoice_number"],
-            "invoice_type":    inv_type,
-            "entity_name":     entity_name,
-            "grand_total":     grand_total,
+            "id":               inv["id"],
+            "invoice_number":   inv["invoice_number"],
+            "invoice_type":     inv_type,
+            "entity_name":      entity_name,
+            "grand_total":      grand_total,
             "amount_paid_so_far": amount_paid,
             "remaining_balance":  round(remaining, 2),
-            "due_date":        str(due) if due else None,
-            "days_overdue":    days_over,
-            "issue_date":      str(inv.get("issue_date", "")),
+            "due_date":         str(due) if due else None,
+            "days_overdue":     days_over,
+            "issue_date":       str(inv.get("issue_date", "")),
         })
 
     overdue_invoices.sort(key=lambda x: x["days_overdue"], reverse=True)
@@ -612,10 +595,6 @@ def get_overdue(db: Client, company_id: str) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# System stats
-# ---------------------------------------------------------------------------
-
 def get_system_stats(db: Client, company_id: str) -> dict:
     counts: dict[str, int] = {}
 
@@ -627,12 +606,11 @@ def get_system_stats(db: Client, company_id: str) -> dict:
         try:
             q = db.table(table).select("id", count="exact").eq("company_id", company_id)
             if soft_delete:
-                q = q.is_("deleted_at", "null")
+                q = q.is_("deleted_at", None)
             counts[key] = q.execute().count or 0
         except Exception:
             counts[key] = 0
 
-    # Payable / receivable split
     for inv_type in ("payable", "receivable"):
         try:
             q = (
@@ -640,13 +618,12 @@ def get_system_stats(db: Client, company_id: str) -> dict:
                 .select("id", count="exact")
                 .eq("company_id", company_id)
                 .eq("invoice_type", inv_type)
-                .is_("deleted_at", "null")
+                .is_("deleted_at", None)
             )
             counts[f"total_{inv_type}s"] = q.execute().count or 0
         except Exception:
             counts[f"total_{inv_type}s"] = 0
 
-    # Embeddings
     try:
         counts["total_embeddings"] = (
             db.table("invoice_embeddings")
@@ -658,7 +635,6 @@ def get_system_stats(db: Client, company_id: str) -> dict:
     except Exception:
         counts["total_embeddings"] = 0
 
-    # Documents
     try:
         result = (
             db.table("company_documents")
@@ -673,5 +649,11 @@ def get_system_stats(db: Client, company_id: str) -> dict:
     except Exception:
         counts["total_documents"]       = 0
         counts["total_document_chunks"] = 0
+
+    # Aliases for dashboard cards
+    counts["vendor_count"] = counts.get("total_vendors", 0)
+    counts["client_count"] = counts.get("total_clients", 0)
+    counts["embedding_count"] = counts.get("total_embeddings", 0)
+    counts["document_count"]  = counts.get("total_documents", 0)
 
     return counts

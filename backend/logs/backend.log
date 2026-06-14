@@ -220,3 +220,832 @@
 2026-06-06 04:01:41,532 DEBUG apscheduler.scheduler Looking for jobs to run
 2026-06-06 04:01:41,532 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
 2026-06-06 04:01:41,533 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 02:49:11,315 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 02:49:15,023 INFO app.main Supabase connection verified at startup
+2026-06-12 02:49:15,026 INFO app.main Storage active bucket: invoices
+2026-06-12 02:49:15,027 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 02:49:15,120 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 02:49:15,121 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 02:49:15,122 INFO apscheduler.scheduler Scheduler started
+2026-06-12 02:49:15,126 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:49:15,128 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 76244.872114 seconds)
+2026-06-12 02:49:15,127 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 02:49:25,167 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 02:49:25,168 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 02:49:27,664 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 02:49:27,665 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 02:49:27,666 ERROR app.routers.query Query failed: '"template"'
+2026-06-12 02:51:36,115 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 02:51:36,117 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:51:36,118 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 02:51:36,119 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 02:51:44,661 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 02:51:46,822 INFO app.main Supabase connection verified at startup
+2026-06-12 02:51:46,823 INFO app.main Storage active bucket: invoices
+2026-06-12 02:51:46,824 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 02:51:46,863 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 02:51:46,866 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 02:51:46,868 INFO apscheduler.scheduler Scheduler started
+2026-06-12 02:51:46,871 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:51:46,871 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 76093.128137 seconds)
+2026-06-12 02:51:46,872 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 02:51:48,011 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 02:51:48,012 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 02:51:50,439 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 02:51:50,440 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 02:51:50,441 ERROR app.routers.query Query failed: '"template"'
+2026-06-12 02:54:03,582 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 02:54:03,582 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:54:03,582 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 02:54:03,583 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 02:54:13,359 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 02:54:15,718 INFO app.main Supabase connection verified at startup
+2026-06-12 02:54:15,719 INFO app.main Storage active bucket: invoices
+2026-06-12 02:54:15,720 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 02:54:15,752 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 02:54:15,754 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 02:54:15,756 INFO apscheduler.scheduler Scheduler started
+2026-06-12 02:54:15,758 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:54:15,759 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 02:54:15,759 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 75944.240355 seconds)
+2026-06-12 02:54:17,001 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 02:54:17,002 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 02:54:20,760 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 02:54:20,761 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 02:54:20,762 ERROR app.routers.query Query failed: '"template"'
+2026-06-12 02:56:20,422 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 02:56:20,423 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:56:20,423 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 02:56:20,424 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 02:56:41,414 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 02:56:43,788 INFO app.main Supabase connection verified at startup
+2026-06-12 02:56:43,788 INFO app.main Storage active bucket: invoices
+2026-06-12 02:56:43,789 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 02:56:43,835 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 02:56:43,837 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 02:56:43,838 INFO apscheduler.scheduler Scheduler started
+2026-06-12 02:56:43,842 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:56:43,843 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 75796.156724 seconds)
+2026-06-12 02:56:43,842 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 02:56:47,065 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 02:56:47,066 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 02:56:50,892 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 02:56:50,893 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 02:56:50,894 ERROR app.routers.query Query failed: '"template"'
+2026-06-12 02:57:33,283 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 02:57:33,285 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:57:33,286 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 02:57:33,287 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 02:58:01,672 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 02:58:04,288 INFO app.main Supabase connection verified at startup
+2026-06-12 02:58:04,289 INFO app.main Storage active bucket: invoices
+2026-06-12 02:58:04,290 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 02:58:04,326 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 02:58:04,328 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 02:58:04,329 INFO apscheduler.scheduler Scheduler started
+2026-06-12 02:58:04,331 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 02:58:04,331 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 75715.668246 seconds)
+2026-06-12 02:58:04,332 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 03:01:21,583 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 03:01:21,583 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 03:01:21,584 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 03:01:21,584 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 03:05:43,395 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 03:05:46,602 INFO app.main Supabase connection verified at startup
+2026-06-12 03:05:46,603 INFO app.main Storage active bucket: invoices
+2026-06-12 03:05:46,604 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 03:05:46,657 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 03:05:46,660 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 03:05:46,661 INFO apscheduler.scheduler Scheduler started
+2026-06-12 03:05:46,664 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 03:05:46,665 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 75253.334878 seconds)
+2026-06-12 03:05:46,664 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 03:05:50,846 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 03:05:50,847 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:05:53,949 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:05:53,950 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:05:53,951 ERROR app.routers.query Query failed: '"template"'
+2026-06-12 03:10:31,043 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 03:10:31,043 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 03:10:31,043 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 03:10:31,044 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 03:10:40,246 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 03:10:42,875 INFO app.main Supabase connection verified at startup
+2026-06-12 03:10:42,876 INFO app.main Storage active bucket: invoices
+2026-06-12 03:10:42,877 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 03:10:42,926 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 03:10:42,928 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 03:10:42,929 INFO apscheduler.scheduler Scheduler started
+2026-06-12 03:10:42,930 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 03:10:42,931 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 74957.068484 seconds)
+2026-06-12 03:10:42,931 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 03:10:44,216 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 03:10:44,216 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:10:46,603 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:10:46,604 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:10:46,610 ERROR app.routers.query Query failed: '"template"'
+Traceback (most recent call last):
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 735, in handle_query
+    data, template = _run_sql_query(db, company_id, question)
+                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 508, in _run_sql_query
+    selection = _select_template(question)
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 128, in _select_template
+    prompt = _TEMPLATE_SELECTOR_PROMPT.format(today=today)
+KeyError: '"template"'
+
+2026-06-12 03:12:22,041 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 03:12:22,042 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 03:12:22,042 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 03:12:22,043 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 03:12:31,633 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 03:12:34,863 INFO app.main Supabase connection verified at startup
+2026-06-12 03:12:34,864 INFO app.main Storage active bucket: invoices
+2026-06-12 03:12:34,865 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 03:12:34,897 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 03:12:34,899 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 03:12:34,900 INFO apscheduler.scheduler Scheduler started
+2026-06-12 03:12:34,901 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 03:12:34,902 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 74845.097344 seconds)
+2026-06-12 03:12:34,902 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 03:12:35,629 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-12 03:12:35,630 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:12:38,296 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:12:38,297 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:12:40,331 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "date_from": "2026-05-01",\n    "date_to": "2026-05-31",\n    "vendor_name": null,\n    "client_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
+2026-06-12 03:12:40,332 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': '2026-05-01', 'date_to': '2026-05-31', 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-12 03:12:41,599 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 03:13:03,706 INFO app.routers.query Query received: "How many invoices do we have in total?"
+2026-06-12 03:13:03,707 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:13:03,707 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:13:05,425 INFO app.services.query_service Template selector raw response: '{"template":"invoice_count","filters":{"status":null,"invoice_type":null,"vendor_name":null,"date_from":null,"date_to":null}}'
+2026-06-12 03:13:05,425 INFO app.services.query_service Template: invoice_count, filters: {'status': None, 'invoice_type': None, 'vendor_name': None, 'date_from': None, 'date_to': None}
+2026-06-12 03:13:06,380 INFO app.services.query_service Template 'invoice_count' executed successfully
+2026-06-12 03:13:20,516 INFO app.routers.query Query received: How many paid invoices do we have?
+2026-06-12 03:13:20,517 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:13:20,518 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:13:22,421 INFO app.services.query_service Template selector raw response: '{"template":"invoice_count","filters":{"status":"paid","date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"invoice_type":null,"currency":null}}'
+2026-06-12 03:13:22,422 INFO app.services.query_service Template: invoice_count, filters: {'status': 'paid', 'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'invoice_type': None, 'currency': None}
+2026-06-12 03:13:23,921 INFO app.services.query_service Template 'invoice_count' executed successfully
+2026-06-12 03:14:25,078 INFO app.routers.query Query received: What is the total amount we have spent
+2026-06-12 03:14:25,079 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:14:25,079 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:14:27,055 INFO app.services.query_service Template selector raw response: '{"template":"total_spending","filters":{"date_from":null,"date_to":null,"vendor_name":null,"status":null,"invoice_type":null,"currency":null}}'
+2026-06-12 03:14:27,056 INFO app.services.query_service Template: total_spending, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'status': None, 'invoice_type': None, 'currency': None}
+2026-06-12 03:14:28,322 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-12 03:14:48,048 INFO app.routers.query Query received: How much did we spend this month?
+2026-06-12 03:14:48,048 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:14:48,048 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:14:50,776 INFO app.services.query_service Template selector raw response: '{"template":"total_spending","filters":{"date_from":"2026-06-01","date_to":"2026-06-12","vendor_name":null,"status":null,"invoice_type":null,"currency":null}}'
+2026-06-12 03:14:50,777 INFO app.services.query_service Template: total_spending, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-12', 'vendor_name': None, 'status': None, 'invoice_type': None, 'currency': None}
+2026-06-12 03:14:52,742 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-12 03:14:59,298 INFO app.routers.query Query received: "How much did we spend last month?
+2026-06-12 03:14:59,299 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:14:59,301 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:15:01,192 INFO app.services.query_service Template selector raw response: '{"template":"total_spending","filters":{"date_from":"2026-05-01","date_to":"2026-05-31","vendor_name":null,"status":null,"invoice_type":null,"currency":null}}'
+2026-06-12 03:15:01,193 INFO app.services.query_service Template: total_spending, filters: {'date_from': '2026-05-01', 'date_to': '2026-05-31', 'vendor_name': None, 'status': None, 'invoice_type': None, 'currency': None}
+2026-06-12 03:15:02,911 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-12 03:15:07,547 INFO app.routers.query Query received: Which vendors have we spent the most on?
+2026-06-12 03:15:07,547 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:15:08,989 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:15:08,990 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:15:11,402 INFO app.services.query_service Template selector raw response: '{\n  "template": "top_vendors",\n  "filters": {\n    "date_from": null,\n    "date_to": null,\n    "vendor_name": null,\n    "client_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
+2026-06-12 03:15:11,406 INFO app.services.query_service Template: top_vendors, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-12 03:15:13,229 INFO app.services.query_service Template 'top_vendors' executed successfully
+2026-06-12 03:15:18,378 INFO app.routers.query Query received: How much have we spent on payable invoices?"
+2026-06-12 03:15:18,378 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:15:18,379 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:15:20,242 INFO app.services.query_service Template selector raw response: '{"template":"total_spending","filters":{"invoice_type":"payable","date_from":null,"date_to":null,"vendor_name":null,"status":null,"currency":null}}'
+2026-06-12 03:15:20,243 INFO app.services.query_service Template: total_spending, filters: {'invoice_type': 'payable', 'date_from': None, 'date_to': None, 'vendor_name': None, 'status': None, 'currency': None}
+2026-06-12 03:15:21,662 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-12 03:15:54,632 INFO app.routers.query Query received: Which vendors have the highest outstanding balances?
+2026-06-12 03:15:54,633 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:15:54,633 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:15:56,116 INFO app.services.query_service Template selector raw response: '{"template": "vendor_balances", "filters": {}}'
+2026-06-12 03:15:56,117 INFO app.services.query_service Template: vendor_balances, filters: {}
+2026-06-12 03:15:57,597 INFO app.services.query_service Template 'vendor_balances' executed successfully
+2026-06-12 03:16:06,467 INFO app.routers.query Query received: Which clients owe us the most money?
+2026-06-12 03:16:06,467 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:16:08,084 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:16:08,085 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:16:11,014 INFO app.services.query_service Template selector raw response: '{"template": "client_balances", "filters": {}}'
+2026-06-12 03:16:11,015 INFO app.services.query_service Template: client_balances, filters: {}
+2026-06-12 03:16:12,379 INFO app.services.query_service Template 'client_balances' executed successfully
+2026-06-12 03:16:21,041 INFO app.routers.query Query received: Show me all overdue invoices
+2026-06-12 03:16:21,041 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:16:22,260 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:16:22,261 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:16:23,985 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "date_from": null,\n    "date_to": null,\n    "vendor_name": null,\n    "client_name": null,\n    "limit": null\n  }\n}'
+2026-06-12 03:16:23,986 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'limit': None}
+2026-06-12 03:16:25,760 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 03:17:09,819 INFO app.routers.query Query received: Show me overdue invoices from last month"
+2026-06-12 03:17:09,820 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:17:12,401 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:17:12,402 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:17:14,795 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "date_from": "2026-05-01",\n    "date_to": "2026-05-31",\n    "vendor_name": null,\n    "client_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
+2026-06-12 03:17:14,796 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': '2026-05-01', 'date_to': '2026-05-31', 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-12 03:17:16,416 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 03:17:40,487 INFO app.routers.query Query received: Give me a monthly breakdown of invoices
+2026-06-12 03:17:40,488 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:17:40,489 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:17:42,527 INFO app.services.query_service Template selector raw response: '{"template":"monthly_breakdown","filters":{}}'
+2026-06-12 03:17:42,528 INFO app.services.query_service Template: monthly_breakdown, filters: {}
+2026-06-12 03:17:44,295 INFO app.services.query_service Template 'monthly_breakdown' executed successfully
+2026-06-12 03:18:06,200 INFO app.routers.query Query received: Which month had the most invoices
+2026-06-12 03:18:06,200 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:18:07,891 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:18:07,892 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:18:09,912 INFO app.services.query_service Template selector raw response: '{"template": "monthly_breakdown", "filters": {}}'
+2026-06-12 03:18:09,913 INFO app.services.query_service Template: monthly_breakdown, filters: {}
+2026-06-12 03:18:11,440 INFO app.services.query_service Template 'monthly_breakdown' executed successfully
+2026-06-12 03:18:27,203 INFO app.routers.query Query received: Show me recent payments
+2026-06-12 03:18:27,204 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:18:29,133 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:18:29,133 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:18:31,202 INFO app.services.query_service Template selector raw response: '{\n  "template": "payment_history",\n  "filters": {\n    "date_from": "2026-06-01",\n    "date_to": "2026-06-12",\n    "vendor_name": null,\n    "limit": null\n  }\n}'
+2026-06-12 03:18:31,203 INFO app.services.query_service Template: payment_history, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-12', 'vendor_name': None, 'limit': None}
+2026-06-12 03:18:33,019 INFO app.services.query_service Template 'payment_history' executed successfully
+2026-06-12 03:19:36,771 INFO app.routers.query Query received: "Give me a summary of all compliance issues
+2026-06-12 03:19:36,771 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:19:38,690 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['compliance_guide']
+2026-06-12 03:19:38,691 INFO app.services.query_service Intent: rag_compliance, doc_types: ['compliance_guide']
+2026-06-12 03:19:41,696 INFO app.services.query_service Query variants: ['"Give me a summary of all compliance issues', 'Provide an overview of all regulatory concerns', 'Summarize all adherence-related problems']
+2026-06-12 03:19:47,369 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
+2026-06-12 03:19:47,370 INFO app.services.query_service Chunks after reranking: 0
+2026-06-12 03:20:39,214 INFO app.routers.query Query received: What is our average payment delay per vendor?
+2026-06-12 03:20:39,214 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 03:20:39,215 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:20:41,083 INFO app.services.query_service Template selector raw response: '{"template":"avg_payment_delay","filters":{}}'
+2026-06-12 03:20:41,084 INFO app.services.query_service Template: avg_payment_delay, filters: {}
+2026-06-12 03:20:42,671 INFO app.services.query_service Template 'avg_payment_delay' executed successfully
+2026-06-12 03:21:16,167 INFO app.routers.query Query received: Show me the invoice aging report
+2026-06-12 03:21:16,169 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 03:21:17,779 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 03:21:17,780 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 03:21:19,996 INFO app.services.query_service Template selector raw response: '{"template":"invoice_aging","filters":{}}'
+2026-06-12 03:21:19,996 INFO app.services.query_service Template: invoice_aging, filters: {}
+2026-06-12 03:21:21,995 INFO app.services.query_service Template 'invoice_aging' executed successfully
+2026-06-12 06:53:29,248 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 06:53:29,249 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 06:53:29,249 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 06:53:29,250 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 06:53:34,162 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 06:53:35,214 INFO app.main Supabase connection verified at startup
+2026-06-12 06:53:35,215 INFO app.main Storage active bucket: invoices
+2026-06-12 06:53:35,215 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 06:53:35,233 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 06:53:35,233 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 06:53:35,233 INFO apscheduler.scheduler Scheduler started
+2026-06-12 06:53:35,234 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 06:53:35,234 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 61584.765469 seconds)
+2026-06-12 06:53:35,234 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:00:13,269 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:00:13,269 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:00:13,269 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:00:13,270 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:00:16,861 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:00:17,926 INFO app.main Supabase connection verified at startup
+2026-06-12 07:00:17,926 INFO app.main Storage active bucket: invoices
+2026-06-12 07:00:17,926 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:00:17,933 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:00:17,934 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:00:17,934 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:00:17,935 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:00:17,936 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 61182.063770 seconds)
+2026-06-12 07:00:17,936 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:01:19,322 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:01:19,322 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:01:19,322 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:01:19,323 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:01:23,312 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:01:24,306 INFO app.main Supabase connection verified at startup
+2026-06-12 07:01:24,306 INFO app.main Storage active bucket: invoices
+2026-06-12 07:01:24,306 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:01:24,313 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:01:24,313 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:01:24,314 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:01:24,314 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:01:24,314 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 61115.685113 seconds)
+2026-06-12 07:01:24,314 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:02:13,465 INFO app.routers.query Query received: "Show me all overdue invoices"
+2026-06-12 07:02:13,465 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:02:15,833 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:02:15,833 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:02:17,400 INFO app.services.query_service Template selector raw response: '{"template":"overdue_invoices","filters":{"date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"limit":null}}'
+2026-06-12 07:02:17,400 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'limit': None}
+2026-06-12 07:02:18,012 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 07:02:24,762 INFO app.routers.query Query received: "Show me recent payments"
+2026-06-12 07:02:24,762 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:02:26,301 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:02:26,302 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:02:27,939 INFO app.services.query_service Template selector raw response: '{\n  "template": "payment_history",\n  "filters": {\n    "date_from": "2026-06-01",\n    "date_to": "2026-06-12",\n    "vendor_name": null,\n    "limit": null\n  }\n}'
+2026-06-12 07:02:27,939 INFO app.services.query_service Template: payment_history, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-12', 'vendor_name': None, 'limit': None}
+2026-06-12 07:02:28,520 INFO app.services.query_service payment_history rows returned: 0
+2026-06-12 07:02:28,521 INFO app.services.query_service Template 'payment_history' executed successfully
+2026-06-12 07:02:32,316 INFO app.routers.query Query received: "Show me recent payments"
+2026-06-12 07:02:32,316 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:02:33,260 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:02:33,260 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:02:34,619 INFO app.services.query_service Template selector raw response: '{"template":"payment_history","filters":{"date_from":"2026-06-01","date_to":"2026-06-12","vendor_name":null}}'
+2026-06-12 07:02:34,619 INFO app.services.query_service Template: payment_history, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-12', 'vendor_name': None}
+2026-06-12 07:02:35,220 INFO app.services.query_service payment_history rows returned: 0
+2026-06-12 07:02:35,221 INFO app.services.query_service Template 'payment_history' executed successfully
+2026-06-12 07:02:40,762 INFO app.routers.query Query received: "Give me a summary of all compliance issues"
+2026-06-12 07:02:40,763 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:02:41,730 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['compliance_guide']
+2026-06-12 07:02:41,730 INFO app.services.query_service Intent: rag_compliance, doc_types: ['compliance_guide']
+2026-06-12 07:02:43,099 INFO app.services.query_service Query variants: ['"Give me a summary of all compliance issues"', 'Provide an overview of all regulatory concerns', 'Summarize all governance-related problems']
+2026-06-12 07:02:45,744 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
+2026-06-12 07:02:45,745 INFO app.services.query_service Chunks after reranking: 0
+2026-06-12 07:04:23,097 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:04:23,097 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:04:23,097 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:04:23,098 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:04:26,697 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:04:27,872 INFO app.main Supabase connection verified at startup
+2026-06-12 07:04:27,872 INFO app.main Storage active bucket: invoices
+2026-06-12 07:04:27,872 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:04:27,881 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:04:27,882 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:04:27,882 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:04:27,882 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:04:27,883 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60932.116923 seconds)
+2026-06-12 07:04:27,883 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:04:29,690 INFO app.routers.query Query received: "Show me all overdue invoices"
+2026-06-12 07:04:29,690 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:04:31,438 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:04:31,438 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:04:32,711 INFO app.services.query_service Template selector raw response: '{"template":"overdue_invoices","filters":{"date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"status":null,"invoice_type":null,"currency":null,"limit":null}}'
+2026-06-12 07:04:32,711 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-12 07:04:33,018 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 07:04:33,324 ERROR app.routers.query Query failed: object of type 'NoneType' has no len()
+Traceback (most recent call last):
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 739, in handle_query
+    answer = _answer_sql(question, data, template)
+  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 536, in _answer_sql
+    row_label = "aggregated summary" if isinstance(data, dict) else f"{len(data)} rows"
+                                                                       ~~~^^^^^^
+TypeError: object of type 'NoneType' has no len()
+
+2026-06-12 07:07:53,375 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:07:53,376 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:07:53,376 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:07:53,376 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:07:57,407 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:07:58,460 INFO app.main Supabase connection verified at startup
+2026-06-12 07:07:58,461 INFO app.main Storage active bucket: invoices
+2026-06-12 07:07:58,461 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:07:58,469 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:07:58,469 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:07:58,469 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:07:58,469 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:07:58,470 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60721.529911 seconds)
+2026-06-12 07:07:58,470 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:08:29,329 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:08:29,329 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:08:29,330 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:08:29,330 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:08:33,358 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:08:34,453 INFO app.main Supabase connection verified at startup
+2026-06-12 07:08:34,453 INFO app.main Storage active bucket: invoices
+2026-06-12 07:08:34,453 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:08:34,460 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:08:34,460 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:08:34,461 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:08:34,461 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:08:34,461 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60685.538162 seconds)
+2026-06-12 07:08:34,461 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:08:50,018 INFO app.routers.query Query received: Give me a summary of all compliance issues
+2026-06-12 07:08:50,018 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 07:08:50,018 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:08:51,967 INFO app.services.query_service Template selector raw response: '{"template": "compliance_summary", "filters": {}}'
+2026-06-12 07:08:51,967 INFO app.services.query_service Template: compliance_summary, filters: {}
+2026-06-12 07:08:52,574 INFO app.services.query_service Template 'compliance_summary' executed successfully
+2026-06-12 07:11:46,142 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:11:46,142 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:11:46,142 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:11:46,142 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:12:00,211 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:12:01,529 INFO app.main Supabase connection verified at startup
+2026-06-12 07:12:01,529 INFO app.main Storage active bucket: invoices
+2026-06-12 07:12:01,530 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:12:01,536 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:12:01,537 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:12:01,537 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:12:01,538 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:12:01,538 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60478.461479 seconds)
+2026-06-12 07:12:01,538 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:14:08,958 INFO app.routers.query Query received: Show me all overdue invoices
+2026-06-12 07:14:08,958 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:14:10,630 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:14:10,630 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:14:12,023 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "date_from": null,\n    "date_to": null,\n    "vendor_name": null,\n    "client_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
+2026-06-12 07:14:12,023 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-12 07:14:12,786 INFO app.services.query_service overdue raw count: 138, filters applied: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-12 07:14:12,787 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 07:14:23,989 INFO app.routers.query Query received: Show me recent payments
+2026-06-12 07:14:23,989 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:14:25,032 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:14:25,032 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:14:26,408 INFO app.services.query_service Template selector raw response: '{\n  "template": "payment_history",\n  "filters": {\n    "date_from": "2026-06-01",\n    "date_to": "2026-06-12",\n    "vendor_name": null,\n    "limit": null\n  }\n}'
+2026-06-12 07:14:26,408 INFO app.services.query_service Template: payment_history, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-12', 'vendor_name': None, 'limit': None}
+2026-06-12 07:14:27,036 INFO app.services.query_service payment_history rows returned: 0
+2026-06-12 07:14:27,036 INFO app.services.query_service Template 'payment_history' executed successfully
+2026-06-12 07:16:34,851 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:16:34,852 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:16:34,852 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:16:34,852 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:16:38,754 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:16:40,274 INFO app.main Supabase connection verified at startup
+2026-06-12 07:16:40,274 INFO app.main Storage active bucket: invoices
+2026-06-12 07:16:40,274 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:16:40,282 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:16:40,282 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:16:40,282 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:16:40,283 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:16:40,283 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:16:40,283 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60199.716450 seconds)
+2026-06-12 07:17:21,370 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:17:21,370 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:17:21,370 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:17:21,371 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:17:25,417 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:17:26,461 INFO app.main Supabase connection verified at startup
+2026-06-12 07:17:26,461 INFO app.main Storage active bucket: invoices
+2026-06-12 07:17:26,462 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:17:26,468 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:17:26,469 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:17:26,470 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:17:26,471 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:17:26,471 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60153.528422 seconds)
+2026-06-12 07:17:26,471 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:17:46,619 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 07:17:46,620 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:17:46,620 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 07:17:46,620 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 07:17:57,925 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 07:17:58,940 INFO app.main Supabase connection verified at startup
+2026-06-12 07:17:58,940 INFO app.main Storage active bucket: invoices
+2026-06-12 07:17:58,941 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 07:17:58,947 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 07:17:58,947 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 07:17:58,948 INFO apscheduler.scheduler Scheduler started
+2026-06-12 07:17:58,948 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 07:17:58,948 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 60121.051235 seconds)
+2026-06-12 07:17:58,948 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 07:21:46,797 INFO app.routers.query Query received: Show me all overdue invoices
+2026-06-12 07:21:46,797 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:21:48,827 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:21:48,827 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:21:50,398 INFO app.services.query_service Template selector raw response: '{"template":"overdue_invoices","filters":{"date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"limit":null}}'
+2026-06-12 07:21:50,398 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'limit': None}
+2026-06-12 07:21:51,016 INFO app.services.query_service overdue raw count: 138, filters applied: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'limit': None}
+2026-06-12 07:21:51,016 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 07:22:02,776 INFO app.routers.query Query received: Show me recent payments
+2026-06-12 07:22:02,776 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:22:03,744 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 07:22:03,744 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:22:04,998 INFO app.services.query_service Template selector raw response: '{"template":"payment_history","filters":{"date_from":"2026-05-13","date_to":"2026-06-12","vendor_name":null}}'
+2026-06-12 07:22:04,998 INFO app.services.query_service Template: payment_history, filters: {'date_from': '2026-05-13', 'date_to': '2026-06-12', 'vendor_name': None}
+2026-06-12 07:22:05,604 INFO app.services.query_service payment_history rows returned: 4
+2026-06-12 07:22:05,604 INFO app.services.query_service Template 'payment_history' executed successfully
+2026-06-12 07:23:15,473 INFO app.routers.query Query received: SELECT COUNT(*) as total_overdue FROM invoices WHERE company_id = '7bf697fc-7220-40c7-9678-542d624d2
+2026-06-12 07:23:15,473 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 07:23:15,474 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 07:23:16,968 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "status": "overdue",\n    "limit": 20\n  }\n}'
+2026-06-12 07:23:16,968 INFO app.services.query_service Template: overdue_invoices, filters: {'status': 'overdue', 'limit': 20}
+2026-06-12 07:23:17,599 INFO app.services.query_service overdue raw count: 138, filters applied: {'status': 'overdue', 'limit': 20}
+2026-06-12 07:23:17,600 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-12 07:34:34,884 INFO app.routers.query Query received: What is considered a self-employed person?
+2026-06-12 07:34:34,884 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:34:36,528 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
+2026-06-12 07:34:36,528 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
+2026-06-12 07:34:38,006 INFO app.services.query_service Query variants: ['What is considered a self-employed person?', 'How is an independent contractor defined?', 'What qualifies someone as a freelancer?']
+2026-06-12 07:34:40,691 INFO app.services.query_service Retrieved 12 chunks from Regulatory Documents
+2026-06-12 07:34:40,691 INFO app.services.query_service Soft boost: 12 chunks matched ['tax_regulation', 'compliance_guide']
+2026-06-12 07:34:41,859 INFO app.services.query_service Chunks after reranking: 6
+2026-06-12 07:35:08,073 INFO app.routers.query Query received: . Do you need to run a full-time business to be self-employed?
+2026-06-12 07:35:08,074 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:35:09,080 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
+2026-06-12 07:35:09,080 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
+2026-06-12 07:35:10,502 INFO app.services.query_service Query variants: ['. Do you need to run a full-time business to be self-employed?', 'Is it necessary to operate a full-time enterprise to be considered self-employed?', 'Must you manage a full-time business to qualify as self-employed?']
+2026-06-12 07:35:12,485 INFO app.services.query_service Retrieved 13 chunks from Regulatory Documents
+2026-06-12 07:35:12,485 INFO app.services.query_service Soft boost: 13 chunks matched ['tax_regulation', 'compliance_guide']
+2026-06-12 07:35:13,195 INFO app.services.query_service Chunks after reranking: 6
+2026-06-12 07:35:46,218 INFO app.routers.query Query received: Do my invoices meet the IRS recordkeeping requirements from the tax guide?
+2026-06-12 07:35:46,218 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 07:35:47,599 INFO app.services.intent_classifier Intent classified by LLM: hybrid, doc_types: ['tax_regulation', 'compliance_guide']
+2026-06-12 07:35:47,599 INFO app.services.query_service Intent: hybrid, doc_types: ['tax_regulation', 'compliance_guide']
+2026-06-12 07:35:49,016 INFO app.services.query_service Query variants: ['Do my invoices meet the IRS recordkeeping requirements from the tax guide?', 'Do my invoices comply with the IRS documentation standards from the tax manual?', 'Are my invoices aligned with the IRS record retention guidelines from the tax handbook?']
+2026-06-12 07:35:52,530 INFO app.services.query_service Retrieved 20 chunks from Invoice Data
+2026-06-12 07:35:53,213 INFO app.services.query_service Retrieved 19 chunks from Regulatory Documents
+2026-06-12 07:35:53,213 INFO app.services.query_service Soft boost: 19 chunks matched ['tax_regulation', 'compliance_guide']
+2026-06-12 07:35:54,682 INFO app.services.query_service Chunks after reranking: 6
+2026-06-12 08:59:28,888 INFO app.routers.query Query received: Which invoices mention software licenses
+2026-06-12 08:59:28,889 INFO app.services.intent_classifier Intent classified by keywords: rag_invoice, doc_types: []
+2026-06-12 08:59:28,889 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-12 08:59:30,869 INFO app.services.query_service Query variants: ['Which invoices mention software licenses', 'What invoices reference software licensing fees?', 'Find invoices containing software subscription charges']
+2026-06-12 08:59:34,553 INFO app.services.query_service Retrieved 12 chunks from Invoice Data
+2026-06-12 08:59:35,606 INFO app.services.query_service Chunks after reranking: 6
+2026-06-12 09:00:06,999 INFO app.routers.query Query received: What does the tax guide say about expense documentation
+2026-06-12 09:00:06,999 INFO app.services.intent_classifier Intent classified by keywords: rag_invoice, doc_types: []
+2026-06-12 09:00:07,000 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-12 09:00:08,279 INFO app.services.query_service Query variants: ['What does the tax guide say about expense documentation', 'What does the tax manual specify regarding expense records?', 'How does the tax handbook address documentation for expenses?']
+2026-06-12 09:00:10,655 INFO app.services.query_service Retrieved 0 chunks from Invoice Data
+2026-06-12 09:00:10,655 INFO app.services.query_service Chunks after reranking: 0
+2026-06-12 09:00:33,082 INFO app.routers.query Query received: Which invoices from Apex mention paper
+2026-06-12 09:00:33,082 INFO app.services.intent_classifier Intent classified by keywords: rag_invoice, doc_types: []
+2026-06-12 09:00:33,083 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-12 09:00:34,506 INFO app.services.query_service Query variants: ['Which invoices from Apex mention paper', 'What invoices from Apex reference stationery?', 'Find invoices from Apex containing paper supplies']
+2026-06-12 09:00:36,479 INFO app.services.query_service Retrieved 19 chunks from Invoice Data
+2026-06-12 09:00:37,195 INFO app.services.query_service Chunks after reranking: 6
+2026-06-12 09:09:43,379 INFO app.routers.query Query received: "what does the tax guide say about expense documentation
+2026-06-12 09:09:43,379 INFO app.services.intent_classifier Intent classified by keywords: rag_invoice, doc_types: []
+2026-06-12 09:09:43,380 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-12 09:09:46,201 INFO app.services.query_service Query variants: ['"what does the tax guide say about expense documentation', 'What does the tax manual specify regarding proof of expenses?', 'How does the tax handbook address records for expenditures?']
+2026-06-12 09:09:48,741 INFO app.services.query_service Retrieved 0 chunks from Invoice Data
+2026-06-12 09:09:48,741 INFO app.services.query_service Chunks after reranking: 0
+2026-06-12 23:21:11,992 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 23:21:11,995 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:21:11,996 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 23:21:11,998 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 23:21:29,393 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 23:21:39,870 INFO app.main Supabase connection verified at startup
+2026-06-12 23:21:39,871 INFO app.main Storage active bucket: invoices
+2026-06-12 23:21:39,872 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 23:21:39,951 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 23:21:39,952 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 23:21:39,953 INFO apscheduler.scheduler Scheduler started
+2026-06-12 23:21:39,955 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:21:39,955 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 2300.044384 seconds)
+2026-06-12 23:21:39,955 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 23:25:06,321 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 23:25:06,322 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:25:06,322 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 23:25:06,323 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 23:25:17,876 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 23:25:22,090 INFO app.main Supabase connection verified at startup
+2026-06-12 23:25:22,091 INFO app.main Storage active bucket: invoices
+2026-06-12 23:25:22,093 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 23:25:22,142 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 23:25:22,145 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 23:25:22,146 INFO apscheduler.scheduler Scheduler started
+2026-06-12 23:25:22,148 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:25:22,148 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 2077.851199 seconds)
+2026-06-12 23:25:22,152 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 23:25:27,898 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 23:25:27,900 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:25:27,901 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 23:25:27,902 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 23:25:37,485 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 23:25:42,870 INFO app.main Supabase connection verified at startup
+2026-06-12 23:25:42,871 INFO app.main Storage active bucket: invoices
+2026-06-12 23:25:42,872 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 23:25:42,908 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 23:25:42,909 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 23:25:42,910 INFO apscheduler.scheduler Scheduler started
+2026-06-12 23:25:42,911 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:25:42,912 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 2057.087337 seconds)
+2026-06-12 23:25:42,912 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 23:26:37,256 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-12 23:26:37,257 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:26:37,257 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-12 23:26:37,258 INFO app.main [overdue_check] scheduler stopped
+2026-06-12 23:26:47,067 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-12 23:26:50,983 INFO app.main Supabase connection verified at startup
+2026-06-12 23:26:50,983 INFO app.main Storage active bucket: invoices
+2026-06-12 23:26:50,984 DEBUG tzlocal Looking up time zone info from registry
+2026-06-12 23:26:50,999 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-12 23:26:51,000 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-12 23:26:51,000 INFO apscheduler.scheduler Scheduler started
+2026-06-12 23:26:51,001 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-12 23:26:51,001 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-13 00:00:00+04:00 (in 1988.998192 seconds)
+2026-06-12 23:26:51,001 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-12 23:28:41,764 INFO app.routers.query Query received: give me the current income
+2026-06-12 23:28:41,765 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 23:28:47,106 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 23:28:47,107 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 23:28:50,090 INFO app.services.query_service Template selector raw response: '{"template": "total_spending", "filters": {"date_from": "2026-01-01", "date_to": "2026-06-12", "invoice_type": "receivable"}}'
+2026-06-12 23:28:50,091 INFO app.services.query_service Template: total_spending, filters: {'date_from': '2026-01-01', 'date_to': '2026-06-12', 'invoice_type': 'receivable'}
+2026-06-12 23:28:51,846 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-12 23:30:40,221 INFO app.routers.query Query received: give me the net income
+2026-06-12 23:30:40,222 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-12 23:30:42,484 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-12 23:30:42,485 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 23:30:45,070 INFO app.services.query_service Template selector raw response: '{"template": "none", "filters": {}}'
+2026-06-12 23:30:45,071 INFO app.services.query_service Template: none, filters: {}
+2026-06-12 23:30:45,072 INFO app.services.query_service No template matched — falling back to RAG
+2026-06-12 23:30:45,073 INFO app.services.query_service SQL fallback: routing to RAG
+2026-06-12 23:30:47,805 INFO app.services.query_service Query variants: ['give me the net income', 'What is the net profit?', 'Can you provide the net earnings?']
+2026-06-12 23:30:54,875 INFO app.services.query_service Retrieved 1 chunks from Invoice Data
+2026-06-12 23:30:54,876 INFO app.services.query_service Chunks after reranking: 1
+2026-06-12 23:31:49,760 INFO app.routers.query Query received: give me the total of receivables
+2026-06-12 23:31:49,761 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-12 23:31:49,761 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-12 23:31:52,389 INFO app.services.query_service Template selector raw response: '{"template":"total_spending","filters":{"invoice_type":"receivable","date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"status":null,"currency":null}}'
+2026-06-12 23:31:52,390 INFO app.services.query_service Template: total_spending, filters: {'invoice_type': 'receivable', 'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'currency': None}
+2026-06-12 23:31:54,605 INFO app.services.query_service Template 'total_spending' executed successfully
+2026-06-13 00:07:06,044 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-13 00:07:06,045 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:07:06,045 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-13 00:07:06,046 INFO app.main [overdue_check] scheduler stopped
+2026-06-13 00:07:10,438 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-13 00:07:11,550 INFO app.main Supabase connection verified at startup
+2026-06-13 00:07:11,551 INFO app.main Storage active bucket: invoices
+2026-06-13 00:07:11,551 DEBUG tzlocal Looking up time zone info from registry
+2026-06-13 00:07:11,559 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-13 00:07:11,559 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-13 00:07:11,559 INFO apscheduler.scheduler Scheduler started
+2026-06-13 00:07:11,560 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:07:11,560 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-14 00:00:00+04:00 (in 85968.439554 seconds)
+2026-06-13 00:07:11,560 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-13 00:10:36,961 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-13 00:10:36,961 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:10:36,962 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-13 00:10:36,962 INFO app.main [overdue_check] scheduler stopped
+2026-06-13 00:10:40,616 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-13 00:10:41,831 INFO app.main Supabase connection verified at startup
+2026-06-13 00:10:41,832 INFO app.main Storage active bucket: invoices
+2026-06-13 00:10:41,832 DEBUG tzlocal Looking up time zone info from registry
+2026-06-13 00:10:41,839 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-13 00:10:41,840 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-13 00:10:41,840 INFO apscheduler.scheduler Scheduler started
+2026-06-13 00:10:41,841 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:10:41,841 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-14 00:00:00+04:00 (in 85758.158651 seconds)
+2026-06-13 00:10:41,841 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-13 00:12:43,652 INFO app.routers.query Query received: give me the current income
+2026-06-13 00:12:43,652 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-13 00:12:46,100 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-13 00:12:46,100 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-13 00:12:47,682 INFO app.services.query_service Template selector raw response: '{"template":"total_income","filters":{"date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"status":null,"invoice_type":null,"currency":null,"limit":null}}'
+2026-06-13 00:12:47,683 INFO app.services.query_service Template: total_income, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-13 00:12:48,394 INFO app.services.query_service Template 'total_income' executed successfully
+2026-06-13 00:13:06,803 INFO app.routers.query Query received: give me the net income
+2026-06-13 00:13:06,803 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-13 00:13:08,047 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-13 00:13:08,047 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-13 00:13:09,267 INFO app.services.query_service Template selector raw response: '{"template":"net_income","filters":{"date_from":null,"date_to":null}}'
+2026-06-13 00:13:09,267 INFO app.services.query_service Template: net_income, filters: {'date_from': None, 'date_to': None}
+2026-06-13 00:13:09,982 INFO app.services.query_service Template 'net_income' executed successfully
+2026-06-13 00:14:47,689 INFO app.routers.query Query received: which client paid the most
+2026-06-13 00:14:47,689 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-13 00:14:49,035 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-13 00:14:49,035 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-13 00:14:50,112 INFO app.services.query_service Template selector raw response: '{"template":"client_spending","filters":{"date_from":null,"date_to":null,"client_name":null}}'
+2026-06-13 00:14:50,112 INFO app.services.query_service Template: client_spending, filters: {'date_from': None, 'date_to': None, 'client_name': None}
+2026-06-13 00:14:50,799 INFO app.services.query_service Template 'client_spending' executed successfully
+2026-06-13 00:20:58,070 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-13 00:20:58,070 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:20:58,071 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-13 00:20:58,071 INFO app.main [overdue_check] scheduler stopped
+2026-06-13 00:21:01,589 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-13 00:24:43,382 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-13 00:24:44,934 INFO app.main Supabase connection verified at startup
+2026-06-13 00:24:44,934 INFO app.main Storage active bucket: invoices
+2026-06-13 00:24:44,935 DEBUG tzlocal Looking up time zone info from registry
+2026-06-13 00:24:44,948 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-13 00:24:44,949 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-13 00:24:44,949 INFO apscheduler.scheduler Scheduler started
+2026-06-13 00:24:44,950 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:24:44,950 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-14 00:00:00+04:00 (in 84915.049806 seconds)
+2026-06-13 00:24:44,950 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-13 00:25:18,129 INFO app.routers.query Query received: what is the total income
+2026-06-13 00:25:18,129 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-13 00:25:18,129 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-13 00:25:20,850 INFO app.services.query_service Template selector raw response: '{"template":"total_income","filters":{"date_from":null,"date_to":null,"vendor_name":null,"client_name":null,"status":null,"invoice_type":null,"currency":null}}'
+2026-06-13 00:25:20,851 INFO app.services.query_service Template: total_income, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None}
+2026-06-13 00:25:21,690 INFO app.services.query_service Template 'total_income' executed successfully
+2026-06-13 00:35:38,738 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-13 00:35:38,739 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:35:38,739 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-13 00:35:38,739 INFO app.main [overdue_check] scheduler stopped
+2026-06-13 00:35:42,094 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-13 00:35:43,274 INFO app.main Supabase connection verified at startup
+2026-06-13 00:35:43,274 INFO app.main Storage active bucket: invoices
+2026-06-13 00:35:43,274 DEBUG tzlocal Looking up time zone info from registry
+2026-06-13 00:35:43,282 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-13 00:35:43,282 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-13 00:35:43,282 INFO apscheduler.scheduler Scheduler started
+2026-06-13 00:35:43,283 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-13 00:35:43,283 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-14 00:00:00+04:00 (in 84256.716400 seconds)
+2026-06-13 00:35:43,283 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 02:25:09,023 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-14 02:25:09,031 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-14 02:25:12,960 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-06-14 02:25:12,960 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 02:25:14,462 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "date_from": "2026-05-01",\n    "date_to": "2026-05-31",\n    "vendor_name": null,\n    "client_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
+2026-06-14 02:25:14,463 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': '2026-05-01', 'date_to': '2026-05-31', 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-14 02:25:15,268 INFO app.services.query_service overdue raw count: 8, filters applied: {'date_from': '2026-05-01', 'date_to': '2026-05-31', 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
+2026-06-14 02:25:15,268 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-06-14 02:26:17,008 INFO app.routers.query Query received: how many invoices are in receivables
+2026-06-14 02:26:17,008 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
+2026-06-14 02:26:17,008 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-06-14 02:26:18,211 INFO app.services.query_service Template selector raw response: '{"template":"invoice_count","filters":{"invoice_type":"receivable","status":null,"vendor_name":null,"client_name":null,"date_from":null,"date_to":null}}'
+2026-06-14 02:26:18,211 INFO app.services.query_service Template: invoice_count, filters: {'invoice_type': 'receivable', 'status': None, 'vendor_name': None, 'client_name': None, 'date_from': None, 'date_to': None}
+2026-06-14 02:26:18,798 INFO app.services.query_service Template 'invoice_count' executed successfully
+2026-06-14 19:37:45,228 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 19:37:45,239 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:37:45,241 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 19:37:45,242 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 19:37:57,519 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 19:38:00,109 INFO app.main Supabase connection verified at startup
+2026-06-14 19:38:00,109 INFO app.main Storage active bucket: invoices
+2026-06-14 19:38:00,110 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 19:38:00,149 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 19:38:00,150 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 19:38:00,150 INFO apscheduler.scheduler Scheduler started
+2026-06-14 19:38:00,151 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:00,151 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 15719.848288 seconds)
+2026-06-14 19:38:00,151 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 19:38:04,193 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 19:38:04,193 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:04,193 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 19:38:04,194 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 19:38:11,266 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 19:38:14,059 INFO app.main Supabase connection verified at startup
+2026-06-14 19:38:14,060 INFO app.main Storage active bucket: invoices
+2026-06-14 19:38:14,061 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 19:38:14,088 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 19:38:14,090 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 19:38:14,090 INFO apscheduler.scheduler Scheduler started
+2026-06-14 19:38:14,094 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:14,094 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 15705.905381 seconds)
+2026-06-14 19:38:14,094 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 19:38:27,954 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 19:38:27,954 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:27,955 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 19:38:27,955 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 19:38:35,195 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 19:38:37,499 INFO app.main Supabase connection verified at startup
+2026-06-14 19:38:37,500 INFO app.main Storage active bucket: invoices
+2026-06-14 19:38:37,503 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 19:38:37,521 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 19:38:37,522 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 19:38:37,522 INFO apscheduler.scheduler Scheduler started
+2026-06-14 19:38:37,530 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:37,530 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 15682.469097 seconds)
+2026-06-14 19:38:37,530 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 19:38:44,733 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 19:38:44,734 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:44,734 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 19:38:44,735 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 19:38:50,479 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 19:38:52,541 INFO app.main Supabase connection verified at startup
+2026-06-14 19:38:52,544 INFO app.main Storage active bucket: invoices
+2026-06-14 19:38:52,545 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 19:38:52,569 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 19:38:52,570 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 19:38:52,570 INFO apscheduler.scheduler Scheduler started
+2026-06-14 19:38:52,574 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:38:52,578 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 15667.421418 seconds)
+2026-06-14 19:38:52,577 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 19:47:36,591 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 19:47:36,592 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:47:36,593 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 19:47:36,593 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 19:47:56,831 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 19:47:59,631 INFO app.main Supabase connection verified at startup
+2026-06-14 19:47:59,631 INFO app.main Storage active bucket: invoices
+2026-06-14 19:47:59,632 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 19:47:59,659 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 19:47:59,660 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 19:47:59,660 INFO apscheduler.scheduler Scheduler started
+2026-06-14 19:47:59,661 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:47:59,661 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 15120.338715 seconds)
+2026-06-14 19:47:59,661 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 19:49:51,739 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 19:49:51,739 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:49:51,739 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 19:49:51,739 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 19:49:58,413 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 19:50:00,884 INFO app.main Supabase connection verified at startup
+2026-06-14 19:50:00,885 INFO app.main Storage active bucket: invoices
+2026-06-14 19:50:00,885 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 19:50:00,919 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 19:50:00,920 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 19:50:00,921 INFO apscheduler.scheduler Scheduler started
+2026-06-14 19:50:00,923 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 19:50:00,924 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 14999.075362 seconds)
+2026-06-14 19:50:00,924 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 20:07:18,145 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 20:07:18,145 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 20:07:18,146 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 20:07:18,146 INFO app.main [overdue_check] scheduler stopped
+2026-06-14 20:07:23,924 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-14 20:07:25,703 INFO app.main Supabase connection verified at startup
+2026-06-14 20:07:25,703 INFO app.main Storage active bucket: invoices
+2026-06-14 20:07:25,703 DEBUG tzlocal Looking up time zone info from registry
+2026-06-14 20:07:25,713 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-14 20:07:25,713 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-14 20:07:25,714 INFO apscheduler.scheduler Scheduler started
+2026-06-14 20:07:25,714 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 20:07:25,715 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-15 00:00:00+04:00 (in 13954.284927 seconds)
+2026-06-14 20:07:25,714 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-14 20:57:09,559 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-14 20:57:09,560 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-14 20:57:09,560 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-14 20:57:09,560 INFO app.main [overdue_check] scheduler stopped

@@ -19,12 +19,12 @@ Full RAG pipeline with Option C SQL routing:
     - Today's date injected into LLM template selector prompt
     - LLM resolves "yesterday", "last month", "this quarter" -> ISO date strings
 
-  Templates (15):
+  Templates (18):
     Regular (Supabase query builder):
-      invoice_count, invoice_list, total_spending, vendor_spending,
-      vendor_count, vendor_balances, client_count, client_balances,
-      overdue_invoices, monthly_breakdown, payment_history,
-      compliance_summary, top_vendors
+      invoice_count, invoice_list, total_spending, total_income, net_income,
+      vendor_spending, client_spending, vendor_count, vendor_balances,
+      client_count, client_balances, overdue_invoices, monthly_breakdown,
+      payment_history, compliance_summary, top_vendors
     RPC (Supabase functions):
       avg_payment_delay, invoice_aging
 """
@@ -82,8 +82,12 @@ Given a user question, return a JSON object with:
 Available templates and what they answer:
   invoice_count       - how many invoices exist, optionally by status/type/vendor/date
   invoice_list        - list invoices, optionally filtered
-  total_spending      - total amount spent, optionally by vendor/date/status/type
-  vendor_spending     - spending broken down by vendor, optionally filtered by date
+  total_spending      - total amount spent on PAYABLE invoices (money going out), optionally by vendor/date/status
+  total_income        - total amount earned from RECEIVABLE invoices (money coming in), optionally by client/date/status
+  total_revenue       - total of ALL invoices regardless of type (payable + receivable combined), optionally by date/status
+  net_income          - net income = total receivable income minus total payable spending, optionally by date range
+  vendor_spending     - spending broken down by vendor (payable only), optionally filtered by date
+  client_spending     - income broken down by client (receivable only), optionally filtered by date
   vendor_count        - how many vendors exist
   vendor_balances     - outstanding (unpaid/overdue) balance per vendor
   client_count        - how many clients exist
@@ -96,6 +100,14 @@ Available templates and what they answer:
   avg_payment_delay   - average days between due_date and payment per vendor
   invoice_aging       - outstanding invoices grouped into aging buckets (0-30, 31-60, 61-90, 90+ days)
 
+Routing rules:
+  - "income", "revenue from clients", "earned", "receivable total" -> total_income
+  - "spending", "expenses", "spent", "payable total", "costs" -> total_spending
+  - "total revenue", "all invoices total", "combined total", "everything invoiced" -> total_revenue
+  - "net income", "net profit", "profit", "net earnings", "income minus expenses" -> net_income
+  - "how much did [client] pay us", "revenue from [client]" -> client_spending
+  - "how much did we pay [vendor]", "spending on [vendor]" -> vendor_spending
+
 Filter parameters (all optional, use null if not applicable):
   date_from     : ISO date string (YYYY-MM-DD) - start of date range on issue_date
   date_to       : ISO date string (YYYY-MM-DD) - end of date range on issue_date
@@ -105,6 +117,10 @@ Filter parameters (all optional, use null if not applicable):
   invoice_type  : "payable" or "receivable"
   currency      : ISO currency code e.g. "USD"
   limit         : integer, max rows to return (default null = all)
+
+IMPORTANT: Do NOT add date filters unless the user explicitly mentions a time period.
+"current income" or "total spending" without a date reference means ALL TIME — use null for date_from and date_to.
+Only add date filters for explicit references like "this month", "in 2026", "last quarter", "yesterday", etc.
 
 Date resolution rules (today is {today}):
   "yesterday"       -> date_from and date_to = yesterday's date
@@ -117,9 +133,10 @@ Date resolution rules (today is {today}):
   "this year"       -> January 1 of current year to today
   "last year"       -> January 1 to December 31 of previous year
   Month name only ("in March", "March 2026") -> first to last day of that month
+  "recent", "recently", "latest" for payment_history -> date_from = 30 days ago, date_to = today
+  No date specified for payment_history -> date_from = 30 days ago, date_to = today
 
-If no template matches, return: {"template": "none", "filters": {}}
-
+If no template matches, return: {{"template": "none", "filters": {{}}}}
 Return ONLY the JSON object. No explanation. No markdown. No extra text."""
 
 
@@ -141,11 +158,16 @@ def _select_template(question: str) -> dict:
         cleaned = response.strip().strip("`")
         if cleaned.startswith("json"):
             cleaned = cleaned[4:].strip()
+        
+
+        log.info(f"Template selector raw response: {repr(cleaned)}")
 
         parsed = json.loads(cleaned)
+        parsed = {k.strip('"').strip("'"): v for k, v in parsed.items()}
 
         valid_templates = {
-            "invoice_count", "invoice_list", "total_spending", "vendor_spending",
+            "invoice_count", "invoice_list", "total_spending", "total_income",
+            "total_revenue", "net_income", "vendor_spending", "client_spending",
             "vendor_count", "vendor_balances", "client_count", "client_balances",
             "overdue_invoices", "monthly_breakdown", "payment_history",
             "compliance_summary", "top_vendors", "avg_payment_delay",
@@ -208,7 +230,7 @@ def _exec_invoice_count(db: Client, company_id: str, filters: dict) -> dict:
         db.table("invoices")
         .select("id, status, invoice_type")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
     )
     q = _apply_date_filters(q, filters)
     if filters.get("status"):
@@ -233,7 +255,7 @@ def _exec_invoice_list(db: Client, company_id: str, filters: dict) -> list[dict]
         .select("invoice_number, status, invoice_type, grand_total, currency, "
                 "issue_date, due_date, vendors(name), clients(name)")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
     )
     q = _apply_date_filters(q, filters)
     if filters.get("status"):
@@ -257,7 +279,7 @@ def _exec_total_spending(db: Client, company_id: str, filters: dict) -> dict:
         db.table("invoices")
         .select("grand_total, currency, status, invoice_type")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
     )
     q = _apply_date_filters(q, filters)
     if filters.get("status"):
@@ -278,12 +300,121 @@ def _exec_total_spending(db: Client, company_id: str, filters: dict) -> dict:
     return {"total_by_currency": totals, "invoice_count": len(rows)}
 
 
+def _exec_total_income(db: Client, company_id: str, filters: dict) -> dict:
+    q = (
+        db.table("invoices")
+        .select("grand_total, currency, status, invoice_type")
+        .eq("company_id", company_id)
+        .is_("deleted_at", None)
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("invoice_type"):
+        q = q.eq("invoice_type", filters["invoice_type"])
+    if filters.get("currency"):
+        q = q.eq("currency", filters["currency"])
+    if filters.get("client_name"):
+        ids = _resolve_client_ids(db, company_id, filters["client_name"])
+        if ids:
+            q = q.in_("client_id", ids)
+    rows = q.execute().data or []
+    totals: dict[str, float] = {}
+    for r in rows:
+        cur = r.get("currency") or "USD"
+        totals[cur] = round(totals.get(cur, 0.0) + float(r.get("grand_total") or 0), 2)
+    return {"total_by_currency": totals, "invoice_count": len(rows)}
+
+
+def _exec_total_revenue(db: Client, company_id: str, filters: dict) -> dict:
+    q = (
+        db.table("invoices")
+        .select("grand_total, currency, invoice_type")
+        .eq("company_id", company_id)
+        .is_("deleted_at", None)
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("currency"):
+        q = q.eq("currency", filters["currency"])
+    rows = q.execute().data or []
+    totals: dict[str, float] = {}
+    for r in rows:
+        cur = r.get("currency") or "USD"
+        totals[cur] = round(totals.get(cur, 0.0) + float(r.get("grand_total") or 0), 2)
+    return {"total_by_currency": totals, "invoice_count": len(rows)}
+
+
+def _exec_net_income(db: Client, company_id: str, filters: dict) -> dict:
+    base_q = (
+        db.table("invoices")
+        .select("grand_total, currency, invoice_type")
+        .eq("company_id", company_id)
+        .is_("deleted_at", None)
+    )
+    base_q = _apply_date_filters(base_q, filters)
+    if filters.get("currency"):
+        base_q = base_q.eq("currency", filters["currency"])
+    rows = base_q.execute().data or []
+
+    income:   dict[str, float] = {}
+    spending: dict[str, float] = {}
+    for r in rows:
+        cur = r.get("currency") or "USD"
+        amt = float(r.get("grand_total") or 0)
+        if r.get("invoice_type") == "receivable":
+            income[cur] = round(income.get(cur, 0.0) + amt, 2)
+        else:
+            spending[cur] = round(spending.get(cur, 0.0) + amt, 2)
+
+    all_currencies = set(income.keys()) | set(spending.keys())
+    net: dict[str, float] = {}
+    for cur in all_currencies:
+        net[cur] = round(income.get(cur, 0.0) - spending.get(cur, 0.0), 2)
+
+    return {
+        "income_by_currency":   income,
+        "spending_by_currency": spending,
+        "net_by_currency":      net,
+        "invoice_count":        len(rows),
+    }
+
+
+def _exec_client_spending(db: Client, company_id: str, filters: dict) -> list[dict]:
+    q = (
+        db.table("invoices")
+        .select("grand_total, currency, status, issue_date, clients(name)")
+        .eq("company_id", company_id)
+        .is_("deleted_at", None)
+        .eq("invoice_type", "receivable")
+    )
+    q = _apply_date_filters(q, filters)
+    if filters.get("status"):
+        q = q.eq("status", filters["status"])
+    if filters.get("client_name"):
+        ids = _resolve_client_ids(db, company_id, filters["client_name"])
+        if ids:
+            q = q.in_("client_id", ids)
+    rows = q.execute().data or []
+    client_totals: dict[str, float] = {}
+    for r in rows:
+        name = (r.get("clients") or {}).get("name") or "Unknown"
+        client_totals[name] = round(
+            client_totals.get(name, 0.0) + float(r.get("grand_total") or 0), 2
+        )
+    return [
+        {"client_name": k, "total_revenue": v}
+        for k, v in sorted(client_totals.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+
 def _exec_vendor_spending(db: Client, company_id: str, filters: dict) -> list[dict]:
     q = (
         db.table("invoices")
         .select("grand_total, currency, status, issue_date, vendors(name)")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
         .eq("invoice_type", "payable")
     )
     q = _apply_date_filters(q, filters)
@@ -311,7 +442,7 @@ def _exec_vendor_count(db: Client, company_id: str, filters: dict) -> dict:
         db.table("vendors")
         .select("id", count="exact")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
         .execute()
     )
     return {"vendor_count": result.count or 0}
@@ -322,7 +453,7 @@ def _exec_vendor_balances(db: Client, company_id: str, filters: dict) -> list[di
         db.table("invoices")
         .select("grand_total, amount_paid_so_far, currency, vendors(name)")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
         .eq("invoice_type", "payable")
         .in_("status", ["unpaid", "overdue", "partially_paid", "sent"])
     )
@@ -344,7 +475,7 @@ def _exec_client_count(db: Client, company_id: str, filters: dict) -> dict:
         db.table("clients")
         .select("id", count="exact")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
         .execute()
     )
     return {"client_count": result.count or 0}
@@ -355,7 +486,7 @@ def _exec_client_balances(db: Client, company_id: str, filters: dict) -> list[di
         db.table("invoices")
         .select("grand_total, amount_paid_so_far, currency, clients(name)")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
         .eq("invoice_type", "receivable")
         .in_("status", ["sent", "unpaid", "overdue", "partially_paid"])
     )
@@ -378,10 +509,9 @@ def _exec_overdue_invoices(db: Client, company_id: str, filters: dict) -> list[d
         .select("invoice_number, grand_total, amount_paid_so_far, currency, "
                 "due_date, issue_date, invoice_type, vendors(name), clients(name)")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
         .eq("status", "overdue")
     )
-    # Overdue date filters apply to due_date
     if filters.get("date_from"):
         q = q.gte("due_date", filters["date_from"])
     if filters.get("date_to"):
@@ -396,15 +526,16 @@ def _exec_overdue_invoices(db: Client, company_id: str, filters: dict) -> list[d
         ids = _resolve_client_ids(db, company_id, filters["client_name"])
         if ids:
             q = q.in_("client_id", ids)
-    return q.order("due_date", desc=False).execute().data or []
-
+    result = q.order("due_date", desc=False).execute()
+    log.info(f"overdue raw count: {len(result.data or [])}, filters applied: {filters}")
+    return result.data or []
 
 def _exec_monthly_breakdown(db: Client, company_id: str, filters: dict) -> dict:
     q = (
         db.table("invoices")
         .select("issue_date, grand_total, status, invoice_type")
         .eq("company_id", company_id)
-        .is_("deleted_at", "null")
+        .is_("deleted_at", None)
     )
     q = _apply_date_filters(q, filters)
     if filters.get("invoice_type"):
@@ -438,8 +569,9 @@ def _exec_payment_history(db: Client, company_id: str, filters: dict) -> list[di
     if filters.get("date_to"):
         q = q.lte("payment_date", filters["date_to"])
     limit = filters.get("limit") or 50
-    return q.order("payment_date", desc=True).limit(limit).execute().data or []
-
+    result = q.order("payment_date", desc=True).limit(limit).execute()
+    log.info(f"payment_history rows returned: {len(result.data or [])}")
+    return result.data or []
 
 def _exec_compliance_summary(db: Client, company_id: str, filters: dict) -> dict:
     rows = (
@@ -482,7 +614,11 @@ _TEMPLATE_EXECUTORS = {
     "invoice_count":      _exec_invoice_count,
     "invoice_list":       _exec_invoice_list,
     "total_spending":     _exec_total_spending,
+    "total_income":       _exec_total_income,
+    "total_revenue":      _exec_total_revenue,
+    "net_income":         _exec_net_income,
     "vendor_spending":    _exec_vendor_spending,
+    "client_spending":    _exec_client_spending,
     "vendor_count":       _exec_vendor_count,
     "vendor_balances":    _exec_vendor_balances,
     "client_count":       _exec_client_count,
@@ -523,11 +659,88 @@ def _run_sql_query(db: Client, company_id: str, question: str) -> tuple:
         return "__fallback__", "none"
 
 
+def _format_currency_totals(totals: dict[str, float]) -> str:
+    if not totals:
+        return "0.00"
+    return ", ".join(f"{v:,.2f} {k}" for k, v in sorted(totals.items()))
+
+
+def _python_format(data, template: str) -> str | None:
+    """
+    Format numeric/aggregation results in Python without LLM involvement.
+    Returns a formatted string, or None if the template needs LLM formatting.
+    """
+    if template == "total_revenue":
+        totals = data.get("total_by_currency", {})
+        count  = data.get("invoice_count", 0)
+        return f"Total revenue (all invoices): {_format_currency_totals(totals)} across {count} invoices."
+
+    if template == "total_spending":
+        totals = data.get("total_by_currency", {})
+        count  = data.get("invoice_count", 0)
+        return f"Total spending: {_format_currency_totals(totals)} across {count} invoices."
+
+    if template == "total_income":
+        totals = data.get("total_by_currency", {})
+        count  = data.get("invoice_count", 0)
+        return f"Total income: {_format_currency_totals(totals)} across {count} invoices."
+
+    if template == "net_income":
+        income   = data.get("income_by_currency", {})
+        spending = data.get("spending_by_currency", {})
+        net      = data.get("net_by_currency", {})
+        lines = [
+            f"Total income:   {_format_currency_totals(income)}",
+            f"Total spending: {_format_currency_totals(spending)}",
+            f"Net income:     {_format_currency_totals(net)}",
+        ]
+        return "\n".join(lines)
+
+    if template == "invoice_count":
+        total    = data.get("total", 0)
+        by_status = data.get("by_status", {})
+        by_type   = data.get("by_type", {})
+        status_str = ", ".join(f"{v} {k}" for k, v in sorted(by_status.items())) or "none"
+        type_str   = ", ".join(f"{v} {k}" for k, v in sorted(by_type.items())) or "none"
+        return f"{total} invoices total — by status: {status_str}; by type: {type_str}."
+
+    if template == "vendor_count":
+        return f"{data.get('vendor_count', 0)} vendors."
+
+    if template == "client_count":
+        return f"{data.get('client_count', 0)} clients."
+
+    if template == "compliance_summary":
+        total     = data.get("total_flags", 0)
+        by_sev    = data.get("by_severity", {})
+        sev_str   = ", ".join(f"{v} {k}" for k, v in sorted(by_sev.items())) or "none"
+        return f"{total} compliance flags — by severity: {sev_str}."
+
+    return None  # fall through to LLM
+
+
 def _answer_sql(question: str, data, template: str) -> str:
-    """LLM formats pre-aggregated data — never counts or computes."""
-    llm       = get_llm_provider()
-    data_str  = json.dumps(data, indent=2)
-    row_label = "aggregated summary" if isinstance(data, dict) else f"{len(data)} rows"
+    # Python formatter handles all numeric/aggregation templates — no LLM involvement
+    python_answer = _python_format(data, template)
+    if python_answer is not None:
+        return python_answer
+
+    # LLM formatter for list-based templates (invoice_list, vendor_spending, etc.)
+    llm = get_llm_provider()
+
+    if isinstance(data, list) and len(data) > 20:
+        data_str = json.dumps({
+            "total_count": len(data),
+            "showing_first_20": data[:20],
+            "note": f"Showing 20 of {len(data)} results"
+        }, indent=2)
+        row_label = f"{len(data)} rows (summarized)"
+    elif isinstance(data, dict):
+        data_str  = json.dumps(data, indent=2)
+        row_label = "aggregated summary"
+    else:
+        data_str  = json.dumps(data, indent=2)
+        row_label = f"{len(data)} rows"
 
     return llm.chat(
         messages=[
@@ -536,6 +749,7 @@ def _answer_sql(question: str, data, template: str) -> str:
                 "Answer the user's question based ONLY on the provided data. "
                 "Be concise and precise. Use exact numbers from the data. "
                 "For lists, show the top results clearly. "
+                "If total_count is provided, mention the total number of results. "
                 "If the data includes pre-computed counts or aggregations, "
                 "use those numbers directly — do not re-count or re-aggregate. "
                 "If data is empty, say no results were found."
@@ -550,7 +764,6 @@ def _answer_sql(question: str, data, template: str) -> str:
         temperature=0.0,
         max_tokens=512,
     )
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # RAG PATH (unchanged from v3)

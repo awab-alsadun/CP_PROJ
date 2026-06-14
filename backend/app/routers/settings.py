@@ -282,46 +282,6 @@ def get_tax_rates():
 
 
 # ===========================================================================
-# Password management (for company profile only)
-# ===========================================================================
-
-@router.post("/set-password")
-def set_password(
-    body: PasswordSetRequest,
-    x_settings_password: str | None = Header(default=None),
-    db: Client = Depends(get_supabase),
-):
-    """
-    Set or clear the company-profile settings password.
-    If a password is already set, the current password must be provided
-    in X-Settings-Password to change it.
-    Pass empty string to clear password protection.
-
-    Note: this password gates PATCH /settings only.
-    Branding endpoints are never gated.
-    """
-    try:
-        password_ok = settings_service.verify_settings_password(
-            db, settings.MVP_COMPANY_ID, x_settings_password or ""
-        )
-    except (NotFoundError, DatabaseError) as e:
-        raise HTTPException(502, str(e))
-
-    if not password_ok:
-        raise HTTPException(
-            status_code=403,
-            detail="Current password is incorrect.",
-        )
-
-    return _handle(
-        settings_service.set_settings_password,
-        db,
-        settings.MVP_COMPANY_ID,
-        body.password,
-    )
-
-
-# ===========================================================================
 # Pipeline config (read-only)
 # ===========================================================================
 
