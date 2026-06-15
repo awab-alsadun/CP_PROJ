@@ -84,6 +84,8 @@ def render_template_1(c, inv, vendor):
     c.setFont("Helvetica", 10)
     c.drawString(50, h - 70, f"Date of issue:")
     c.drawString(200, h - 70, inv["issue_date"])
+    c.drawString(50, h - 84, "Due date:")
+    c.drawString(200, h - 84, inv["due_date"] or "N/A")
 
     y = h - 120
     c.setFillColor(gray_bg)
@@ -353,10 +355,9 @@ def render_template_3(c, inv, vendor):
         c.drawString(390, y, f"Discount ({inv['discount']}%):")
         c.drawString(490, y, f"-{fmt_money(inv['subtotal'] * inv['discount'] / 100)}")
         y -= 15
-    if inv["tax_percent"] > 0:
-        c.drawString(390, y, f"Sales Tax ({inv['tax_percent']}%):")
-        c.drawString(490, y, fmt_money(inv["total_tax"]))
-        y -= 15
+    c.drawString(390, y, f"Sales Tax ({inv['tax_percent']}%):")
+    c.drawString(490, y, fmt_money(inv["total_tax"]))
+    y -= 15
 
     y -= 5
     c.setFillColor(teal)
@@ -559,10 +560,9 @@ def render_template_5(c, inv, vendor):
     c.drawString(380, y, "Subtotal:")
     c.drawString(490, y, f"{fmt_money_plain(inv['subtotal'])} {inv['currency']}")
     y -= 15
-    if inv["tax_percent"] > 0:
-        c.drawString(380, y, f"VAT ({inv['tax_percent']:.1f}%):")
-        c.drawString(490, y, f"{fmt_money_plain(inv['total_tax'])} {inv['currency']}")
-        y -= 15
+    c.drawString(380, y, f"VAT ({inv['tax_percent']:.1f}%):")
+    c.drawString(490, y, f"{fmt_money_plain(inv['total_tax'])} {inv['currency']}")
+    y -= 15
 
     c.setFillColor(beige)
     c.rect(370, y - 10, w - 420, 25, fill=1, stroke=0)

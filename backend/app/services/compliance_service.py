@@ -1,26 +1,41 @@
 """
-Compliance Service
-------------------
-Validates invoices against business rules and maintains compliance_flags.
+Compliance Service — two-phase engine.
 
-Upsert logic (per flag_type per invoice):
-  - Violation found, no existing flag → INSERT
-  - Violation found, flag exists      → leave (no duplicate)
-  - No violation, flag exists         → DELETE (auto-resolve)
-  - No violation, no flag             → nothing
+Phase A: extraction-derived. Computed during ingestion only.
 
-High severity flags create notifications.
+Phase B: cross-row / DB-state checks. Runs at the end of each ingestion
+         AND on demand via POST /api/v1/admin/run-compliance-check.
 
-Trigger points:
-  - After ingestion (invoice_processor.py)
-  - After status transition
-  - After payment recorded
-  - After manual invoice edit
-  - Batch: POST /api/v1/admin/run-compliance-check
+Idempotency: each phase clears its own flags for the invoice before
+re-inserting. Phase B never touches Phase A flags and vice versa.
+
+# Phase A — extraction-derived, ingestion only:
+#   required_field_null      high    missing invoice_number / issue_date / grand_total / vendor.name / client.name
+#   line_item_sum_mismatch   medium  line items sum != subtotal
+#   ocr_low_quality          high    OCR returned < 400 chars
+#   ocr_fallback_used        medium  PyMuPDF failed, Tesseract used
+#   llm_retry                high    LLM needed retry to produce valid JSON
+#   date_fallback_used       high    issue_date or due_date fell back to 1900-01-01
+#   tax_id_fallback_used     low     vendor or client tax_id could not be extracted
+#   currency_invalid         medium  currency missing or not a 3-letter ISO code
+#   missing_due_date         medium  invoice has no due_date
+#
+# Phase B — cross-row/DB-state, runs per ingestion + admin endpoint:
+#   missing_client_email     low     receivable client has no email on file
+#   missing_vendor_tax_id    low     payable vendor tax_id is NULL in DB
+#   negative_line_item       high    line item has negative quantity or unit_price
+#   future_issue_date        high    issue_date is ahead of today
+#   due_before_issue         high    due_date is before issue_date
+#
+# Pipeline-only — inserted inline during ingestion, not managed by phases:
+#   duplicate_invoice_number high    same invoice_number + vendor already exists
+#   self_invoice_vendor      medium  extracted vendor name matches own company name
+#   unmatched_client         medium  receivable with no extractable client name
+#   storage_upload_failed    medium  PDF upload to Supabase Storage failed
 """
 
 import logging
-from datetime import date, datetime
+from datetime import date
 
 from supabase import Client
 
@@ -30,156 +45,47 @@ log = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Individual checks — each returns (violated: bool, reason: str | None)
+# Constants
 # ---------------------------------------------------------------------------
 
-def _check_tax_mismatch(invoice: dict, line_items: list[dict]) -> tuple[bool, str | None]:
-    subtotal    = float(invoice.get("subtotal") or 0)
-    total_tax   = float(invoice.get("total_tax") or 0)
-    grand_total = float(invoice.get("grand_total") or 0)
+PHASE_A_FLAG_TYPES = {
+    "required_field_null",
+    "line_item_sum_mismatch",
+    "ocr_low_quality",
+    "ocr_fallback_used",
+    "llm_retry",
+    "date_fallback_used",
+    "tax_id_fallback_used",
+    "currency_invalid",
+    "missing_due_date",
+}
 
-    if grand_total == 0:
-        return False, None
-
-    expected = subtotal + total_tax
-    if abs(expected - grand_total) > 0.01:
-        return True, (
-            f"Tax calculation mismatch: {subtotal:.2f} + {total_tax:.2f} "
-            f"= {expected:.2f} ≠ grand_total {grand_total:.2f}"
-        )
-    return False, None
-
-
-def _check_missing_fields(invoice: dict) -> tuple[bool, list[str]]:
-    missing = []
-
-    if not invoice.get("due_date"):
-        missing.append("due_date")
-    if not invoice.get("invoice_number"):
-        missing.append("invoice_number")
-
-    invoice_type = invoice.get("invoice_type", "payable")
-    if invoice_type == "payable" and not invoice.get("vendor_id"):
-        missing.append("vendor_id")
-    if invoice_type == "receivable" and not invoice.get("client_id"):
-        missing.append("client_id")
-
-    return bool(missing), missing
-
-
-def _check_missing_fields(invoice: dict) -> tuple[bool, list[str]]:
-    missing = []
-
-    if not invoice.get("due_date"):
-        missing.append("due_date")
-    if not invoice.get("invoice_number"):
-        missing.append("invoice_number")
-
-    invoice_type = invoice.get("invoice_type", "payable")
-    if invoice_type == "payable" and not invoice.get("vendor_id"):
-        missing.append("vendor_id")
-    # Receivable client_id absence is handled by invoice_processor's
-    # 'unmatched_client' flag during ingestion. Do not duplicate here.
-
-    return bool(missing), missing
-
-
-def _check_duplicate(
-    db: Client, company_id: str, invoice: dict
-) -> tuple[bool, str | None]:
-    invoice_id   = invoice.get("id")
-    inv_number   = invoice.get("invoice_number")
-    invoice_type = invoice.get("invoice_type", "payable")
-
-    if not inv_number:
-        return False, None
-
-    try:
-        q = (
-            db.table("invoices")
-            .select("id")
-            .eq("company_id", company_id)
-            .eq("invoice_number", inv_number)
-            .neq("id", invoice_id)               # exclude self
-            .is_("deleted_at", "null")
-        )
-        if invoice_type == "payable" and invoice.get("vendor_id"):
-            q = q.eq("vendor_id", invoice["vendor_id"])
-        elif invoice_type == "receivable" and invoice.get("client_id"):
-            q = q.eq("client_id", invoice["client_id"])
-
-        result = q.execute()
-        if result.data:
-            return True, (
-                f"Duplicate invoice number '{inv_number}' "
-                f"already exists (id: {result.data[0]['id']})"
-            )
-    except Exception as e:
-        log.error(f"Duplicate check DB error for invoice {invoice_id}: {e}")
-
-    return False, None
-
-
-def _check_line_item_mismatch(invoice: dict, line_items: list[dict]) -> tuple[bool, str | None]:
-    if not line_items:
-        return False, None
-
-    subtotal = float(invoice.get("subtotal") or 0)
-    if subtotal == 0:
-        return False, None
-
-    items_sum = sum(float(item.get("line_subtotal") or 0) for item in line_items)
-    if abs(items_sum - subtotal) > 0.01:
-        return True, (
-            f"Line items sum {items_sum:.2f} ≠ invoice subtotal {subtotal:.2f}"
-        )
-    return False, None
-
-
-def _check_overdue_no_action(invoice: dict) -> tuple[bool, str | None]:
-    if invoice.get("status") != "overdue":
-        return False, None
-
-    updated_at = invoice.get("updated_at") or invoice.get("created_at")
-    if not updated_at:
-        return False, None
-
-    try:
-        if isinstance(updated_at, str):
-            updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
-        days_overdue = (datetime.now(updated_at.tzinfo) - updated_at).days
-        if days_overdue > 30:
-            amount_paid = float(invoice.get("amount_paid_so_far") or 0)
-            if amount_paid == 0:
-                return True, (
-                    f"Invoice overdue for {days_overdue} days with no payment recorded"
-                )
-    except Exception as e:
-        log.warning(f"overdue_no_action date parse failed: {e}")
-
-    return False, None
+PHASE_B_FLAG_TYPES = {
+    "missing_client_email",
+    "missing_vendor_tax_id",
+    "negative_line_item",
+    "future_issue_date",
+    "due_before_issue",
+}
 
 
 # ---------------------------------------------------------------------------
-# Flag upsert helpers
+# Flag I/O helpers
 # ---------------------------------------------------------------------------
 
-def _get_existing_flags(
-    db: Client, company_id: str, invoice_id: str
-) -> dict[str, dict]:
-    """Returns {flag_type: flag_row} for all existing flags on this invoice."""
+def _delete_flags_by_type(
+    db: Client, company_id: str, invoice_id: str, flag_types: set[str],
+) -> None:
+    if not flag_types:
+        return
     try:
-        result = (
-            db.table("compliance_flags")
-            .select("*")
-            .eq("company_id", company_id)
-            .eq("invoice_id", invoice_id)
-            .execute()
-        )
-        return {row["flag_type"]: row for row in (result.data or [])}
+        (db.table("compliance_flags").delete()
+         .eq("company_id", company_id)
+         .eq("invoice_id", invoice_id)
+         .in_("flag_type", list(flag_types))
+         .execute())
     except Exception as e:
-        log.error(f"Failed to fetch compliance flags for {invoice_id}: {e}")
-        return {}
+        log.error(f"Clear flags failed for {invoice_id}: {e}")
 
 
 def _insert_flag(
@@ -194,22 +100,13 @@ def _insert_flag(
             "severity":   severity,
             "reason":     reason,
         }).execute()
-        log.info(f"Compliance flag inserted: {flag_type} ({severity}) on {invoice_id}")
+        log.info(f"flag_inserted  invoice={invoice_id}  type={flag_type}  sev={severity}")
     except Exception as e:
-        log.error(f"Failed to insert compliance flag {flag_type} for {invoice_id}: {e}")
+        log.error(f"Insert flag {flag_type} failed for {invoice_id}: {e}")
 
 
-def _delete_flag(db: Client, flag_id: str) -> None:
-    try:
-        db.table("compliance_flags").delete().eq("id", flag_id).execute()
-        log.info(f"Compliance flag auto-resolved: {flag_id}")
-    except Exception as e:
-        log.error(f"Failed to delete compliance flag {flag_id}: {e}")
-
-
-def _notify_high_severity(
-    db: Client, company_id: str, invoice_id: str,
-    flag_type: str, reason: str,
+def _notify_high(
+    db: Client, company_id: str, invoice_id: str, flag_type: str, reason: str,
 ) -> None:
     try:
         from app.services.notification_service import create_notification
@@ -225,156 +122,197 @@ def _notify_high_severity(
 
 
 # ---------------------------------------------------------------------------
-# Process a single check result
+# Phase A — write extraction-derived signals
 # ---------------------------------------------------------------------------
 
-def _process_check(
-    db: Client,
-    company_id: str,
-    invoice_id: str,
-    flag_type: str,
-    severity: str,
-    violated: bool,
-    reason: str | None,
-    existing_flags: dict[str, dict],
-) -> None:
-    existing = existing_flags.get(flag_type)
+def write_phase_a_flags(
+    db: Client, company_id: str, invoice_id: str,
+    signals: list[dict], confidence_score: float,
+) -> dict:
+    """
+    Persist Phase A signals as compliance_flags rows. Idempotent: clears
+    all Phase A flag types for this invoice first.
+    """
+    _delete_flags_by_type(db, company_id, invoice_id, PHASE_A_FLAG_TYPES)
 
-    if violated and reason:
-        if not existing:
-            _insert_flag(db, company_id, invoice_id, flag_type, severity, reason)
-            if severity == "high":
-                _notify_high_severity(db, company_id, invoice_id, flag_type, reason)
-        # If flag already exists, leave it — no duplicate
-    else:
-        if existing:
-            _delete_flag(db, existing["id"])
+    inserted = 0
+    for sig in signals:
+        ft = sig.get("flag_type")
+        sev = sig.get("severity")
+        reason = sig.get("reason")
+        if not (ft and sev and reason):
+            continue
+        _insert_flag(db, company_id, invoice_id, ft, sev, reason)
+        inserted += 1
+        if sev == "high":
+            _notify_high(db, company_id, invoice_id, ft, reason)
+
+    return {"phase_a_flags": inserted}
 
 
 # ---------------------------------------------------------------------------
-# Main entry point
+# Phase B — cross-row / DB-state checks (per invoice)
+# ---------------------------------------------------------------------------
+
+def run_phase_b_checks(
+    db: Client, company_id: str, invoice_id: str,
+) -> dict:
+    """
+    Run Phase B checks on a single invoice. Idempotent.
+    Returns {phase_b_flags: count_inserted}.
+
+    Checks:
+      #4  missing_client_email
+      #8  missing_vendor_tax_id
+      #9  negative_line_item
+      #10 future_issue_date
+      #11 due_before_issue
+    """
+    try:
+        inv_res = (db.table("invoices").select("*")
+                   .eq("id", invoice_id).eq("company_id", company_id)
+                   .single().execute())
+        inv = inv_res.data
+    except Exception as e:
+        raise NotFoundError(f"Invoice {invoice_id} not found: {e}")
+
+    if not inv:
+        raise NotFoundError(f"Invoice {invoice_id} not found")
+
+    try:
+        line_items = (db.table("line_items").select("*")
+                      .eq("invoice_id", invoice_id).execute()).data or []
+    except Exception:
+        line_items = []
+
+    _delete_flags_by_type(db, company_id, invoice_id, PHASE_B_FLAG_TYPES)
+
+    inserted = 0
+    today = date.today()
+
+    invoice_type = inv.get("invoice_type", "payable")
+    vendor_id    = inv.get("vendor_id")
+    client_id    = inv.get("client_id")
+
+    def write(ft: str, sev: str, reason: str):
+        nonlocal inserted
+        _insert_flag(db, company_id, invoice_id, ft, sev, reason)
+        inserted += 1
+        if sev == "high":
+            _notify_high(db, company_id, invoice_id, ft, reason)
+
+    # Check #4: missing_client_email (receivable only)
+    if invoice_type == "receivable" and client_id:
+        try:
+            client = (db.table("clients").select("email")
+                      .eq("id", client_id).single().execute()).data
+            if client and not client.get("email"):
+                write("missing_client_email", "low", "Client has no email on file")
+        except Exception as e:
+            log.error(f"check#4 failed: {e}")
+
+    # Check #8: missing_vendor_tax_id (payable only)
+    if invoice_type == "payable" and vendor_id:
+        try:
+            vendor = (db.table("vendors").select("tax_id")
+                      .eq("id", vendor_id).single().execute()).data
+            tax_id = vendor.get("tax_id") if vendor else None
+            if not tax_id or tax_id.strip() == "":
+                write("missing_vendor_tax_id", "low", "Vendor has no tax_id on file")
+        except Exception as e:
+            log.error(f"check#8 failed: {e}")
+
+    # Check #9: negative_line_item
+    for item in line_items:
+        try:
+            qty   = float(item.get("quantity") or 0)
+            price = float(item.get("unit_price") or 0)
+            desc  = item.get("description", "<no desc>")
+            if qty < 0:
+                write("negative_line_item", "high",
+                      f"Line item '{desc}' has negative quantity")
+                break
+            if price < 0:
+                write("negative_line_item", "high",
+                      f"Line item '{desc}' has negative unit_price")
+                break
+        except (TypeError, ValueError):
+            continue
+
+    # Check #10: future_issue_date
+    try:
+        issue_str = inv.get("issue_date")
+        if issue_str:
+            issue_dt = date.fromisoformat(str(issue_str)[:10])
+            if issue_dt > today:
+                write("future_issue_date", "high",
+                      f"Invoice issued in the future ({(issue_dt - today).days} days ahead)")
+    except (ValueError, TypeError):
+        pass
+
+    # Check #11: due_before_issue
+    try:
+        issue_str = inv.get("issue_date")
+        due_str   = inv.get("due_date")
+        if issue_str and due_str:
+            issue_dt = date.fromisoformat(str(issue_str)[:10])
+            due_dt   = date.fromisoformat(str(due_str)[:10])
+            if due_dt < issue_dt:
+                write("due_before_issue", "high", "Due date is before issue date")
+    except (ValueError, TypeError):
+        pass
+
+    return {"phase_b_flags": inserted}
+
+
+# ---------------------------------------------------------------------------
+# Per-invoice entry point
 # ---------------------------------------------------------------------------
 
 def validate_invoice_compliance(
     db: Client, company_id: str, invoice_id: str,
 ) -> dict:
     """
-    Run all compliance checks on a single invoice.
-    Inserts new flags, auto-resolves cleared flags.
-
-    Returns summary: { checked, inserted, resolved }
+    Runs Phase B only. Returns {invoice_id, inserted, resolved}.
     """
-    # Fetch invoice
     try:
-        inv_result = (
-            db.table("invoices").select("*")
-            .eq("id", invoice_id)
-            .eq("company_id", company_id)
-            .single()
-            .execute()
-        )
-    except Exception as e:
-        raise DatabaseError(f"Failed to fetch invoice {invoice_id}", detail=str(e))
-
-    if not inv_result.data:
-        raise NotFoundError(f"Invoice {invoice_id} not found")
-
-    invoice = inv_result.data
-
-    # Fetch line items
-    try:
-        li_result = (
-            db.table("line_items").select("*")
-            .eq("invoice_id", invoice_id)
-            .execute()
-        )
-        line_items = li_result.data or []
+        prior = (db.table("compliance_flags").select("id")
+                 .eq("company_id", company_id)
+                 .eq("invoice_id", invoice_id)
+                 .in_("flag_type", list(PHASE_B_FLAG_TYPES))
+                 .execute()).data or []
+        prior_count = len(prior)
     except Exception:
-        line_items = []
+        prior_count = 0
 
-    # Fetch existing flags
-    existing_flags = _get_existing_flags(db, company_id, invoice_id)
+    result = run_phase_b_checks(db, company_id, invoice_id)
+    inserted = result["phase_b_flags"]
+    resolved = max(0, prior_count - inserted)
 
-    inserted = 0
-    resolved = 0
-    checks_run = 0
-
-    def run(flag_type, severity, violated, reason):
-        nonlocal inserted, resolved, checks_run
-        checks_run += 1
-        had_flag = flag_type in existing_flags
-        _process_check(
-            db, company_id, invoice_id,
-            flag_type, severity, violated, reason, existing_flags,
-        )
-        now_has = violated and bool(reason) and not had_flag
-        now_resolved = not violated and had_flag
-        if now_has:
-            inserted += 1
-        if now_resolved:
-            resolved += 1
-
-    # --- TAX_MISMATCH ---
-    v, r = _check_tax_mismatch(invoice, line_items)
-    run("tax_mismatch", "high", v, r)
-
-    # --- MISSING_REQUIRED_FIELDS ---
-    v, missing = _check_missing_fields(invoice)
-    r = f"Missing required fields: {', '.join(missing)}" if missing else None
-    run("missing_required_fields", "medium", v, r)
-
-    # --- LOW_CONFIDENCE ---
-    v, r = _check_low_confidence(invoice)
-    run("low_confidence", "medium", v, r)
-
-    # --- DUPLICATE_INVOICE ---
-    v, r = _check_duplicate(db, company_id, invoice)
-    run("duplicate_invoice", "high", v, r)
-
-    # --- LINE_ITEM_MISMATCH ---
-    v, r = _check_line_item_mismatch(invoice, line_items)
-    run("line_item_mismatch", "medium", v, r)
-
-    # --- OVERDUE_NO_ACTION ---
-    v, r = _check_overdue_no_action(invoice)
-    run("overdue_no_action", "low", v, r)
-
-    log.info(
-        f"Compliance check complete for {invoice_id}: "
-        f"{checks_run} checks, {inserted} inserted, {resolved} resolved"
-    )
-
-    return {
-        "invoice_id": invoice_id,
-        "checks_run": checks_run,
-        "inserted":   inserted,
-        "resolved":   resolved,
-    }
+    return {"invoice_id": invoice_id, "inserted": inserted, "resolved": resolved}
 
 
 # ---------------------------------------------------------------------------
-# Batch validation (for admin endpoint)
+# Batch entry point — admin endpoint
 # ---------------------------------------------------------------------------
 
 def run_compliance_check_all(db: Client, company_id: str) -> dict:
     """
-    Re-validate every non-deleted invoice for the company.
-    Returns aggregate summary.
+    Re-run Phase B for every non-deleted invoice in the company.
+    Phase A is NOT re-run (requires re-ingestion).
     """
     try:
-        result = (
-            db.table("invoices").select("id")
-            .eq("company_id", company_id)
-            .is_("deleted_at", "null")
-            .execute()
-        )
-        invoice_ids = [row["id"] for row in (result.data or [])]
+        result = (db.table("invoices").select("id")
+                  .eq("company_id", company_id)
+                  .is_("deleted_at", "null")
+                  .execute())
+        invoice_ids = [r["id"] for r in (result.data or [])]
     except Exception as e:
         raise DatabaseError("Failed to fetch invoices for batch compliance", detail=str(e))
 
     total_inserted = 0
     total_resolved = 0
-    errors         = 0
+    errors = 0
 
     for invoice_id in invoice_ids:
         try:
@@ -382,7 +320,7 @@ def run_compliance_check_all(db: Client, company_id: str) -> dict:
             total_inserted += summary["inserted"]
             total_resolved += summary["resolved"]
         except Exception as e:
-            log.error(f"Batch compliance failed for invoice {invoice_id}: {e}")
+            log.error(f"Batch compliance failed on {invoice_id}: {e}")
             errors += 1
 
     return {
@@ -394,20 +332,18 @@ def run_compliance_check_all(db: Client, company_id: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Read helpers (for router)
+# Read helpers
 # ---------------------------------------------------------------------------
 
 def get_invoice_flags(
     db: Client, company_id: str, invoice_id: str,
 ) -> list[dict]:
     try:
-        result = (
-            db.table("compliance_flags").select("*")
-            .eq("company_id", company_id)
-            .eq("invoice_id", invoice_id)
-            .order("created_at", desc=True)
-            .execute()
-        )
+        result = (db.table("compliance_flags").select("*")
+                  .eq("company_id", company_id)
+                  .eq("invoice_id", invoice_id)
+                  .order("created_at", desc=True)
+                  .execute())
         return result.data or []
     except Exception as e:
         raise DatabaseError("Failed to fetch compliance flags", detail=str(e))
@@ -415,18 +351,16 @@ def get_invoice_flags(
 
 def get_compliance_summary(db: Client, company_id: str) -> dict:
     try:
-        result = (
-            db.table("compliance_flags").select("severity, flag_type")
-            .eq("company_id", company_id)
-            .execute()
-        )
+        result = (db.table("compliance_flags").select("severity, flag_type")
+                  .eq("company_id", company_id)
+                  .execute())
         flags = result.data or []
     except Exception as e:
         raise DatabaseError("Failed to fetch compliance summary", detail=str(e))
 
-    high   = sum(1 for f in flags if f["severity"] == "high")
-    medium = sum(1 for f in flags if f["severity"] == "medium")
-    low    = sum(1 for f in flags if f["severity"] == "low")
+    high   = sum(1 for f in flags if f.get("severity") == "high")
+    medium = sum(1 for f in flags if f.get("severity") == "medium")
+    low    = sum(1 for f in flags if f.get("severity") == "low")
 
     by_type: dict[str, int] = {}
     for f in flags:
@@ -435,8 +369,8 @@ def get_compliance_summary(db: Client, company_id: str) -> dict:
 
     return {
         "total_flags": len(flags),
-        "high":        high,
-        "medium":      medium,
-        "low":         low,
-        "by_type":     by_type,
+        "high":   high,
+        "medium": medium,
+        "low":    low,
+        "by_type": by_type,
     }

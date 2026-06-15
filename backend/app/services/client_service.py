@@ -72,9 +72,15 @@ def create_client(
     client["address"] = address
     return client
 
+
 def get_or_create_client(
     db: SupabaseClient, company_id: uuid.UUID, name: str, tax_id: str, **kwargs
 ) -> dict:
+    """
+    Legacy function — matches on tax_id.
+    Kept for any callers outside the ingestion pipeline.
+    For ingestion use get_or_create_client_by_name.
+    """
     try:
         result = (
             db.table("clients")
@@ -97,6 +103,80 @@ def get_or_create_client(
     return create_client(db, payload)
 
 
+def get_or_create_client_by_name(
+    db: SupabaseClient,
+    company_id: uuid.UUID,
+    name: str,
+    tax_id: str,
+    email: str | None = None,
+    phone: str | None = None,
+) -> dict:
+    """
+    Ingestion-path upsert. Match priority:
+      1. LOWER(TRIM(name)) exact match within company (primary — name is
+         stable; tax_id is often 'N/A' from extraction)
+      2. Exact tax_id match if tax_id is real (not null / 'N/A')
+
+    If no match found, INSERT a new client row.
+    Bypasses the tax_id duplicate check in create_client — we use a
+    direct insert here so we don't raise DuplicateError on N/A tax_ids.
+    """
+    name_clean = (name or "").strip()
+    if not name_clean:
+        name_clean = "Unknown Client"
+
+    company_id_str = str(company_id)
+
+    # ── 1. Name match ─────────────────────────────────────────────────────
+    try:
+        rows = (
+            db.table("clients")
+            .select("*")
+            .eq("company_id", company_id_str)
+            .is_("deleted_at", "null")
+            .execute()
+        ).data or []
+
+        for row in rows:
+            if (row.get("name") or "").strip().lower() == name_clean.lower():
+                return row
+    except Exception as e:
+        raise DatabaseError("Failed to lookup client by name", detail=str(e))
+
+    # ── 2. tax_id match (only when tax_id is real) ───────────────────────
+    tax_id_clean = (tax_id or "").strip()
+    if tax_id_clean and tax_id_clean.upper() != "N/A":
+        try:
+            result = (
+                db.table("clients")
+                .select("*")
+                .eq("company_id", company_id_str)
+                .eq("tax_id", tax_id_clean)
+                .is_("deleted_at", "null")
+                .limit(1)
+                .execute()
+            )
+            if result.data:
+                return result.data[0]
+        except Exception as e:
+            raise DatabaseError("Failed to lookup client by tax_id", detail=str(e))
+
+    # ── 3. Insert new client (direct insert — bypasses DuplicateError on N/A) ──
+    try:
+        result = db.table("clients").insert({
+            "company_id": company_id_str,
+            "name":       name_clean,
+            "tax_id":     tax_id_clean or "N/A",
+            "email":      email,
+            "phone":      phone,
+        }).execute()
+    except Exception as e:
+        raise DatabaseError("Failed to create client during ingestion", detail=str(e))
+    if not result.data:
+        raise DatabaseError("Client insert returned no data")
+    return result.data[0]
+
+
 def list_clients(
     db: SupabaseClient,
     company_id: uuid.UUID,
@@ -104,7 +184,6 @@ def list_clients(
     offset: int = 0,
     search: str | None = None,
 ) -> dict:
-    """Returns paginated response with optional search on name/tax_id."""
     try:
         count_query = (
             db.table("clients")

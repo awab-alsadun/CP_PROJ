@@ -5,6 +5,12 @@ Generates 100 payable invoices + 150 receivable invoices with realistic
 correlated data for the AI-Driven Invoice Analysis FinTech System.
 
 Output: dataset.json — all structured data ready for DB seeding + PDF rendering.
+
+COMPLIANCE TEST CONVENTION:
+  - All NORMAL invoices have invoice_number ending in a 2-digit suffix that is NOT "67".
+  - All FLAGGED invoices (deliberately injected to trigger compliance checks) end in "67".
+  - This makes flagged invoices visually identifiable in the DB and UI.
+  - The compliance engine itself does not look at the suffix — it's purely a marker for humans.
 """
 
 import json
@@ -14,7 +20,7 @@ from datetime import date, timedelta, datetime
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
-random.seed(42)  # Reproducible
+random.seed(67)  # Reproducible
 
 OUTPUT = Path(__file__).parent / "dataset.json"
 
@@ -35,7 +41,7 @@ COMPANY = {
     "logo_url": None,
 }
 
-# ─── Vendors (5) ───────────────────────────────────────────────────────────
+# ─── Vendors (10 + 1 test = 11 total after injection) ──────────────────────
 
 VENDORS = [
     # Template 1 vendors
@@ -255,7 +261,7 @@ VENDORS = [
     },
 ]
 
-# ─── Clients (8) ────────────────────────────────────────────────────────────
+# ─── Clients (8 + 1 test = 9 total after injection) ─────────────────────────
 
 CLIENTS = [
     {
@@ -558,15 +564,49 @@ def rand_date(start, end):
     delta = (end - start).days
     return start + timedelta(days=random.randint(0, max(delta, 0)))
 
+# ─── Invoice numbering (67 = flagged, anything else = normal) ───────────────
+
+def _non_67_suffix(idx):
+    """
+    Return a 4-digit suffix derived from idx where the last two digits are NEVER 67.
+    """
+    suffix = idx % 10000
+    last_two = suffix % 100
+    if last_two == 67:
+        # Shift to 68 to avoid collision with the flagged marker
+        suffix = (suffix - last_two) + 68
+    return f"{suffix:04d}"
+
 def inv_number_vendor(vendor_name, idx, issue_date_str):
     prefix = "".join(w[0] for w in vendor_name.split()[:2]).upper()
     year = issue_date_str[:4]
-    return f"{prefix}-{year}-{(idx % 1000):04d}"
+    return f"{prefix}-{year}-{_non_67_suffix(idx)}"
 
 def inv_number_client(client_name, idx):
     prefix = "K4Y"
-    seq = 1000 + idx
-    return f"{prefix}-INV-{seq}"
+    return f"{prefix}-INV-{_non_67_suffix(1000 + idx)}"
+
+def force_67(invoice_number, discriminator=None):
+    """
+    Rewrite the trailing 4-digit suffix so the last two digits are '67'.
+    The two digits BEFORE the '67' can be set via `discriminator` (0-99) to
+    avoid accidental collisions when two non-related flagged invoices share
+    the same prefix and year (e.g. two different CodeForge tests both
+    producing 'CC-2025-XX67'). Without a discriminator, the original two
+    middle digits are preserved.
+
+    Examples:
+      force_67("CC-2025-0034")               -> "CC-2025-0067"
+      force_67("CC-2025-0034", discriminator=12) -> "CC-2025-1267"
+    """
+    if len(invoice_number) < 4:
+        return invoice_number + "67"
+    head = invoice_number[:-4]
+    if discriminator is None:
+        middle = invoice_number[-4:-2]
+    else:
+        middle = f"{discriminator % 100:02d}"
+    return f"{head}{middle}67"
 
 START_DATE = date(2025, 6, 1)
 END_DATE = date(2026, 7, 15)
@@ -672,21 +712,17 @@ def generate_payables():
             grand_total = d(subtotal + total_tax)
             
             # Status — forced distribution, overridden after generation
-            # Will be redistributed in post-processing to hit target percentages
             today = date(2026, 5, 25)
             days_old = (today - inv_date).days
             
             if vname == "Meridian Workspace LLC":
-                # Reliable vendor — always paid on time (except recent ones)
                 if days_old > vendor["payment_terms"] + 5:
                     status = "paid"
                 else:
                     status = "unpaid"
             elif days_old < 20:
-                # Very recent — always unpaid
                 status = "unpaid"
             else:
-                # Will be redistributed below
                 status = "_pending"
             
             # Payment data for paid/partially_paid
@@ -726,7 +762,8 @@ def generate_payables():
                 "discount": 0,
                 "status": status,
                 "amount_paid_so_far": amount_paid,
-                "confidence_score": round(random.uniform(0.82, 0.97), 3),
+                # NOTE: confidence_score removed from JSON.
+                # It will be computed by extraction_service.py during re-ingestion.
                 "payment_method": random.choice(["bank_transfer", "check", "ach", None]),
                 "description": None,
                 "vendor_name": vname,
@@ -739,7 +776,6 @@ def generate_payables():
             global_idx += 1
     
     # Post-process: redistribute statuses to hit targets
-    # Target: 45% paid, 25% unpaid, 15% overdue, 10% partially_paid
     pending = [inv for inv in invoices if inv["status"] == "_pending"]
     random.shuffle(pending)
     n = len(pending)
@@ -801,7 +837,6 @@ def generate_receivables():
         cat = client["category"]
         behavior = client["payment_behavior"]
         
-        # Determine how many invoices per month
         if client["frequency"] == "2-3/month":
             months_active = list(range(13))
             invs_per_month = lambda m: random.choice([2, 3, 3])
@@ -815,7 +850,6 @@ def generate_receivables():
             months_active = [0, 2, 3, 5, 6, 8, 9, 11, 12]
             invs_per_month = lambda m: 1
         elif client["frequency"] == "occasional":
-            # BlueStar — new client from month 8
             months_active = [8, 9, 10, 11, 12]
             invs_per_month = lambda m: random.choice([1, 2, 2])
         else:
@@ -830,12 +864,10 @@ def generate_receivables():
                     continue
                 due_date = inv_date + timedelta(days=30)
                 
-                # Growing receivables — later months have higher amounts
                 low, high = client["amount_range"]
-                growth = 1 + (month_offset * 0.02)  # ~2% per month, ~24% over year
+                growth = 1 + (month_offset * 0.02)
                 subtotal = rand_amount(low * growth, high * growth)
                 
-                # Line items
                 pool = CLIENT_LINE_ITEMS[cat]
                 n_items = random.randint(1, min(4, len(pool)))
                 items = random.sample(pool, n_items)
@@ -859,16 +891,15 @@ def generate_receivables():
                     })
                 
                 subtotal = d(sum(li["line_subtotal"] for li in line_items))
-                tax_pct = 0  # services, no sales tax
+                tax_pct = 0
                 total_tax = 0
                 grand_total = subtotal
                 
-                # Status based on payment behavior + age
                 today = date(2026, 5, 25)
                 days_old = (today - inv_date).days
                 days_past_due = (today - due_date).days
                 
-                if behavior == "slow":  # Halcyon — problem client
+                if behavior == "slow":
                     if days_old > 120:
                         status = random.choices(["paid", "overdue"], weights=[40, 60])[0]
                     elif days_old > 60:
@@ -908,7 +939,6 @@ def generate_receivables():
                 else:
                     status = "draft"
                 
-                # Payments
                 amount_paid = 0.0
                 payments = []
                 if status == "paid":
@@ -952,7 +982,7 @@ def generate_receivables():
                     "discount": 0,
                     "status": status,
                     "amount_paid_so_far": amount_paid,
-                    "confidence_score": 0.99,  # we created these, confidence is perfect
+                    # NOTE: confidence_score removed; populated by extraction during re-ingestion.
                     "payment_method": None,
                     "description": None,
                     "client_name": cname,
@@ -964,7 +994,6 @@ def generate_receivables():
                 global_idx += 1
     
     # Post-process: redistribute excess "paid" to other statuses
-    # Target: ~35% paid, ~15% draft, ~15% sent, ~15% overdue, ~10% partially_paid, ~10% unpaid
     today = date(2026, 5, 25)
     n = len(invoices)
     target_paid = int(n * 0.35)
@@ -973,7 +1002,6 @@ def generate_receivables():
     excess_paid = len(paid_invs) - target_paid
     
     if excess_paid > 0:
-        # Convert excess paid back to other statuses — pick random paid invoices
         random.shuffle(paid_invs)
         to_convert = paid_invs[:excess_paid]
         
@@ -1017,76 +1045,376 @@ def generate_receivables():
     
     return invoices
 
+
+# ─── Compliance injection (re-engineered) ───────────────────────────────────
+
+# Test-row identities. Both flagged invoices for missing-field tests
+# (#4 missing_client_email and #8 missing_vendor_tax_id) are routed to these
+# dedicated rows so the canonical 8 clients and 10 vendors stay untouched.
+#
+# Fourth-wall joke: the testing rows are themselves named after testing — a
+# vendor literally called "Jones and Jordan" (a fake firm) and a client called
+# "William Testria" (the test client used by the test client).
+
+TEST_VENDOR = {
+    "name": "Jones and Jordan",                # used for test #8 (vendor tax_id null)
+    "email": "ap@jonesjordan.example",
+    "phone": "+1 (000) 555-0000",
+    "tax_id": None,                            # the test
+    "address": {
+        "street": "1 Testing Way",
+        "city": "Testville",
+        "state": "TX",
+        "postal_code": "00000",
+        "country": "USA",
+    },
+    "template": 2,
+    "category": "freelance_contractors",
+    "frequency": "occasional",
+    "amount_range": (1000, 2000),
+    "tax_rate": 0,
+    "currency": "USD",
+    "payment_terms": 30,
+    "iban": None,
+}
+
+TEST_CLIENT = {
+    "name": "William Testria",                 # used for test #4 (client email null)
+    "email": None,                             # the test
+    "phone": "+1 (000) 555-0001",
+    "tax_id": "00-0000001",
+    "address": {
+        "street": "1 Testing Way",
+        "city": "Testville",
+        "state": "TX",
+        "postal_code": "00000",
+        "country": "USA",
+    },
+    "category": "software_dev",
+    "payment_behavior": "reliable",
+    "avg_days_to_pay": 15,
+    "amount_range": (1000, 2000),
+    "frequency": "occasional",
+}
+
+
+def _make_test_payable_for_jones_jordan(vendor_idx):
+    """Build a single payable invoice routed to the Jones and Jordan test vendor."""
+    inv_date = date(2026, 3, 15)
+    due_date = inv_date + timedelta(days=30)
+    line_items = [{
+        "description": "Backend API Development (Python)",
+        "quantity": 1,
+        "unit_price": 1500.00,
+        "line_subtotal": 1500.00,
+        "discount": 0,
+    }]
+    subtotal = 1500.00
+    return {
+        "id": uid(),
+        "company_id": COMPANY_ID,
+        "invoice_number": f"JJ-2026-{_non_67_suffix(0)}",   # will be forced to 67 by caller
+        "invoice_type": "payable",
+        "issue_date": str(inv_date),
+        "due_date": str(due_date),
+        "currency": "USD",
+        "tax_percent": 0,
+        "subtotal": subtotal,
+        "total_tax": 0,
+        "grand_total": subtotal,
+        "discount": 0,
+        "status": "unpaid",
+        "amount_paid_so_far": 0,
+        "payment_method": "bank_transfer",
+        "description": None,
+        "vendor_name": TEST_VENDOR["name"],
+        "vendor_idx": vendor_idx,
+        "template": TEST_VENDOR["template"],
+        "line_items": line_items,
+        "payments": [],
+    }
+
+
+def _make_test_receivable_for_william_testria(client_idx):
+    """Build a single receivable invoice routed to the William Testria test client."""
+    inv_date = date(2026, 3, 10)
+    due_date = inv_date + timedelta(days=30)
+    line_items = [{
+        "description": "Backend API Development (Sprint 1)",
+        "quantity": 1,
+        "unit_price": 1500.00,
+        "line_subtotal": 1500.00,
+        "discount": 0,
+    }]
+    subtotal = 1500.00
+    return {
+        "id": uid(),
+        "company_id": COMPANY_ID,
+        "invoice_number": f"K4Y-INV-{_non_67_suffix(9000)}",  # will be forced to 67 by caller
+        "invoice_type": "receivable",
+        "issue_date": str(inv_date),
+        "due_date": str(due_date),
+        "currency": "USD",
+        "tax_percent": 0,
+        "subtotal": subtotal,
+        "total_tax": 0,
+        "grand_total": subtotal,
+        "discount": 0,
+        "status": "sent",
+        "amount_paid_so_far": 0,
+        "payment_method": None,
+        "description": None,
+        "client_name": TEST_CLIENT["name"],
+        "client_idx": client_idx,
+        "line_items": line_items,
+        "payments": [],
+    }
+
+
 def inject_compliance_issues(payables, receivables):
+    """
+    Mutates payables/receivables in place to inject deliberate compliance issues.
+    Appends TEST_VENDOR and TEST_CLIENT to the VENDORS/CLIENTS module-level lists
+    and creates dedicated invoices routed to them for tests #4 and #8.
+
+    Every flagged invoice has invoice_number ending in '67'.
+    Returns a list of issue descriptors for the metadata block in dataset.json.
+    """
     issues = []
-    
-    # 1. Tax mismatch on Apex Office Supply (payable)
+
+    # Append test rows. Indexes:
+    #   TEST_VENDOR_IDX = 10  (after the existing 10 vendors at 0–9)
+    #   TEST_CLIENT_IDX = 8   (after the existing 8 clients at 0–7)
+    VENDORS.append(TEST_VENDOR)
+    test_vendor_idx = len(VENDORS) - 1
+    CLIENTS.append(TEST_CLIENT)
+    test_client_idx = len(CLIENTS) - 1
+
+    # ── Test #1: arithmetic mismatch on Apex Office Supply (payable) ──
     apex_invs = [p for p in payables if p["vendor_name"] == "Apex Office Supply Co"]
     if len(apex_invs) > 3:
         target = apex_invs[3]
-        target["total_tax"] = d(target["total_tax"] + 12.50)  # off by $12.50
-        # Don't adjust grand_total — that's the mismatch
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "tax_mismatch", "detail": "subtotal + tax ≠ grand_total (off by $12.50)"})
-    
-    # 2. Missing due_date on CodeForge (payable)
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=1)
+        target["total_tax"] = d(target["total_tax"] + 12.50)
+        # grand_total intentionally NOT recomputed — that's the mismatch
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "arithmetic_mismatch",
+            "detail": "subtotal + tax - discount ≠ grand_total (off by $12.50)",
+        })
+
+    # ── Test #2: missing due_date on CodeForge (payable) ──
     cf_invs = [p for p in payables if p["vendor_name"] == "CodeForge Contractors"]
     if len(cf_invs) > 4:
         target = cf_invs[4]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=2)
         target["due_date"] = None
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "missing_fields", "detail": "No due_date on invoice"})
-    
-    # 3. Line item mismatch on Halcyon Media (receivable)
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "missing_due_date",
+            "detail": "due_date is null",
+        })
+
+    # ── Test #3: line item sum mismatch on Halcyon Media (receivable) ──
     halcyon_invs = [r for r in receivables if r["client_name"] == "Halcyon Media Inc"]
     if len(halcyon_invs) > 5:
         target = halcyon_invs[5]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=3)
         if target["line_items"]:
-            target["line_items"][0]["line_subtotal"] = d(target["line_items"][0]["line_subtotal"] + 200)
-            # Now sum of line items ≠ subtotal
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "line_item_mismatch", "detail": "Line items sum ≠ subtotal (off by $200)"})
-    
-    # 4. Missing client email on Cascade Logistics (receivable)
-    cascade_invs = [r for r in receivables if r["client_name"] == "Cascade Logistics Ltd"]
-    if cascade_invs:
-        target = cascade_invs[0]
-        target["_missing_client_email"] = True
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "missing_fields", "detail": "No client email"})
-    
-    # 5. Duplicate invoice number on Ironside Hardware (payable)
+            target["line_items"][0]["line_subtotal"] = d(
+                target["line_items"][0]["line_subtotal"] + 200
+            )
+            # sum of line items now exceeds invoice.subtotal by $200
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "line_item_sum_mismatch",
+            "detail": "Sum of line items exceeds invoice.subtotal by $200",
+        })
+
+    # ── Test #4: missing client email — route a receivable to William Testria ──
+    test_receivable = _make_test_receivable_for_william_testria(test_client_idx)
+    test_receivable["invoice_number"] = force_67(test_receivable["invoice_number"], discriminator=4)
+    receivables.append(test_receivable)
+    issues.append({
+        "invoice_id": test_receivable["id"],
+        "invoice_number": test_receivable["invoice_number"],
+        "type": "missing_client_email",
+        "detail": "William Testria has no email on file",
+    })
+
+    # ── Test #5: duplicate invoice number on Ironside Hardware (payable) ──
+    # Only the second invoice gets a flag at ingestion time (the first one is
+    # normal at the moment of its own insert). Both still end in -67 for
+    # visual identification, and they SHARE the same discriminator so they
+    # genuinely collide.
     iron_invs = [p for p in payables if p["vendor_name"] == "Ironside Hardware Corp"]
     if len(iron_invs) >= 2:
-        iron_invs[1]["invoice_number"] = iron_invs[0]["invoice_number"]  # duplicate!
-        issues.append({"invoice_id": iron_invs[1]["id"], "invoice_number": iron_invs[1]["invoice_number"],
-                       "type": "duplicate_invoice", "detail": f"Same number as invoice {iron_invs[0]['id']}"})
-    
-    # 6. Low confidence on Broadleaf Marketing (payable)
+        iron_invs[0]["invoice_number"] = force_67(iron_invs[0]["invoice_number"], discriminator=5)
+        iron_invs[1]["invoice_number"] = iron_invs[0]["invoice_number"]   # duplicate
+        issues.append({
+            "invoice_id": iron_invs[1]["id"],
+            "invoice_number": iron_invs[1]["invoice_number"],
+            "type": "duplicate_invoice_number",
+            "detail": (
+                f"Same (company_id, vendor_id, invoice_number) as invoice "
+                f"{iron_invs[0]['id']}"
+            ),
+        })
+
+    # ── Test #6: low_confidence — stack multiple issues on a Broadleaf payable ──
+    # No longer a hand-set confidence score. Instead, the invoice carries
+    # multiple genuine defects; the compliance engine will raise enough flags
+    # that the meta-rule (>2 flags ⇒ low_confidence) fires automatically.
     bl_invs = [p for p in payables if p["vendor_name"] == "Broadleaf Marketing Group"]
     if len(bl_invs) > 3:
         target = bl_invs[3]
-        target["confidence_score"] = 0.45
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "low_confidence", "detail": "Confidence score 0.45 (below 0.6 threshold)"})
-    
-    # 7. Tax mismatch on Halcyon Media (receivable) — different invoice
-    if len(halcyon_invs) > 8:
-        target = halcyon_invs[8]
-        target["total_tax"] = d(target["subtotal"] * 0.05)  # added 5% tax that shouldn't be there
-        target["grand_total"] = d(target["subtotal"] + target["total_tax"])
-        target["tax_percent"] = 5.0
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "tax_mismatch", "detail": "5% tax applied to service invoice (should be 0%)"})
-    
-    # 8. Missing vendor tax_id on DataVault (payable)
-    dv_invs = [p for p in payables if p["vendor_name"] == "DataVault Security Inc"]
-    if len(dv_invs) > 2:
-        target = dv_invs[2]
-        target["_missing_vendor_tax_id"] = True
-        issues.append({"invoice_id": target["id"], "invoice_number": target["invoice_number"],
-                       "type": "missing_fields", "detail": "No vendor tax_id"})
-    
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=6)
+
+        # Defect 1: arithmetic mismatch
+        target["total_tax"] = d(target["total_tax"] + 25.00)
+        # grand_total unchanged
+
+        # Defect 2: missing due_date
+        target["due_date"] = None
+
+        # Defect 3: line item sum mismatch
+        if target["line_items"]:
+            target["line_items"][0]["line_subtotal"] = d(
+                target["line_items"][0]["line_subtotal"] + 30
+            )
+
+        # Expected flag count on ingestion:
+        #   arithmetic_mismatch + missing_due_date + line_item_sum_mismatch
+        #   = 3 flags ⇒ low_confidence fires as the 4th
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "low_confidence_via_multiple_defects",
+            "detail": (
+                "3 stacked defects (arithmetic + missing_due_date + "
+                "line_item_sum) should trigger low_confidence meta-flag"
+            ),
+        })
+
+    # ── Test #7: wrong tax applied on Apex (payable) ──
+    # Apex's expected tax rate is 8.25%. We zero it out so the wrong_tax_applied
+    # check fires against the vendor→expected-tax map maintained in the
+    # backend compliance service.
+    if len(apex_invs) > 6:
+        target = apex_invs[6]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=7)
+        target["tax_percent"] = 0.0
+        # Recompute totals so the invoice is internally consistent — the test
+        # is "wrong tax", not "broken arithmetic"
+        subtotal = d(sum(li["line_subtotal"] for li in target["line_items"]))
+        target["subtotal"] = subtotal
+        target["total_tax"] = 0.0
+        target["grand_total"] = subtotal
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "wrong_tax_applied",
+            "detail": "0% tax applied to Apex invoice (expected 8.25%)",
+        })
+
+    # ── Test #8: missing vendor tax_id — route a payable to Jones and Jordan ──
+    test_payable = _make_test_payable_for_jones_jordan(test_vendor_idx)
+    test_payable["invoice_number"] = force_67(test_payable["invoice_number"], discriminator=8)
+    payables.append(test_payable)
+    issues.append({
+        "invoice_id": test_payable["id"],
+        "invoice_number": test_payable["invoice_number"],
+        "type": "missing_vendor_tax_id",
+        "detail": "Jones and Jordan has no tax_id on file",
+    })
+
+    # ── Test #9: negative line item on Prisma Software (payable) ──
+    # WARNING: extraction may normalize the sign. If after re-ingestion the
+    # line item has positive quantity, the test failed silently — fall back to
+    # backend/scripts/inject_post_ingestion_anomalies.py.
+    prisma_invs = [p for p in payables if p["vendor_name"] == "Prisma Software Inc"]
+    if prisma_invs:
+        target = prisma_invs[0]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=9)
+        if target["line_items"]:
+            target["line_items"][0]["quantity"] = -1
+            # line_subtotal would normally go negative too; mirror that so the
+            # PDF renders consistently
+            up = target["line_items"][0]["unit_price"]
+            target["line_items"][0]["line_subtotal"] = d(up * -1)
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "negative_line_item",
+            "detail": "First line item has quantity = -1",
+        })
+
+    # ── Test #10: future issue_date on Summit Legal (payable) ──
+    # "Today" in this dataset is 2026-05-25. issue_date set 90 days ahead.
+    summit_invs = [p for p in payables if p["vendor_name"] == "Summit Legal Partners"]
+    if summit_invs:
+        target = summit_invs[0]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=10)
+        future_issue = date(2026, 5, 25) + timedelta(days=90)
+        future_due = future_issue + timedelta(days=45)  # Summit's payment terms
+        target["issue_date"] = str(future_issue)
+        target["due_date"] = str(future_due)
+        # Force status back to unpaid; the original status may have been based
+        # on the now-superseded issue date
+        target["status"] = "unpaid"
+        target["amount_paid_so_far"] = 0
+        target["payments"] = []
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "future_issue_date",
+            "detail": "issue_date is 90 days in the future",
+        })
+
+    # ── Test #11: due_date before issue_date on Meridian (payable) ──
+    meridian_invs = [p for p in payables if p["vendor_name"] == "Meridian Workspace LLC"]
+    if meridian_invs:
+        # Pick an invoice that isn't already mutated by another test
+        target = meridian_invs[2] if len(meridian_invs) > 2 else meridian_invs[0]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=11)
+        issue_dt = date.fromisoformat(target["issue_date"])
+        target["due_date"] = str(issue_dt - timedelta(days=5))
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "due_before_issue",
+            "detail": "due_date is 5 days before issue_date",
+        })
+
+    # ── Test #12: overpayment on a paid CodeForge invoice (payable) ──
+    # Find a paid CodeForge invoice (not the one already mutated by test #2).
+    cf_paid = [p for p in cf_invs if p["status"] == "paid" and p["payments"]]
+    if cf_paid:
+        target = cf_paid[0]
+        target["invoice_number"] = force_67(target["invoice_number"], discriminator=12)
+        # Add an excess payment of $200 over grand_total
+        overpay_amount = d(target["grand_total"] + 200)
+        issue_dt = date.fromisoformat(target["issue_date"])
+        target["payments"].append({
+            "payment_date": str(issue_dt + timedelta(days=40)),
+            "amount": overpay_amount,
+            "method": "bank_transfer",
+            "reference": f"PAY-{random.randint(100000, 999999)}",
+        })
+        # Total paid now exceeds grand_total
+        target["amount_paid_so_far"] = d(
+            sum(p["amount"] for p in target["payments"])
+        )
+        issues.append({
+            "invoice_id": target["id"],
+            "invoice_number": target["invoice_number"],
+            "type": "overpayment",
+            "detail": f"Total payments exceed grand_total by ~$200",
+        })
+
     return issues
 
 
@@ -1104,6 +1432,8 @@ def main():
     print("Injecting compliance issues...")
     issues = inject_compliance_issues(payables, receivables)
     print(f"  Injected {len(issues)} deliberate compliance issues")
+    print(f"  Test vendor 'Jones and Jordan' appended at index {len(VENDORS) - 1}")
+    print(f"  Test client 'William Testria' appended at index {len(CLIENTS) - 1}")
     
     # Stats
     pay_statuses = {}
@@ -1128,10 +1458,25 @@ def main():
         count = sum(1 for r in receivables if r["client_name"] == c["name"])
         print(f"  {c['name']}: {count}")
     
+    # Show all flagged (67-suffix) invoices for human verification
+    print("\nFlagged invoices (suffix '67'):")
+    flagged = [p for p in payables if p["invoice_number"].endswith("67")]
+    flagged += [r for r in receivables if r["invoice_number"].endswith("67")]
+    for inv in flagged:
+        print(f"  {inv['invoice_number']}  ({inv['invoice_type']})")
+    
     dataset = {
         "company": COMPANY,
-        "vendors": [{k: v for k, v in ven.items() if k not in ("template", "category", "frequency", "amount_range", "payment_terms")} for ven in VENDORS],
-        "clients": [{k: v for k, v in cli.items() if k not in ("category", "payment_behavior", "avg_days_to_pay", "amount_range", "frequency")} for cli in CLIENTS],
+        "vendors": [
+            {k: v for k, v in ven.items()
+             if k not in ("template", "category", "frequency", "amount_range", "payment_terms")}
+            for ven in VENDORS
+        ],
+        "clients": [
+            {k: v for k, v in cli.items()
+             if k not in ("category", "payment_behavior", "avg_days_to_pay", "amount_range", "frequency")}
+            for cli in CLIENTS
+        ],
         "payables": payables,
         "receivables": receivables,
         "compliance_issues": issues,
@@ -1143,6 +1488,8 @@ def main():
             "payable_statuses": pay_statuses,
             "receivable_statuses": rec_statuses,
             "compliance_issue_count": len(issues),
+            "test_vendor_name": TEST_VENDOR["name"],
+            "test_client_name": TEST_CLIENT["name"],
         },
     }
     

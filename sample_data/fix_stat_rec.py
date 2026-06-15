@@ -7,15 +7,18 @@ Why this exists
 When receivable PDFs are ingested via /upload, the OCR -> LLM pipeline
 cannot recover the invoice's workflow status (draft / sent / paid /
 partially_paid / overdue) because that information was never drawn on
-the PDF page. Every receivable lands as 'draft' (LLM prompt default).
+the PDF page. Every receivable lands at the DB default, which for
+receivables is 'sent' (not 'draft' as the LLM prompt suggests — the
+invoice service normalizes the LLM's 'draft' default to 'sent' for
+receivable_type rows).
 
 This script reconciles the DB with dataset.json:
   - paid           -> UPDATE status + amount_paid_so_far + INSERT payments
   - partially_paid -> UPDATE status + amount_paid_so_far + INSERT payments
   - overdue        -> UPDATE status only
-  - sent           -> UPDATE status only
+  - draft          -> UPDATE status only  (DOWNGRADE from sent)
   - unpaid         -> UPDATE status only
-  - draft          -> SKIP (DB default matches)
+  - sent           -> SKIP (DB default matches)
 
 Idempotent: payments are only inserted if the invoice has zero existing
 payment rows. Re-running is safe.
@@ -64,8 +67,10 @@ log = logging.getLogger("sync_receivables")
 SCRIPT_DIR = Path(__file__).parent
 DATASET_PATH = SCRIPT_DIR / "dataset.json"
 
-# Statuses that need DB action
-STATUSES_NEEDING_UPDATE = {"paid", "partially_paid", "overdue", "sent", "unpaid"}
+# The DB default for receivables after ingestion.
+# Any row whose dataset target matches this value needs NO action.
+DB_DEFAULT_STATUS = "sent"
+
 STATUSES_WITH_PAYMENTS = {"paid", "partially_paid"}
 
 
@@ -91,7 +96,6 @@ def get_supabase_client() -> Client:
         log.warning("No .env file found; relying on process environment")
 
     url = os.getenv("SUPABASE_URL")
-    # backend uses SUPABASE_SERVICE_KEY; older scripts used SUPABASE_KEY
     key = os.getenv("SUPABASE_SERVICE_KEY") or os.getenv("SUPABASE_KEY")
 
     if not url or not key:
@@ -166,7 +170,6 @@ def insert_payments(
     payments: list[dict],
     dry_run: bool,
 ) -> int:
-    """Returns count of payments inserted (or would-be-inserted in dry-run)."""
     if not payments:
         return 0
 
@@ -212,7 +215,7 @@ def main():
     args = parser.parse_args()
 
     mode = "DRY-RUN" if args.dry_run else "LIVE"
-    log.info(f"=== Mode: {mode} ===")
+    log.info(f"=== Mode: {mode} ===  DB default = {DB_DEFAULT_STATUS!r}")
 
     if not DATASET_PATH.exists():
         log.error(f"dataset.json not found at {DATASET_PATH}")
@@ -226,16 +229,15 @@ def main():
 
     db = get_supabase_client()
 
-    # Counters
     stats = {
-        "total":           len(receivables),
-        "skipped_draft":   0,
-        "not_in_db":       0,
-        "status_updated":  0,
-        "payments_added":  0,
+        "total":                     len(receivables),
+        "skipped_db_default":        0,
+        "not_in_db":                 0,
+        "status_updated":            0,
+        "payments_added":            0,
         "payments_skipped_existing": 0,
-        "errors":          0,
-        "by_status":       {},
+        "errors":                    0,
+        "by_status":                 {},
     }
 
     for rec in receivables:
@@ -246,13 +248,12 @@ def main():
 
         stats["by_status"][target_status] = stats["by_status"].get(target_status, 0) + 1
 
-        # Skip drafts: DB default already matches
-        if target_status == "draft":
-            stats["skipped_draft"] += 1
-            log.debug(f"{invoice_number}: target=draft, skipping (DB default matches)")
+        # Skip when target already matches DB default
+        if target_status == DB_DEFAULT_STATUS:
+            stats["skipped_db_default"] += 1
+            log.debug(f"{invoice_number}: target={target_status}, skipping (DB default)")
             continue
 
-        # Find DB row
         db_inv = fetch_db_invoice(db, invoice_number)
         if not db_inv:
             stats["not_in_db"] += 1
@@ -263,7 +264,6 @@ def main():
         company_id = db_inv["company_id"]
         current_status = db_inv["status"]
 
-        # Status update
         action = "WOULD UPDATE" if args.dry_run else "UPDATE"
         log.info(
             f"{invoice_number}: {action} status "
@@ -276,7 +276,6 @@ def main():
             stats["errors"] += 1
             continue
 
-        # Payments — only for paid / partially_paid
         if target_status in STATUSES_WITH_PAYMENTS and payments:
             existing_count = count_existing_payments(db, invoice_id)
             if existing_count > 0:
@@ -291,14 +290,12 @@ def main():
                 verb = "WOULD INSERT" if args.dry_run else "INSERTED"
                 log.info(f"{invoice_number}: {verb} {inserted} payment(s)")
             else:
-                # existing_count == -1 (lookup failed)
                 log.warning(f"{invoice_number}: payment count unknown, skipping insert")
 
-    # Summary
     log.info("=" * 60)
     log.info(f"=== Summary ({mode}) ===")
     log.info(f"Total receivables in dataset: {stats['total']}")
-    log.info(f"Skipped (target=draft):       {stats['skipped_draft']}")
+    log.info(f"Skipped (target = DB default):{stats['skipped_db_default']}")
     log.info(f"Not found in DB:              {stats['not_in_db']}")
     log.info(f"Status updates:               {stats['status_updated']}")
     log.info(f"Payments inserted:            {stats['payments_added']}")

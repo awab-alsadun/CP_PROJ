@@ -120,10 +120,13 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             log.error(f"[overdue_check] scheduled run failed: {e}")
 
-    scheduler.add_job(_run_overdue_check, "cron", hour=0, minute=0)
-    scheduler.start()
-    log.info("[overdue_check] scheduler started — job runs daily at 00:00")
-
+    # Only start scheduler in the main process — not in uvicorn's reloader watcher.
+    # When --reload is active, uvicorn sets RUN_MAIN=true in the child (worker) process.
+    # We start the scheduler only there, preventing duplicate jobs and reload-kill issues.  
+    if os.environ.get("SCHEDULER_DISABLED") != "1":
+        scheduler.add_job(_run_overdue_check, "cron", hour=0, minute=0)
+        scheduler.start()
+        log.info("[overdue_check] scheduler started — job runs daily at 00:00")
     yield
 
     scheduler.shutdown(wait=False)

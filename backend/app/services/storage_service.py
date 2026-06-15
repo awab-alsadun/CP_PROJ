@@ -10,7 +10,9 @@ Buckets:
                               images in already-rendered PDFs)
 
 Paths:
-  invoices: {company_id}/{invoice_id}.pdf
+  invoices: {company_id}/{company_name} - {invoice_number}.pdf
+            (caller-provided via storage_path; falls back to
+             {company_id}/{invoice_id}.pdf if not supplied)
   branding: {company_id}/logo.{ext}
 """
 
@@ -29,26 +31,33 @@ def upload_invoice_pdf(
     company_id: str,
     invoice_id: str,
     pdf_bytes: bytes,
+    storage_path: str | None = None,
 ) -> str:
     """
-    Upload a payable invoice PDF to the private "invoices" bucket.
-
-    Path: {company_id}/{invoice_id}.pdf
-    Uses upsert=True — re-ingestion overwrites cleanly.
+    Upload an invoice PDF to the private "invoices" bucket.
 
     Args:
-        db:          Supabase client.
-        company_id:  Tenant UUID.
-        invoice_id:  Invoice UUID — used as the filename.
-        pdf_bytes:   Raw PDF bytes.
+        db:           Supabase client.
+        company_id:   Tenant UUID.
+        invoice_id:   Invoice UUID — used as the filename in the
+                      legacy fallback path only.
+        pdf_bytes:    Raw PDF bytes.
+        storage_path: Optional pre-computed path. When supplied, this is
+                      written as-is. When None, the legacy UUID-based
+                      path is used. Callers (invoice_processor) compose
+                      "{company_id}/{company_name} - {invoice_number}.pdf"
+                      so storage objects are human-readable.
+
+    Uses upsert=True — re-ingestion overwrites cleanly.
 
     Returns:
-        storage_path: "{company_id}/{invoice_id}.pdf"
+        storage_path used for the upload.
 
     Raises:
         ValueError on upload failure.
     """
-    storage_path = f"{company_id}/{invoice_id}.pdf"
+    if storage_path is None:
+        storage_path = f"{company_id}/{invoice_id}.pdf"
 
     try:
         db.storage.from_(BUCKET).upload(
@@ -63,7 +72,7 @@ def upload_invoice_pdf(
         return storage_path
     except Exception as e:
         log.error(f"upload_invoice_pdf failed  invoice_id={invoice_id}  error={e}")
-        raise ValueError(f"Failed to upload payable PDF to storage: {e}")
+        raise ValueError(f"Failed to upload invoice PDF to storage: {e}")
 
 
 def get_signed_url(

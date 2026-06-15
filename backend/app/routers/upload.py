@@ -4,8 +4,8 @@ Upload Router
 POST /api/v1/upload       — single file
 POST /api/v1/upload/batch — multiple files (sequential, not concurrent)
 
-Payable invoices ONLY. Receivables are created via POST /api/v1/invoices
-(structured form input), not via OCR.
+TESTING MODE: invoice_type form field re-enabled. Receivables uploaded
+this way bypass the canonical receivable form flow. Do not merge.
 
 Logs every incoming request and every batch failure with full context.
 """
@@ -13,7 +13,7 @@ Logs every incoming request and every batch failure with full context.
 import logging
 import time
 
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, File, Form, UploadFile, HTTPException
 from supabase import Client
 
 from app.core.config import get_settings
@@ -25,6 +25,7 @@ log = logging.getLogger(__name__)
 router = APIRouter(prefix="/upload", tags=["upload"])
 
 ALLOWED_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".bmp", ".tiff"}
+ALLOWED_INVOICE_TYPES = {"payable", "receivable"}
 MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
 
 
@@ -36,9 +37,10 @@ async def _process_single_upload(
     file: UploadFile,
     company_id: str,
     db: Client,
+    invoice_type: str,
 ) -> dict:
     """
-    Validate and process one UploadFile through the full payable pipeline.
+    Validate and process one UploadFile through the full pipeline.
 
     Returns a result dict: filename, status, invoice_id, invoice_number,
     error. Never raises — all exceptions caught and returned as failed
@@ -94,16 +96,20 @@ async def _process_single_upload(
 
     log.info(
         f"upload_received  filename={filename!r}  "
-        f"size_bytes={len(file_bytes)}  company_id={company_id}"
+        f"size_bytes={len(file_bytes)}  invoice_type={invoice_type}  "
+        f"company_id={company_id}"
     )
 
     # --- Pipeline ---
     stage = "pipeline_init"
     try:
         stage = "process_invoice"
-        result = process_invoice(db, company_id, file_bytes, filename)
+        result = process_invoice(
+            db, company_id, file_bytes, filename, invoice_type=invoice_type
+        )
         log.info(
             f"upload_success  filename={filename!r}  "
+            f"invoice_type={invoice_type}  "
             f"invoice_id={result.get('invoice_id')}  "
             f"invoice_number={result.get('invoice_number')!r}"
         )
@@ -141,17 +147,25 @@ async def _process_single_upload(
 
 @router.post("")
 async def upload_invoice(
+    invoice_type: str = Form(...),
     file: UploadFile = File(...),
     db: Client = Depends(get_supabase),
 ):
     """
-    Upload a single payable invoice file.
+    Upload a single invoice file.
     Accepts: PDF, JPG, JPEG, PNG, BMP, TIFF — max 20 MB.
+    invoice_type must be 'payable' or 'receivable'.
     """
+    if invoice_type not in ALLOWED_INVOICE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"invoice_type must be 'payable' or 'receivable', got {invoice_type!r}",
+        )
+
     settings   = get_settings()
     company_id = settings.MVP_COMPANY_ID
 
-    result = await _process_single_upload(file, company_id, db)
+    result = await _process_single_upload(file, company_id, db, invoice_type)
 
     if result["status"] == "failed":
         error = result["error"] or ""
@@ -163,7 +177,7 @@ async def upload_invoice(
 
     return {
         "status":  "success",
-        "message": f"Payable invoice processed: {result['invoice_number']}",
+        "message": f"{invoice_type.capitalize()} invoice processed: {result['invoice_number']}",
         "data":    result,
     }
 
@@ -174,21 +188,31 @@ async def upload_invoice(
 
 @router.post("/batch")
 async def upload_invoice_batch(
+    invoice_type: str = Form(...),
     files: list[UploadFile] = File(...),
     db: Client = Depends(get_supabase),
 ):
     """
-    Upload multiple payable invoice files sequentially.
-    One bad file does not abort the batch.
+    Upload multiple invoice files sequentially. All files in a batch must
+    share the same invoice_type. One bad file does not abort the batch.
     Returns aggregate summary + per-file results.
     """
+    if invoice_type not in ALLOWED_INVOICE_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"invoice_type must be 'payable' or 'receivable', got {invoice_type!r}",
+        )
+
     if not files:
         raise HTTPException(status_code=400, detail="No files provided")
 
     settings   = get_settings()
     company_id = settings.MVP_COMPANY_ID
 
-    log.info(f"batch_start  file_count={len(files)}  company_id={company_id}")
+    log.info(
+        f"batch_start  file_count={len(files)}  invoice_type={invoice_type}  "
+        f"company_id={company_id}"
+    )
     t_batch = time.monotonic()
 
     results = []
@@ -196,7 +220,7 @@ async def upload_invoice_batch(
         filename = file.filename or "unknown"
         log.debug(f"batch_item_start  index={i}/{len(files)}  filename={filename!r}")
 
-        result = await _process_single_upload(file, company_id, db)
+        result = await _process_single_upload(file, company_id, db, invoice_type)
         results.append(result)
 
         if result["status"] == "failed":
@@ -217,8 +241,8 @@ async def upload_invoice_batch(
     duration = round(time.monotonic() - t_batch, 3)
 
     log.info(
-        f"batch_complete  total={len(results)}  success={success}  "
-        f"failed={failed}  duration_s={duration}"
+        f"batch_complete  invoice_type={invoice_type}  total={len(results)}  "
+        f"success={success}  failed={failed}  duration_s={duration}"
     )
 
     return {
@@ -226,4 +250,4 @@ async def upload_invoice_batch(
         "success": success,
         "failed":  failed,
         "results": results,
-    }
+    } 

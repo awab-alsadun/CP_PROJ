@@ -5,9 +5,10 @@ export function getCompanyId() {
 }
 
 async function request(path, options = {}) {
+  const { headers: optHeaders, ...rest } = options
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
+    ...rest,
+    headers: { 'Content-Type': 'application/json', ...optHeaders },
   })
   if (!res.ok) {
     const ct = res.headers.get('content-type') || ''
@@ -121,15 +122,11 @@ export const clientsApi = {
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 
-// ADD this method to the existing uploadApi object in src/lib/api.js
-// Place it directly after the existing upload() method
-
-// uploadApi should look like this after the change:
-
 export const uploadApi = {
-  upload: async (file) => {
+  upload: async (file, invoiceType = 'payable') => {
     const form = new FormData()
     form.append('file', file)
+    form.append('invoice_type', invoiceType)
     const res = await fetch(`${BASE}/upload`, { method: 'POST', body: form })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Upload failed' }))
@@ -138,9 +135,12 @@ export const uploadApi = {
     return res.json()
   },
 
-  // NEW — batch upload, no Content-Type header (browser sets multipart boundary)
-  uploadBatch: async (formData) => {
-    const res = await fetch(`${BASE}/upload/batch`, { method: 'POST', body: formData })
+  uploadBatch: async (files, invoiceType = 'payable') => {
+    const form = new FormData()
+    const list = Array.isArray(files) ? files : Array.from(files)
+    list.forEach(f => form.append('files', f))
+    form.append('invoice_type', invoiceType)
+    const res = await fetch(`${BASE}/upload/batch`, { method: 'POST', body: form })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Batch upload failed' }))
       throw new Error(err.detail || err.error || `HTTP ${res.status}`)
@@ -148,7 +148,6 @@ export const uploadApi = {
     return res.json()
   },
 }
-
 
 // ── Documents ─────────────────────────────────────────────────────────────────
 
@@ -255,9 +254,10 @@ export const settingsApi = {
     body: JSON.stringify({ ...data, company_id: getCompanyId() }),
   }),
   taxRates: () => request('/settings/tax-rates'),
-  setPassword: (password) => request('/settings/set-password', {
+  setPassword: (newPassword, currentPassword = '') => request('/settings/set-password', {
     method: 'POST',
-    body: JSON.stringify({ password, company_id: getCompanyId() }),
+    headers: { 'X-Settings-Password': currentPassword },
+    body: JSON.stringify({ password: newPassword, company_id: getCompanyId() }),
   }),
   pipeline: () => {
     const q = new URLSearchParams({ company_id: getCompanyId() })

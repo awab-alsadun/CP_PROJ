@@ -1,22 +1,20 @@
 """
 OCR Service
 -----------
-Extracts text from invoice files (images and PDFs).
+Extracts text from invoice files.
 
-Extracted from rag_pipeline/ingest_invoices.py and adapted for FastAPI:
-- Accepts bytes instead of file paths (FastAPI UploadFile gives bytes)
-- Tesseract path from Settings, not hardcoded
-- No file I/O for intermediate steps — works in memory
+extract_text_from_pdf returns (text, used_fallback) so callers can detect
+when Tesseract was invoked vs. PyMuPDF native — used by the compliance
+ocr_fallback_used flag.
 
-Two extraction paths:
-  Image (JPG/PNG) → Pillow → Tesseract OCR → text
-  PDF             → PyMuPDF render to image → Tesseract OCR → text
+extract_text_from_image always uses Tesseract — there is no fallback
+concept for images, so it returns text only.
 """
 
 import io
 import logging
 
-import fitz  # PyMuPDF
+import fitz
 import pytesseract
 from PIL import Image
 
@@ -26,22 +24,12 @@ log = logging.getLogger(__name__)
 
 
 def _configure_tesseract():
-    """Set Tesseract binary path from env if provided."""
     settings = get_settings()
     if settings.TESSERACT_PATH:
         pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_PATH
 
 
 def extract_text_from_image(file_bytes: bytes) -> str:
-    """
-    Extract text from an image file using Tesseract OCR.
-
-    Args:
-        file_bytes: Raw bytes of a JPG/PNG image.
-
-    Returns:
-        Extracted text string. Empty string if OCR fails.
-    """
     _configure_tesseract()
     try:
         image = Image.open(io.BytesIO(file_bytes))
@@ -52,47 +40,37 @@ def extract_text_from_image(file_bytes: bytes) -> str:
         return ""
 
 
-def extract_text_from_pdf(file_bytes: bytes) -> str:
+def extract_text_from_pdf(file_bytes: bytes) -> tuple[str, bool]:
     """
-    Extract text from a PDF file.
+    Returns (text, used_tesseract_fallback).
 
-    Strategy:
-      1. Try PyMuPDF native text extraction first (fast, works on text-based PDFs).
-      2. If no text found, fall back to rendering each page as an image
-         and running Tesseract OCR (handles scanned/image-based PDFs).
-
-    Args:
-        file_bytes: Raw bytes of a PDF file.
-
-    Returns:
-        Extracted text string. Empty string if all methods fail.
+    used_tesseract_fallback is True only when PyMuPDF native returned
+    empty/whitespace and we had to rasterize + OCR each page.
     """
     _configure_tesseract()
     try:
         doc = fitz.open(stream=file_bytes, filetype="pdf")
 
-        # Attempt 1: Native text extraction (fast path)
         native_text = ""
         for page in doc:
             native_text += page.get_text() + "\n"
 
         if native_text.strip():
             doc.close()
-            log.info("PDF text extracted via PyMuPDF native (fast path)")
-            return native_text.strip()
+            log.info("PDF text extracted via PyMuPDF native")
+            return native_text.strip(), False
 
-        # Attempt 2: OCR fallback (image-based PDFs)
-        log.info("No native text found, falling back to Tesseract OCR")
+        log.info("No native text — using Tesseract fallback")
         ocr_text = ""
         for page in doc:
-            mat = fitz.Matrix(300 / 72, 300 / 72)  # 300 DPI
+            mat = fitz.Matrix(300 / 72, 300 / 72)
             pix = page.get_pixmap(matrix=mat)
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             ocr_text += pytesseract.image_to_string(img, lang="eng") + "\n"
 
         doc.close()
-        return ocr_text.strip()
+        return ocr_text.strip(), True
 
     except Exception as e:
         log.error(f"PDF text extraction failed: {e}")
-        return ""
+        return "", False

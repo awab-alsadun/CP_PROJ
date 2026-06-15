@@ -156,6 +156,7 @@ export default function Settings() {
   const [clientError,    setClientError]    = useState('')
 
   // ── Account (password + session) ─────────────────────────────────────────────
+  const [pwCurrent, setPwCurrent] = useState('')
   const [pw,        setPw]        = useState('')
   const [pwConfirm, setPwConfirm] = useState('')
   const [showPw,    setShowPw]    = useState(false)
@@ -245,10 +246,17 @@ export default function Settings() {
   const setPassword = async () => {
     if (!pw || pw !== pwConfirm) { toast('Passwords do not match', 'error'); return }
     try {
-      await settingsApi.setPassword(pw)
-      setPw(''); setPwConfirm('')
+      await settingsApi.setPassword(pw, pwCurrent)
+      setPwCurrent(''); setPw(''); setPwConfirm('')
       toast('Password set')
-    } catch (e) { toast(e.message, 'error') }
+    } catch (e) {
+      const msg = e.message || ''
+      if (msg.includes('403') || /incorrect|wrong password|invalid password/i.test(msg)) {
+        toast('Current password is incorrect', 'error')
+      } else {
+        toast(msg || 'Failed to set password', 'error')
+      }
+    }
   }
 
   const logout = () => {
@@ -333,7 +341,6 @@ export default function Settings() {
   }
 
   const saveBranding = async () => {
-    // Validate three hex colors
     const colorKeys = ['invoice_primary_color', 'invoice_accent_color', 'invoice_text_color']
     for (const k of colorKeys) {
       if (!HEX_RE.test(branding[k] || '')) {
@@ -439,10 +446,16 @@ export default function Settings() {
             </h2>
 
             <div className="space-y-3 max-w-sm">
+              <Field label="Current Password" hint="Leave blank if no password is set yet.">
+                <input className="input h-9 text-sm" type="password"
+                  value={pwCurrent} onChange={e => setPwCurrent(e.target.value)}
+                  autoComplete="current-password" />
+              </Field>
               <Field label="New Password">
                 <div className="relative">
                   <input className="input h-9 text-sm pr-10" type={showPw ? 'text' : 'password'}
-                    value={pw} onChange={e => setPw(e.target.value)} />
+                    value={pw} onChange={e => setPw(e.target.value)}
+                    autoComplete="new-password" />
                   <button onClick={() => setShowPw(v => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
                     {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -451,7 +464,8 @@ export default function Settings() {
               </Field>
               <Field label="Confirm New Password">
                 <input className="input h-9 text-sm" type="password"
-                  value={pwConfirm} onChange={e => setPwConfirm(e.target.value)} />
+                  value={pwConfirm} onChange={e => setPwConfirm(e.target.value)}
+                  autoComplete="new-password" />
               </Field>
               <button onClick={setPassword} disabled={!pw || !pwConfirm}
                 className="btn-primary text-sm disabled:opacity-50 w-fit">
@@ -820,7 +834,6 @@ export default function Settings() {
 
 // ── ColorRow — picker + synced hex text input ──────────────────────────────────
 function ColorRow({ label, hint, value, onChange }) {
-  // Normalize: <input type="color"> only emits lowercase, but we accept any case in text
   const safeValue = HEX_RE.test(value || '') ? value : '#000000'
 
   return (
