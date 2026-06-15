@@ -5,9 +5,10 @@ export function getCompanyId() {
 }
 
 async function request(path, options = {}) {
+  const { headers: optHeaders, ...rest } = options
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
+    ...rest,
+    headers: { 'Content-Type': 'application/json', ...optHeaders },
   })
   if (!res.ok) {
     const ct = res.headers.get('content-type') || ''
@@ -41,11 +42,11 @@ export const invoicesApi = {
     if (invoice_type) q.set('invoice_type', invoice_type)
     return request(`/invoices/?${q}`)
   },
-  get: (id) => request(`/invoices/${id}`),
-  create: (body) => request('/invoices/', { method: 'POST', body: JSON.stringify(body) }),
-  update: (id, body) => request(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete: (id) => request(`/invoices/${id}`, { method: 'DELETE' }),
-  transition: (id, newStatus) => request(`/invoices/${id}/transition`, {
+  get:          (id)       => request(`/invoices/${id}`),
+  create:       (body)     => request('/invoices/', { method: 'POST', body: JSON.stringify(body) }),
+  update:       (id, body) => request(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  delete:       (id)       => request(`/invoices/${id}`, { method: 'DELETE' }),
+  transition:   (id, newStatus) => request(`/invoices/${id}/transition`, {
     method: 'POST',
     body: JSON.stringify({ new_status: newStatus }),
   }),
@@ -53,10 +54,9 @@ export const invoicesApi = {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  getPayments:  (id) => request(`/invoices/${id}/payments`),
-  getLineItems: (id) => request(`/invoices/${id}/line-items`),
-  getRaw:       (id) => request(`/invoices/${id}/raw`),
-  getPdf:       (id) => request(`/invoices/${id}/pdf`),
+  getPayments:        (id) => request(`/invoices/${id}/payments`),
+  getLineItems:       (id) => request(`/invoices/${id}/line-items`),
+  getPdf:             (id) => request(`/invoices/${id}/pdf`),
   getComplianceFlags: (id) => request(`/invoices/${id}/compliance-flags`),
   creditNote: (id, { amount, reason }) => request(`/invoices/${id}/credit-note`, {
     method: 'POST',
@@ -66,20 +66,6 @@ export const invoicesApi = {
     method: 'POST',
     body: JSON.stringify({ payment_id, amount }),
   }),
-}
-
-// ── Payments ─────────────────────────────────────────────────────────────────
-
-export const paymentsApi = {
-  allocate: ({ entity_id, entity_type, amount, currency, method, reference, payment_date }) =>
-    request('/payments/allocate', {
-      method: 'POST',
-      body: JSON.stringify({
-        entity_id, entity_type, amount, currency,
-        method, reference, payment_date,
-        company_id: getCompanyId(),
-      }),
-    }),
 }
 
 // ── Vendors ───────────────────────────────────────────────────────────────────
@@ -93,10 +79,10 @@ export const vendorsApi = {
     if (search?.trim()) q.set('search', search.trim())
     return request(`/vendors/?${q}`)
   },
-  get: (id) => request(`/vendors/${id}`),
-  create: (body) => request('/vendors/', { method: 'POST', body: JSON.stringify(body) }),
+  get:    (id)       => request(`/vendors/${id}`),
+  create: (body)     => request('/vendors/', { method: 'POST', body: JSON.stringify(body) }),
   update: (id, body) => request(`/vendors/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete: (id) => request(`/vendors/${id}`, { method: 'DELETE' }),
+  delete: (id)       => request(`/vendors/${id}`, { method: 'DELETE' }),
 }
 
 // ── Clients ───────────────────────────────────────────────────────────────────
@@ -110,10 +96,10 @@ export const clientsApi = {
     if (search?.trim()) q.set('search', search.trim())
     return request(`/clients/?${q}`)
   },
-  get: (id) => request(`/clients/${id}`),
-  create: (body) => request('/clients/', { method: 'POST', body: JSON.stringify(body) }),
+  get:    (id)       => request(`/clients/${id}`),
+  create: (body)     => request('/clients/', { method: 'POST', body: JSON.stringify(body) }),
   update: (id, body) => request(`/clients/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete: (id) => request(`/clients/${id}`, { method: 'DELETE' }),
+  delete: (id)       => request(`/clients/${id}`, { method: 'DELETE' }),
   getLatestAddress(clientId) {
     return request(`/clients/${clientId}/latest-address`)
   },
@@ -121,15 +107,11 @@ export const clientsApi = {
 
 // ── Upload ────────────────────────────────────────────────────────────────────
 
-// ADD this method to the existing uploadApi object in src/lib/api.js
-// Place it directly after the existing upload() method
-
-// uploadApi should look like this after the change:
-
 export const uploadApi = {
-  upload: async (file) => {
+  upload: async (file, invoiceType = 'payable') => {
     const form = new FormData()
     form.append('file', file)
+    form.append('invoice_type', invoiceType)
     const res = await fetch(`${BASE}/upload`, { method: 'POST', body: form })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Upload failed' }))
@@ -137,10 +119,12 @@ export const uploadApi = {
     }
     return res.json()
   },
-
-  // NEW — batch upload, no Content-Type header (browser sets multipart boundary)
-  uploadBatch: async (formData) => {
-    const res = await fetch(`${BASE}/upload/batch`, { method: 'POST', body: formData })
+  uploadBatch: async (files, invoiceType = 'payable') => {
+    const form = new FormData()
+    const list = Array.isArray(files) ? files : Array.from(files)
+    list.forEach(f => form.append('files', f))
+    form.append('invoice_type', invoiceType)
+    const res = await fetch(`${BASE}/upload/batch`, { method: 'POST', body: form })
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Batch upload failed' }))
       throw new Error(err.detail || err.error || `HTTP ${res.status}`)
@@ -148,7 +132,6 @@ export const uploadApi = {
     return res.json()
   },
 }
-
 
 // ── Documents ─────────────────────────────────────────────────────────────────
 
@@ -165,9 +148,9 @@ export const documentsApi = {
     }
     return res.json()
   },
-  list: () => request('/documents'),
-  delete: (id) => request(`/documents/${id}`, { method: 'DELETE' }),
-  update: (id, body) => request(`/documents/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  list:   ()        => request('/documents'),
+  delete: (id)      => request(`/documents/${id}`, { method: 'DELETE' }),
+  update: (id, body)=> request(`/documents/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 }
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
@@ -180,6 +163,10 @@ export const analyticsApi = {
   spending: (months = 6) => {
     const q = new URLSearchParams({ company_id: getCompanyId(), months })
     return request(`/analytics/spending?${q}`)
+  },
+  revenue: (months = 6) => {
+    const q = new URLSearchParams({ company_id: getCompanyId(), months })
+    return request(`/analytics/revenue?${q}`)
   },
   trends: (months = 12) => {
     const q = new URLSearchParams({ company_id: getCompanyId(), months })
@@ -197,6 +184,10 @@ export const analyticsApi = {
     const q = new URLSearchParams({ company_id: getCompanyId() })
     return request(`/analytics/system-stats?${q}`)
   },
+  pageMetrics: (invoiceType) => {
+    const q = new URLSearchParams({ company_id: getCompanyId(), invoice_type: invoiceType })
+    return request(`/analytics/page-metrics?${q}`)
+  },
 }
 
 // ── Notifications ─────────────────────────────────────────────────────────────
@@ -207,8 +198,8 @@ export const notificationsApi = {
     if (unreadOnly) q.set('unread_only', 'true')
     return request(`/notifications?${q}`)
   },
-  markRead: (id) => request(`/notifications/${id}/read`, { method: 'POST' }),
-  markAllRead: () => request(`/notifications/read-all`, { method: 'POST' }),
+  markRead:    (id) => request(`/notifications/${id}/read`, { method: 'POST' }),
+  markAllRead: ()   => request(`/notifications/read-all`,  { method: 'POST' }),
 }
 
 // ── Query ─────────────────────────────────────────────────────────────────────
@@ -217,14 +208,12 @@ export const queryApi = {
   ask: (question) => request('/query', {
     method: 'POST',
     body: JSON.stringify({ question }),
-  })
+  }),
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 
 export const settingsApi = {
-
-    // ── Branding ──────────────────────────────────────────────────────────────
   getBranding: () => {
     const q = new URLSearchParams({ company_id: getCompanyId() })
     return request(`/settings/branding?${q}`)
@@ -255,10 +244,6 @@ export const settingsApi = {
     body: JSON.stringify({ ...data, company_id: getCompanyId() }),
   }),
   taxRates: () => request('/settings/tax-rates'),
-  setPassword: (password) => request('/settings/set-password', {
-    method: 'POST',
-    body: JSON.stringify({ password, company_id: getCompanyId() }),
-  }),
   pipeline: () => {
     const q = new URLSearchParams({ company_id: getCompanyId() })
     return request(`/settings/pipeline?${q}`)

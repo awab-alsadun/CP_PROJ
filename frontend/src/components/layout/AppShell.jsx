@@ -5,18 +5,18 @@ import ChatPanel from '../chat/ChatPanel'
 import { useChat } from '../../context/ChatContext'
 
 export default function AppShell({ pageTitle, pageSubtitle }) {
-  const { isExpanded } = useChat()
+  const { isOpen, setIsOpen } = useChat()
 
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
-      <div className={`flex flex-col flex-1 min-w-0 transition-all duration-250 ${isExpanded ? 'mr-0' : ''}`}>
+      <div className="flex flex-col flex-1 min-w-0">
         <Topbar title={pageTitle} subtitle={pageSubtitle} />
         <main className="flex-1 overflow-y-auto" style={{ background: 'var(--bg-primary)' }}>
           <Outlet />
         </main>
       </div>
-      <ChatPanel />
+      <ChatPanel open={isOpen} onClose={() => setIsOpen(false)} />
     </div>
   )
 }

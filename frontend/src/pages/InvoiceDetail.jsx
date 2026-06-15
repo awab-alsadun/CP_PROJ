@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import {
-  ArrowLeft, Eye, EyeOff, DollarSign, Send,
-  CheckCircle, AlertTriangle, X, FileCode, FileText,
+  ArrowLeft, DollarSign, Send,
+  CheckCircle, AlertTriangle, X, FileText,
   ExternalLink, ChevronDown, ChevronUp, ShieldCheck
 } from 'lucide-react'
-import { invoicesApi, paymentsApi } from '../lib/api'
+import { invoicesApi } from '../lib/api'
 import { formatCurrency, formatDate, daysOverdue } from '../lib/utils'
 import {
   StatusBadge, InvoiceTypeBadge, ConfidenceBar, ProgressBar,
@@ -130,42 +130,32 @@ export default function InvoiceDetail() {
   const isReceivable = location.pathname.startsWith('/receivables')
   const backPath = isReceivable ? '/receivables' : '/payables'
 
-  const [invoice,         setInvoice]         = useState(null)
-  const [raw,             setRaw]             = useState(null)
-  const [showRaw,         setShowRaw]         = useState(false)
-  const [loading,         setLoading]         = useState(true)
-  const [error,           setError]           = useState(null)
-  const [transitioning,   setTransitioning]   = useState(false)
-  const [loadingRaw,      setLoadingRaw]      = useState(false)
+  const [invoice,       setInvoice]       = useState(null)
+  const [loading,       setLoading]       = useState(true)
+  const [error,         setError]         = useState(null)
+  const [transitioning, setTransitioning] = useState(false)
 
-  const [flags,           setFlags]           = useState([])
-  const [flagsOpen,       setFlagsOpen]       = useState(false)
-  const [loadingFlags,    setLoadingFlags]    = useState(false)
+  const [flags,         setFlags]         = useState([])
+  const [flagsOpen,     setFlagsOpen]     = useState(false)
+  const [loadingFlags,  setLoadingFlags]  = useState(false)
 
-  const [showPayModal,    setShowPayModal]    = useState(false)
-  const [payLoading,      setPayLoading]      = useState(false)
-  const [allocResult,     setAllocResult]     = useState(null)
-  const [payData,         setPayData]         = useState({
+  // Single payment modal
+  const [showPayModal,  setShowPayModal]  = useState(false)
+  const [savingPayment, setSavingPayment] = useState(false)
+  const [paymentData,   setPaymentData]   = useState({
     amount: '', method: 'bank_transfer', reference: '',
     payment_date: new Date().toISOString().split('T')[0],
   })
 
-  const [showDirectPay,   setShowDirectPay]   = useState(false)
-  const [savingPayment,   setSavingPayment]   = useState(false)
-  const [paymentData,     setPaymentData]     = useState({
-    amount: '', method: 'bank_transfer', reference: '',
-    payment_date: new Date().toISOString().split('T')[0],
-  })
+  const [showCN,        setShowCN]        = useState(false)
+  const [cnData,        setCnData]        = useState({ amount: '', reason: '' })
+  const [cnLoading,     setCnLoading]     = useState(false)
 
-  const [showCN,          setShowCN]          = useState(false)
-  const [cnData,          setCnData]          = useState({ amount: '', reason: '' })
-  const [cnLoading,       setCnLoading]       = useState(false)
+  const [refundTarget,  setRefundTarget]  = useState(null)
+  const [refundAmt,     setRefundAmt]     = useState('')
+  const [refundLoading, setRefundLoading] = useState(false)
 
-  const [refundTarget,    setRefundTarget]    = useState(null)
-  const [refundAmt,       setRefundAmt]       = useState('')
-  const [refundLoading,   setRefundLoading]   = useState(false)
-
-  const [confirmSend,     setConfirmSend]     = useState(false)
+  const [confirmSend,   setConfirmSend]   = useState(false)
 
   const loadInvoice = useCallback(async () => {
     try {
@@ -203,20 +193,6 @@ export default function InvoiceDetail() {
     setFlagsOpen(v => !v)
   }
 
-  const handleLoadRaw = async () => {
-    if (raw) { setShowRaw(v => !v); return }
-    setLoadingRaw(true)
-    try {
-      const data = await invoicesApi.getRaw(id)
-      setRaw(data)
-      setShowRaw(true)
-    } catch (e) {
-      toast(`Raw extraction: ${e.message}`, 'error')
-    } finally {
-      setLoadingRaw(false)
-    }
-  }
-
   const handleViewPdf = async () => {
     try {
       const blob = await invoicesApi.getPdf(id)
@@ -237,43 +213,20 @@ export default function InvoiceDetail() {
     }
   }
 
-  const handleAllocate = async () => {
-    if (!payData.amount) return
-    setPayLoading(true)
-    try {
-      const inv = invoice
-      const entityId   = isReceivable ? inv.client_id  : inv.vendor_id
-      const entityType = isReceivable ? 'client'       : 'vendor'
-      const res = await paymentsApi.allocate({
-        entity_id:    entityId,
-        entity_type:  entityType,
-        amount:       parseFloat(payData.amount),
-        currency:     inv.currency,
-        method:       payData.method || null,
-        reference:    payData.reference || null,
-        payment_date: payData.payment_date,
-      })
-      setAllocResult(res)
-      await loadInvoice()
-      toast(`Payment of ${formatCurrency(parseFloat(payData.amount), inv.currency)} allocated`)
-    } catch (e) {
-      toast(e.message, 'error')
-    } finally {
-      setPayLoading(false)
-    }
-  }
-
   const handleRecordPayment = async () => {
     setSavingPayment(true)
     try {
       await invoicesApi.recordPayment(id, {
-        amount: parseFloat(paymentData.amount),
-        method: paymentData.method || null,
-        reference: paymentData.reference || null,
+        amount:       parseFloat(paymentData.amount),
+        method:       paymentData.method || null,
+        reference:    paymentData.reference || null,
         payment_date: paymentData.payment_date,
       })
-      setShowDirectPay(false)
-      setPaymentData({ amount: '', method: 'bank_transfer', reference: '', payment_date: new Date().toISOString().split('T')[0] })
+      setShowPayModal(false)
+      setPaymentData({
+        amount: '', method: 'bank_transfer', reference: '',
+        payment_date: new Date().toISOString().split('T')[0],
+      })
       await loadInvoice()
       toast('Payment recorded successfully')
     } catch (e) {
@@ -321,11 +274,11 @@ export default function InvoiceDetail() {
   const transitions = isReceivable
     ? (TRANSITIONS_RECEIVABLE[invoice.status] || [])
     : (TRANSITIONS_PAYABLE[invoice.status]    || [])
-  const canPay   = !['paid'].includes(invoice.status)
-  const canCN    = invoice.status === 'paid'
-  const paid     = invoice.amount_paid_so_far || 0
+  const canPay    = !['paid'].includes(invoice.status)
+  const canCN     = invoice.status === 'paid'
+  const paid      = invoice.amount_paid_so_far || 0
   const remaining = Math.max(0, (invoice.grand_total || 0) - paid)
-  const od       = daysOverdue(invoice.due_date)
+  const od        = daysOverdue(invoice.due_date)
 
   return (
     <>
@@ -344,7 +297,6 @@ export default function InvoiceDetail() {
                 <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {invoice.invoice_number || 'Invoice'}
                 </h1>
-                {/* Pass full invoice object so Partial/Overdue composite state renders correctly */}
                 <StatusBadge invoice={invoice} />
                 <InvoiceTypeBadge type={invType} />
               </div>
@@ -364,10 +316,6 @@ export default function InvoiceDetail() {
             <button onClick={handleViewPdf} className="btn-secondary text-xs h-8">
               <FileText size={13} /> PDF <ExternalLink size={11} />
             </button>
-            <button onClick={handleLoadRaw} disabled={loadingRaw} className="btn-secondary text-xs h-8 disabled:opacity-50">
-              <FileCode size={13} />
-              {loadingRaw ? 'Loading…' : showRaw ? 'Hide Raw' : 'View Raw'}
-            </button>
 
             {transitions.map(t => {
               const Icon = t.icon
@@ -386,8 +334,13 @@ export default function InvoiceDetail() {
             })}
 
             {canPay && (
-              <button onClick={() => { setPayData(p => ({ ...p, amount: remaining.toFixed(2) })); setShowPayModal(true) }}
-                className="btn-primary text-xs h-8">
+              <button
+                onClick={() => {
+                  setPaymentData(p => ({ ...p, amount: remaining.toFixed(2) }))
+                  setShowPayModal(true)
+                }}
+                className="btn-primary text-xs h-8"
+              >
                 <DollarSign size={13} /> Record Payment
               </button>
             )}
@@ -400,7 +353,7 @@ export default function InvoiceDetail() {
           </div>
         </div>
 
-        {/* Financial summary with progress */}
+        {/* Payment progress */}
         {(invoice.amount_paid_so_far != null || paid > 0) && (
           <div className="card p-5">
             <div className="flex items-center justify-between mb-3">
@@ -419,29 +372,6 @@ export default function InvoiceDetail() {
               <span style={{ color: '#22C55E' }}>Paid: {formatCurrency(paid, invoice.currency)}</span>
               {remaining > 0 && <span style={{ color: '#EF4444' }}>Remaining: {formatCurrency(remaining, invoice.currency)}</span>}
             </div>
-          </div>
-        )}
-
-        {/* Raw extraction panel */}
-        {showRaw && raw && (
-          <div className="card overflow-hidden animate-fade-up">
-            <div className="px-5 py-3.5 border-b flex items-center justify-between"
-              style={{ borderColor: 'var(--border)' }}>
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Raw Extraction</h2>
-              <div className="flex items-center gap-3">
-                {invoice.confidence_score != null && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Confidence</span>
-                    <ConfidenceBar score={invoice.confidence_score} />
-                  </div>
-                )}
-                <span className="text-xs font-mono px-2 py-0.5 rounded"
-                  style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>
-                  v{raw.schema_version || '1.0'}
-                </span>
-              </div>
-            </div>
-            <RawTabs raw={raw} />
           </div>
         )}
 
@@ -466,9 +396,9 @@ export default function InvoiceDetail() {
           <Section title="Financials">
             <div className="space-y-3">
               {[
-                { label: 'Subtotal', value: formatCurrency(invoice.subtotal,   invoice.currency) },
+                { label: 'Subtotal', value: formatCurrency(invoice.subtotal,  invoice.currency) },
                 { label: 'Discount', value: invoice.discount > 0 ? `- ${formatCurrency(invoice.discount, invoice.currency)}` : '—' },
-                { label: 'Tax',      value: formatCurrency(invoice.total_tax,  invoice.currency) },
+                { label: 'Tax',      value: formatCurrency(invoice.total_tax, invoice.currency) },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{label}</span>
@@ -652,75 +582,53 @@ export default function InvoiceDetail() {
         </div>
       </div>
 
-      {/* ── FIFO Payment Modal ─────────────────────────────────── */}
+      {/* ── Record Payment Modal ───────────────────────────────── */}
       {showPayModal && (
-        <Modal title="Record Payment (FIFO Allocation)" onClose={() => { setShowPayModal(false); setAllocResult(null) }}>
-          {allocResult ? (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold" style={{ color: '#22C55E' }}>Payment allocated</p>
-              {allocResult.allocations?.map((a, i) => (
-                <div key={i} className="flex justify-between text-sm px-3 py-2 rounded-lg"
-                  style={{ background: 'var(--bg-secondary)' }}>
-                  <span className="font-mono text-xs">{a.invoice_number}</span>
-                  <span>{formatCurrency(a.amount_applied, invoice.currency)}</span>
-                  {/* Allocation result only has a status string — no amount_paid_so_far available here */}
-                  <StatusBadge status={a.new_status} />
-                </div>
-              ))}
-              {allocResult.overpayment > 0 && (
-                <p className="text-xs" style={{ color: '#F59E0B' }}>
-                  Overpayment of {formatCurrency(allocResult.overpayment)} credited.
-                </p>
-              )}
-              <button className="btn-primary w-full" onClick={() => { setShowPayModal(false); setAllocResult(null) }}>
-                Done
+        <Modal title="Record Payment" onClose={() => setShowPayModal(false)}>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <FieldRow label="Amount *">
+                <input className="input h-9 text-sm font-mono" type="number" step="0.01"
+                  value={paymentData.amount}
+                  onChange={e => setPaymentData(p => ({ ...p, amount: e.target.value }))}
+                  placeholder={remaining.toFixed(2)} />
+              </FieldRow>
+              <FieldRow label="Date *">
+                <input className="input h-9 text-sm" type="date"
+                  value={paymentData.payment_date}
+                  onChange={e => setPaymentData(p => ({ ...p, payment_date: e.target.value }))} />
+              </FieldRow>
+              <FieldRow label="Method">
+                <select className="input h-9 text-sm" value={paymentData.method}
+                  onChange={e => setPaymentData(p => ({ ...p, method: e.target.value }))}>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="credit_card">Credit Card</option>
+                  <option value="cash">Cash</option>
+                  <option value="cheque">Cheque</option>
+                  <option value="wire">Wire</option>
+                  <option value="other">Other</option>
+                </select>
+              </FieldRow>
+              <FieldRow label="Reference">
+                <input className="input h-9 text-sm" value={paymentData.reference}
+                  onChange={e => setPaymentData(p => ({ ...p, reference: e.target.value }))}
+                  placeholder="TXN-001" />
+              </FieldRow>
+            </div>
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Remaining balance: <span className="font-mono font-medium">{formatCurrency(remaining, invoice.currency)}</span>
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowPayModal(false)} className="btn-secondary text-xs h-8">Cancel</button>
+              <button
+                onClick={handleRecordPayment}
+                disabled={savingPayment || !paymentData.amount}
+                className="btn-primary text-xs h-8 disabled:opacity-50"
+              >
+                {savingPayment ? 'Saving…' : 'Confirm Payment'}
               </button>
             </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <FieldRow label="Amount *">
-                  <input className="input h-9 text-sm font-mono" type="number" step="0.01"
-                    value={payData.amount}
-                    onChange={e => setPayData(p => ({ ...p, amount: e.target.value }))}
-                    placeholder={remaining.toFixed(2)} />
-                </FieldRow>
-                <FieldRow label="Date *">
-                  <input className="input h-9 text-sm" type="date"
-                    value={payData.payment_date}
-                    onChange={e => setPayData(p => ({ ...p, payment_date: e.target.value }))} />
-                </FieldRow>
-                <FieldRow label="Method">
-                  <select className="input h-9 text-sm" value={payData.method}
-                    onChange={e => setPayData(p => ({ ...p, method: e.target.value }))}>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="cash">Cash</option>
-                    <option value="check">Check</option>
-                    <option value="other">Other</option>
-                  </select>
-                </FieldRow>
-                <FieldRow label="Reference">
-                  <input className="input h-9 text-sm" value={payData.reference}
-                    onChange={e => setPayData(p => ({ ...p, reference: e.target.value }))}
-                    placeholder="TXN-001" />
-                </FieldRow>
-              </div>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Allocates across {isReceivable ? 'client' : 'vendor'}'s open invoices via FIFO (earliest first).
-              </p>
-              <div className="flex gap-2 justify-end">
-                <button onClick={() => setShowPayModal(false)} className="btn-secondary text-xs h-8">Cancel</button>
-                <button
-                  onClick={handleAllocate}
-                  disabled={payLoading || !payData.amount}
-                  className="btn-primary text-xs h-8 disabled:opacity-50"
-                >
-                  {payLoading ? 'Allocating…' : 'Confirm Payment'}
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
         </Modal>
       )}
 
@@ -781,38 +689,5 @@ export default function InvoiceDetail() {
         confirmLabel="Send Invoice"
       />
     </>
-  )
-}
-
-// ── Raw tabs ───────────────────────────────────────────────────────────────────
-function RawTabs({ raw }) {
-  const [tab, setTab] = useState('json')
-  return (
-    <div>
-      <div className="flex gap-1 px-5 pt-3 border-b" style={{ borderColor: 'var(--border)' }}>
-        {[['json', 'Extraction JSON'], ['text', 'Raw Text']].map(([key, label]) => (
-          <button key={key} onClick={() => setTab(key)}
-            className="px-3 py-1.5 text-xs font-medium rounded-t-lg transition-all"
-            style={tab === key
-              ? { color: 'var(--accent)', borderBottom: '2px solid var(--accent)' }
-              : { color: 'var(--text-muted)' }
-            }>
-            {label}
-          </button>
-        ))}
-      </div>
-      <pre className="p-5 text-xs font-mono overflow-auto leading-relaxed"
-        style={{
-          color: 'var(--text-secondary)',
-          background: 'var(--bg-secondary)',
-          maxHeight: 360,
-          whiteSpace: tab === 'text' ? 'pre-wrap' : 'pre',
-        }}>
-        {tab === 'json'
-          ? JSON.stringify(raw.extraction_json || {}, null, 2)
-          : (raw.raw_text || 'No raw text available.')
-        }
-      </pre>
-    </div>
   )
 }

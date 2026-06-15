@@ -1711,3 +1711,107 @@ Please arrange payment at your e...
 2026-06-15 00:08:21,539 DEBUG apscheduler.scheduler Looking for jobs to run
 2026-06-15 00:08:21,539 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
 2026-06-15 00:08:21,539 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 01:31:48,250 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 01:31:51,778 INFO app.main Supabase connection verified at startup
+2026-06-15 01:31:51,778 INFO app.main Storage active bucket: invoices
+2026-06-15 01:31:51,779 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 01:31:51,795 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 01:31:51,795 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 01:31:51,796 INFO apscheduler.scheduler Scheduler started
+2026-06-15 01:31:51,796 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 01:31:51,797 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 80888.202949 seconds)
+2026-06-15 01:31:51,796 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 01:57:18,610 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 01:57:20,862 INFO app.main Supabase connection verified at startup
+2026-06-15 01:57:20,863 INFO app.main Storage active bucket: invoices
+2026-06-15 01:57:20,863 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 01:57:20,890 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 01:57:20,891 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 01:57:20,891 INFO apscheduler.scheduler Scheduler started
+2026-06-15 01:57:20,892 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 01:57:20,892 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 79359.107512 seconds)
+2026-06-15 01:57:20,892 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 02:11:01,856 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 02:11:01,857 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 02:11:01,858 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 02:11:01,858 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 02:12:26,631 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 02:12:29,055 INFO app.main Supabase connection verified at startup
+2026-06-15 02:12:29,056 INFO app.main Storage active bucket: invoices
+2026-06-15 02:12:29,056 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 02:12:29,092 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 02:12:29,093 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 02:12:29,093 INFO apscheduler.scheduler Scheduler started
+2026-06-15 02:12:29,094 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 02:12:29,094 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 78450.905495 seconds)
+2026-06-15 02:12:29,094 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 02:13:04,832 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 02:13:04,833 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 02:13:04,834 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 02:13:04,835 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 02:27:36,396 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 02:27:38,090 INFO app.main Supabase connection verified at startup
+2026-06-15 02:27:38,090 INFO app.main Storage active bucket: invoices
+2026-06-15 02:27:38,091 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 02:27:38,122 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 02:27:38,124 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 02:27:38,125 INFO apscheduler.scheduler Scheduler started
+2026-06-15 02:27:38,127 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 02:27:38,128 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 77541.871215 seconds)
+2026-06-15 02:27:38,128 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 06:40:59,692 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 06:40:59,693 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 06:40:59,694 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 06:40:59,695 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 06:41:10,126 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 06:41:12,302 INFO app.main Supabase connection verified at startup
+2026-06-15 06:41:12,303 INFO app.main Storage active bucket: invoices
+2026-06-15 06:41:12,304 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 06:41:12,373 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 06:41:12,375 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 06:41:12,375 INFO apscheduler.scheduler Scheduler started
+2026-06-15 06:41:12,377 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 06:41:12,378 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 62327.621166 seconds)
+2026-06-15 06:41:12,378 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 06:44:35,844 INFO app.services.invoice_service receivable_create  invoice_id=f5fbe4c0-703a-412c-a55f-891b45d0bd4d  invoice_number='REC-2026-0141'
+2026-06-15 06:44:38,708 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 06:44:38,709 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 06:44:38,710 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 06:44:38,710 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 06:44:38,710 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 06:44:38,710 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 06:44:38,711 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 06:44:38,711 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 06:44:38,711 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 06:44:38,712 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 06:44:38,712 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 06:44:38,712 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 06:44:38,713 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 06:44:38,713 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 06:44:38,713 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 06:44:38,713 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 06:44:38,714 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 06:44:38,714 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 06:44:38,736 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-15 06:44:38,736 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-15 06:44:39,327 ERROR app.services.invoice_service receivable_create  stage=storage_upload_failed  error=upload_invoice_pdf() got an unexpected keyword argument 'storage_path'
+2026-06-15 06:44:46,289 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  error=name '_check_low_confidence' is not defined
+2026-06-15 06:48:32,198 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 06:48:32,199 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 06:48:32,200 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 06:48:32,201 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 06:48:56,535 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-06-15 06:48:58,203 INFO app.main Supabase connection verified at startup
+2026-06-15 06:48:58,204 INFO app.main Storage active bucket: invoices
+2026-06-15 06:48:58,205 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 06:48:58,238 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 06:48:58,240 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 06:48:58,241 INFO apscheduler.scheduler Scheduler started
+2026-06-15 06:48:58,242 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 06:48:58,243 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+04:00 (in 61861.756737 seconds)
+2026-06-15 06:48:58,242 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 07:28:30,522 WARNING app.services.payment_allocation_service Duplicate payment reference 'TXN-005' for company 7bf697fc-7220-40c7-9678-542d624d22ad. Proceeding — manual review recommended.
+2026-06-15 07:52:47,760 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 07:52:47,762 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 07:52:47,762 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 07:52:47,763 INFO app.main [overdue_check] scheduler stopped

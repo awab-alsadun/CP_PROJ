@@ -239,7 +239,7 @@ class ClientReadWithAddress(ClientRead):
 # ---------------------------------------------------------------------------
 
 class InvoiceBase(BaseModel):
-    invoice_number:    str
+    invoice_number: str | None = None
     issue_date:        date
     due_date:          date | None = None
     currency:          str

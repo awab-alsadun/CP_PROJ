@@ -11,6 +11,8 @@ import Dashboard from './pages/Dashboard'
 import Invoices from './pages/Invoices'
 import InvoiceDetail from './pages/InvoiceDetail'
 import CreateInvoice from './pages/CreateInvoice'
+import CreateClient from './pages/CreateClient'
+import CreateVendor from './pages/CreateVendor'
 import Vendors from './pages/Vendors'
 import Clients from './pages/Clients'
 import UploadExtract from './pages/UploadExtract'
@@ -28,24 +30,26 @@ function RequireAuth({ children }) {
 }
 
 const PAGE_META = {
-  '/':            { title: 'Dashboard',         subtitle: 'Overview of your financial activity' },
-  '/payables':    { title: 'Payables',          subtitle: 'Accounts payable — invoices you owe' },
-  '/receivables': { title: 'Receivables',       subtitle: 'Accounts receivable — invoices owed to you' },
-  '/invoices':    { title: 'Invoices',          subtitle: 'All invoices across vendors and clients' },
-  '/create':      { title: 'Create Invoice',    subtitle: 'New outbound invoice' },
-  '/vendors':     { title: 'Vendors',           subtitle: 'Manage and view vendor relationships' },
-  '/clients':     { title: 'Clients',           subtitle: 'Manage and view client relationships' },
-  '/upload':      { title: 'Upload & Extract',  subtitle: 'AI-powered invoice ingestion pipeline' },
-  '/documents':   { title: 'Company Documents', subtitle: 'Regulation and compliance document library' },
-  '/analytics':   { title: 'Analytics',         subtitle: 'Spending trends and financial metrics' },
-  '/chat':        { title: 'AI Chat',           subtitle: 'Hybrid SQL + RAG invoice assistant' },
-  '/settings':    { title: 'Settings',          subtitle: 'Company configuration and preferences' },
+  '/':                  { title: 'Dashboard',         subtitle: 'Overview of your financial activity' },
+  '/payables':          { title: 'Payables',          subtitle: 'Accounts payable — invoices you owe' },
+  '/receivables':       { title: 'Receivables',       subtitle: 'Accounts receivable — invoices owed to you' },
+  '/invoices':          { title: 'Invoices',          subtitle: 'All invoices across vendors and clients' },
+  '/create':            { title: 'Create Invoice',    subtitle: 'New outbound invoice' },
+  '/vendors':           { title: 'Vendors',           subtitle: 'Manage and view vendor relationships' },
+  '/vendors/create':    { title: 'Create Vendor',     subtitle: 'Add a new vendor' },
+  '/clients':           { title: 'Clients',           subtitle: 'Manage and view client relationships' },
+  '/clients/create':    { title: 'Create Client',     subtitle: 'Add a new client' },
+  '/upload':            { title: 'Upload & Extract',  subtitle: 'AI-powered invoice ingestion pipeline' },
+  '/documents':         { title: 'Company Documents', subtitle: 'Regulation and compliance document library' },
+  '/analytics':         { title: 'Analytics',         subtitle: 'Spending trends and financial metrics' },
+  '/chat':              { title: 'AI Chat',           subtitle: 'Hybrid SQL + RAG invoice assistant' },
+  '/settings':          { title: 'Settings',          subtitle: 'Company configuration and preferences' },
 }
 
 function ShellWrapper() {
   const location = useLocation()
-  const base = '/' + location.pathname.split('/')[1]
-  const meta = PAGE_META[base] || { title: 'K4Y', subtitle: '' }
+  const base = '/' + location.pathname.split('/').slice(1, 3).join('/')
+  const meta = PAGE_META[base] || PAGE_META['/' + location.pathname.split('/')[1]] || { title: 'K4Y', subtitle: '' }
   return (
     <AppShell pageTitle={meta.title} pageSubtitle={meta.subtitle} />
   )
@@ -73,13 +77,18 @@ export default function App() {
               <Route path="receivables" element={<Receivables />} />
               <Route path="receivables/:id" element={<InvoiceDetail />} />
 
-              {/* Legacy invoice routes kept as fallback */}
+              {/* Legacy invoice routes */}
               <Route path="invoices" element={<Invoices />} />
               <Route path="invoices/:id" element={<InvoiceDetail />} />
 
               <Route path="create" element={<CreateInvoice />} />
+
               <Route path="vendors" element={<Vendors />} />
+              <Route path="vendors/create" element={<CreateVendor />} />
+
               <Route path="clients" element={<Clients />} />
+              <Route path="clients/create" element={<CreateClient />} />
+
               <Route path="upload" element={<UploadExtract />} />
               <Route path="documents" element={<CompanyDocuments />} />
               <Route path="analytics" element={<Analytics />} />

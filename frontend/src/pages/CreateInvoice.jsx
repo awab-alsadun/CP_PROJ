@@ -14,6 +14,7 @@ import {
 // Payload builder — camelCase state → snake_case API payload at the boundary
 // All numeric fields go out as strings. Empty discount becomes "0".
 // invoice_type is hardcoded receivable. vendor fields are always null.
+// issue_date is always today. invoice_number is omitted — backend auto-generates.
 // ---------------------------------------------------------------------------
 function buildInvoicePayload(s, status) {
   const num = (v) => {
@@ -24,8 +25,7 @@ function buildInvoicePayload(s, status) {
     company_id: getCompanyId(),
     client_id: s.clientId,
     client_address_id: s.clientAddressId || null,
-    invoice_number: s.invoiceNumber.trim(),
-    issue_date: s.issueDate,
+    issue_date: new Date().toISOString().split('T')[0],
     due_date: s.dueDate || null,
     currency: s.currency,
     tax_percent: num(s.taxPercent),
@@ -83,15 +83,11 @@ const EMPTY_LINE = {
   lineSubtotal: '0.00',
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
-
 export default function CreateInvoice() {
   const navigate = useNavigate()
 
   // -------- form state (camelCase) --------
   const [form, setForm] = useState({
-    invoiceNumber: '',
-    issueDate: today(),
     dueDate: '',
     currency: 'USD',
     taxPercent: '0',
@@ -107,12 +103,12 @@ export default function CreateInvoice() {
   const [clients, setClients] = useState([])
   const [clientsLoading, setClientsLoading] = useState(true)
   const [clientsError, setClientsError] = useState(null)
-  const [clientAddress, setClientAddress] = useState(null) // single normalized address object
+  const [clientAddress, setClientAddress] = useState(null)
   const [addressLoading, setAddressLoading] = useState(false)
 
   // -------- submit state --------
-  const [submitting, setSubmitting] = useState(null) // 'draft' | 'sent' | null
-  const [fieldErrors, setFieldErrors] = useState({}) // { 'invoice_number': 'msg', 'line_items.0.description': 'msg' }
+  const [submitting, setSubmitting] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
 
   // -------- seed tax % from company default on mount --------
   useEffect(() => {
@@ -123,7 +119,7 @@ export default function CreateInvoice() {
           setForm((f) => ({ ...f, taxPercent: String(rate) }))
         }
       })
-      .catch(() => {}) // leave taxPercent as '0' on failure
+      .catch(() => {})
   }, [])
 
   // -------- load clients on mount --------
@@ -148,7 +144,7 @@ export default function CreateInvoice() {
     }
   }, [])
 
-  // -------- when client changes, fetch latest address from dedicated endpoint --------
+  // -------- when client changes, fetch latest address --------
   useEffect(() => {
     if (!form.clientId) {
       setClientAddress(null)
@@ -182,13 +178,12 @@ export default function CreateInvoice() {
     }
   }, [form.clientId])
 
-  // -------- recompute totals whenever line items / tax / discount change --------
+  // -------- recompute totals --------
   const totals = useMemo(
     () => computeTotals(form.lineItems, form.taxPercent, form.discount),
     [form.lineItems, form.taxPercent, form.discount]
   )
 
-  // sync computed line_subtotal back into form lineItems (for payload build)
   useEffect(() => {
     setForm((f) => {
       const same =
@@ -223,11 +218,9 @@ export default function CreateInvoice() {
     })
   }
 
-  // -------- client-side validation --------
+  // -------- validation --------
   const validate = () => {
     const errs = {}
-    if (!form.invoiceNumber.trim()) errs.invoice_number = 'Required'
-    if (!form.issueDate) errs.issue_date = 'Required'
     if (!form.clientId) errs.client_id = 'Select a client'
     if (!form.currency) errs.currency = 'Required'
     form.lineItems.forEach((li, i) => {
@@ -273,7 +266,6 @@ export default function CreateInvoice() {
     }
   }
 
-  // 422 → map err.detail[] into fieldErrors. 400 → toast.
   const handleSubmitError = (err) => {
     const status = err?.status || err?.response?.status
     const detail = err?.detail || err?.response?.data?.detail
@@ -281,7 +273,7 @@ export default function CreateInvoice() {
     if (Array.isArray(detail)) {
       const next = {}
       detail.forEach((d) => {
-        const path = (d.loc || []).slice(1).join('.') // strip 'body'
+        const path = (d.loc || []).slice(1).join('.')
         if (path) next[path] = d.msg || 'Invalid'
       })
       setFieldErrors(next)
@@ -295,15 +287,14 @@ export default function CreateInvoice() {
     toast(err?.message || 'Failed to create invoice', 'error')
   }
 
-  // -------- render helpers --------
   const errFor = (key) => fieldErrors[key]
   const inputCls = (key) =>
     cn('input', errFor(key) && 'border-red-500 focus:border-red-500')
 
-  // -------- render --------
+  const todayLabel = new Date().toLocaleDateString('en-US')
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-8 animate-fade-up">
-      {/* header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <button
@@ -343,19 +334,18 @@ export default function CreateInvoice() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT: meta + client + line items */}
         <div className="lg:col-span-2 space-y-6">
-          {/* meta */}
           <section className="card p-6">
             <SectionHeader title="Invoice details" />
             <div className="grid grid-cols-2 gap-4 mt-4">
-              <Field label="Invoice number" error={errFor('invoice_number')}>
-                <input
-                  className={inputCls('invoice_number')}
-                  value={form.invoiceNumber}
-                  onChange={(e) => set('invoiceNumber', e.target.value)}
-                  placeholder="INV-2026-001"
-                />
+              <Field label="Invoice number" hint="Auto-generated by the system">
+                <div
+                  className="input h-9 text-sm flex items-center italic"
+                  style={{ color: 'var(--text-muted)' }}
+                  aria-readonly="true"
+                >
+                  Auto-generated on save
+                </div>
               </Field>
               <Field label="Currency" error={errFor('currency')}>
                 <select
@@ -370,13 +360,14 @@ export default function CreateInvoice() {
                   ))}
                 </select>
               </Field>
-              <Field label="Issue date" error={errFor('issue_date')}>
-                <input
-                  type="date"
-                  className={inputCls('issue_date')}
-                  value={form.issueDate}
-                  onChange={(e) => set('issueDate', e.target.value)}
-                />
+              <Field label="Issue date" hint="Today">
+                <div
+                  className="input h-9 text-sm flex items-center"
+                  style={{ color: 'var(--text-muted)' }}
+                  aria-readonly="true"
+                >
+                  {todayLabel}
+                </div>
               </Field>
               <Field label="Due date" error={errFor('due_date')}>
                 <input
@@ -411,7 +402,6 @@ export default function CreateInvoice() {
             </div>
           </section>
 
-          {/* client */}
           <section className="card p-6">
             <SectionHeader title="Bill to" />
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -468,7 +458,6 @@ export default function CreateInvoice() {
             </div>
           </section>
 
-          {/* line items */}
           <section className="card p-6">
             <div className="flex items-center justify-between mb-4">
               <SectionHeader title="Line items" />
@@ -553,7 +542,6 @@ export default function CreateInvoice() {
           </section>
         </div>
 
-        {/* RIGHT: totals */}
         <aside className="lg:col-span-1">
           <section className="card p-6 sticky top-6">
             <SectionHeader title="Totals" />
@@ -603,16 +591,16 @@ export default function CreateInvoice() {
   )
 }
 
-// ---------------------------------------------------------------------------
-// Small presentational helpers (kept in-file per single-file-component rule)
-// ---------------------------------------------------------------------------
-function Field({ label, error, children }) {
+function Field({ label, hint, error, children }) {
   return (
     <label className="block">
       <span className="block text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] mb-1.5">
         {label}
       </span>
       {children}
+      {hint && !error && (
+        <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{hint}</p>
+      )}
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </label>
   )

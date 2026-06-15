@@ -1,68 +1,110 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Users } from 'lucide-react';
-import { clientsApi } from '../lib/api';
-import { EmptyState, ErrorState, PageLoader } from '../components/ui';
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Users, UserPlus } from 'lucide-react'
+import { clientsApi } from '../lib/api'
+import { EmptyState, ErrorState, PageLoader } from '../components/ui'
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 50
 
 export default function Clients() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [data, setData] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate()
+  const [page,    setPage]    = useState(1)
+  const [search,  setSearch]  = useState('')
+  const [data,    setData]    = useState([])
+  const [total,   setTotal]   = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error,   setError]   = useState(null)
 
   const load = useCallback(async () => {
-    setLoading(true); setError(null);
+    setLoading(true); setError(null)
     try {
-      const res = await clientsApi.list({ page, limit: PAGE_SIZE });
-      setData(res.data || res || []);
-      setTotal(res.total ?? 0);
-    } catch (e) { setError(e.message); }
-    finally { setLoading(false); }
-  }, [page]);
+      const res = await clientsApi.list({ page, limit: PAGE_SIZE })
+      setData(res.data || res || [])
+      setTotal(res.total ?? 0)
+    } catch (e) { setError(e.message) }
+    finally { setLoading(false) }
+  }, [page])
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load() }, [load])
 
-  const filtered = search ? data.filter(c => c.name?.toLowerCase().includes(search.toLowerCase()) || c.email?.toLowerCase().includes(search.toLowerCase())) : data;
-  const totalPages = Math.ceil(total / PAGE_SIZE) || 1;
+  const filtered = search
+    ? data.filter(c =>
+        c.name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.email?.toLowerCase().includes(search.toLowerCase())
+      )
+    : data
+
+  const totalPages = Math.ceil(total / PAGE_SIZE) || 1
 
   return (
     <div>
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 12, alignItems: 'center' }}>
-          <input className="input" placeholder="Search clients…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, fontSize: 13, padding: '6px 12px' }} />
-          {total > 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{total} total</span>}
+        <div style={{
+          padding: '14px 20px',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          gap: 12,
+          alignItems: 'center',
+        }}>
+          <input
+            className="input"
+            placeholder="Search clients…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{ flex: 1, fontSize: 13, padding: '6px 12px' }}
+          />
+          {total > 0 && (
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+              {total} total
+            </span>
+          )}
+          <button
+            onClick={() => navigate('/clients/create')}
+            className="btn-primary"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 14px', whiteSpace: 'nowrap' }}
+          >
+            <UserPlus size={14} />
+            Create Client
+          </button>
         </div>
 
-        {loading ? <PageLoader /> : error ? <ErrorState message={error} onRetry={load} /> : filtered.length === 0 ? (
-          <EmptyState icon={Users} title="No clients found" />
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {['Name', 'Email', 'Phone', 'Tax ID', 'Credit Balance', 'Invoice Count'].map(h => (
-                    <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-muted)' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map(c => (
-                  <tr key={c.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: 600, fontSize: 13 }}>{c.name}</td>
-                    <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>{c.email || '—'}</td>
-                    <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>{c.phone || '—'}</td>
-                    <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{c.tax_id}</td>
-                    <td style={{ padding: '12px 16px' }}>{c.credit_balance && c.credit_balance > 0 ? <span className="font-mono text-xs" style={{color:"#F59E0B"}}>{c.credit_balance.toFixed(2)}</span> : <span style={{color:"var(--text-muted)"}}>—</span>}</td>
-                    <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{c.invoice_count ?? '—'}</td>
+        {loading ? <PageLoader />
+          : error ? <ErrorState message={error} onRetry={load} />
+          : filtered.length === 0 ? (
+            <EmptyState icon={Users} title="No clients found" />
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    {['Name', 'Email', 'Phone', 'Tax ID', 'Credit Balance', 'Invoice Count'].map(h => (
+                      <th key={h} style={{
+                        padding: '10px 16px', textAlign: 'left', fontSize: 11,
+                        fontWeight: 600, textTransform: 'uppercase',
+                        letterSpacing: '0.06em', color: 'var(--text-muted)',
+                      }}>{h}</th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {filtered.map(c => (
+                    <tr key={c.id} className="table-row-hover" style={{ borderBottom: '1px solid var(--border-subtle)', cursor: 'pointer' }}>
+                      <td style={{ padding: '12px 16px', fontWeight: 600, fontSize: 13 }}>{c.name}</td>
+                      <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>{c.email || '—'}</td>
+                      <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--text-secondary)' }}>{c.phone || '—'}</td>
+                      <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)' }}>{c.tax_id}</td>
+                      <td style={{ padding: '12px 16px' }}>
+                        {c.credit_balance && c.credit_balance > 0
+                          ? <span className="font-mono text-xs" style={{ color: '#F59E0B' }}>{c.credit_balance.toFixed(2)}</span>
+                          : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                      </td>
+                      <td style={{ padding: '12px 16px', fontFamily: 'var(--font-mono)', fontSize: 12 }}>{c.invoice_count ?? '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
         {!loading && !error && total > PAGE_SIZE && (
           <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -75,5 +117,5 @@ export default function Clients() {
         )}
       </div>
     </div>
-  );
+  )
 }
