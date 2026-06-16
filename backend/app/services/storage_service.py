@@ -29,26 +29,31 @@ def upload_invoice_pdf(
     company_id: str,
     invoice_id: str,
     pdf_bytes: bytes,
+    storage_path: str | None = None,
 ) -> str:
     """
-    Upload a payable invoice PDF to the private "invoices" bucket.
+    Upload an invoice PDF to the private "invoices" bucket.
 
-    Path: {company_id}/{invoice_id}.pdf
+    Path (default): {company_id}/{invoice_id}.pdf
+    Pass storage_path to override (e.g. human-readable receivable path).
     Uses upsert=True — re-ingestion overwrites cleanly.
 
     Args:
-        db:          Supabase client.
-        company_id:  Tenant UUID.
-        invoice_id:  Invoice UUID — used as the filename.
-        pdf_bytes:   Raw PDF bytes.
+        db:           Supabase client.
+        company_id:   Tenant UUID.
+        invoice_id:   Invoice UUID.
+        pdf_bytes:    Raw PDF bytes.
+        storage_path: Optional override path. Defaults to
+                      "{company_id}/{invoice_id}.pdf".
 
     Returns:
-        storage_path: "{company_id}/{invoice_id}.pdf"
+        storage_path used for the upload.
 
     Raises:
         ValueError on upload failure.
     """
-    storage_path = f"{company_id}/{invoice_id}.pdf"
+    if not storage_path:
+        storage_path = f"{company_id}/{invoice_id}.pdf"
 
     try:
         db.storage.from_(BUCKET).upload(
@@ -63,7 +68,7 @@ def upload_invoice_pdf(
         return storage_path
     except Exception as e:
         log.error(f"upload_invoice_pdf failed  invoice_id={invoice_id}  error={e}")
-        raise ValueError(f"Failed to upload payable PDF to storage: {e}")
+        raise ValueError(f"Failed to upload PDF to storage: {e}")
 
 
 def get_signed_url(

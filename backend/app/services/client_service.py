@@ -104,7 +104,9 @@ def list_clients(
     offset: int = 0,
     search: str | None = None,
 ) -> dict:
-    """Returns paginated response with optional search on name/tax_id."""
+    """Returns paginated response with optional search on name/tax_id.
+    Each client row includes invoice_count.
+    """
     try:
         count_query = (
             db.table("clients")
@@ -112,38 +114,69 @@ def list_clients(
             .eq("company_id", str(company_id))
             .is_("deleted_at", "null")
         )
-
         data_query = (
             db.table("clients")
             .select("*")
             .eq("company_id", str(company_id))
             .is_("deleted_at", "null")
         )
-
+ 
         if search:
             or_filter = f"name.ilike.%{search}%,tax_id.ilike.%{search}%"
             count_query = count_query.or_(or_filter)
-            data_query = data_query.or_(or_filter)
-
+            data_query  = data_query.or_(or_filter)
+ 
         count_result = count_query.execute()
         total = count_result.count or 0
-
+ 
         result = (
             data_query
             .order("created_at", desc=True)
             .range(offset, offset + limit - 1)
             .execute()
         )
+        clients = result.data or []
     except Exception as e:
         raise DatabaseError("Failed to list clients", detail=str(e))
-
+ 
+    # Attach invoice_count per client
+    if clients:
+        client_ids = [c["id"] for c in clients]
+        try:
+            inv_rows = (
+                db.table("invoices")
+                .select("client_id", count="exact")
+                .in_("client_id", client_ids)
+                .eq("company_id", str(company_id))
+                .is_("deleted_at", "null")
+                .execute()
+            )
+            # Build count map by fetching all rows (no GROUP BY in supabase-py)
+            all_inv = (
+                db.table("invoices")
+                .select("client_id")
+                .in_("client_id", client_ids)
+                .eq("company_id", str(company_id))
+                .is_("deleted_at", "null")
+                .execute()
+            )
+            count_map: dict[str, int] = {}
+            for row in (all_inv.data or []):
+                cid = row["client_id"]
+                count_map[cid] = count_map.get(cid, 0) + 1
+            for c in clients:
+                c["invoice_count"] = count_map.get(c["id"], 0)
+        except Exception:
+            for c in clients:
+                c["invoice_count"] = None
+ 
     return {
-        "data": result.data or [],
-        "total": total,
-        "limit": limit,
+        "data":   clients,
+        "total":  total,
+        "limit":  limit,
         "offset": offset,
     }
-
+ 
 
 def get_client(db: SupabaseClient, client_id: uuid.UUID) -> dict:
     try:

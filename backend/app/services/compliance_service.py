@@ -323,10 +323,7 @@ def validate_invoice_compliance(
     r = f"Missing required fields: {', '.join(missing)}" if missing else None
     run("missing_required_fields", "medium", v, r)
 
-    # --- LOW_CONFIDENCE ---
-    v, r = _check_low_confidence(invoice)
-    run("low_confidence", "medium", v, r)
-
+  
     # --- DUPLICATE_INVOICE ---
     v, r = _check_duplicate(db, company_id, invoice)
     run("duplicate_invoice", "high", v, r)

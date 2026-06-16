@@ -1815,3 +1815,676 @@ Please arrange payment at your e...
 2026-06-15 07:52:47,762 DEBUG apscheduler.scheduler Looking for jobs to run
 2026-06-15 07:52:47,762 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
 2026-06-15 07:52:47,763 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 21:27:59,620 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 21:28:01,794 INFO app.main Supabase connection verified at startup
+2026-06-15 21:28:01,794 INFO app.main Storage active bucket: invoices
+2026-06-15 21:28:01,798 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 21:28:01,824 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 21:28:01,824 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 21:28:01,824 INFO apscheduler.scheduler Scheduler started
+2026-06-15 21:28:01,824 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:28:01,831 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 9118.168504 seconds)
+2026-06-15 21:28:01,824 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 21:29:30,928 INFO app.services.invoice_service receivable_create  invoice_id=c599875e-a6e4-49a7-92f2-f8eeaf7013f3  invoice_number='REC-2026-0143'
+2026-06-15 21:29:34,323 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 21:29:34,324 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 21:29:34,324 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 21:29:34,326 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 21:29:34,326 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 21:29:34,327 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 21:29:34,327 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 21:29:34,328 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 21:29:34,328 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 21:29:34,328 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 21:29:34,330 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 21:29:34,346 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-15 21:29:34,353 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-15 21:29:34,877 ERROR app.services.invoice_service receivable_create  stage=storage_upload_failed  error=upload_invoice_pdf() got an unexpected keyword argument 'storage_path'
+2026-06-15 21:29:44,344 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:29:46,072 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:29:46,186 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:29:46,189 ERROR app.services.invoice_service receivable_create  stage=embedding_failed  error=Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:29:47,621 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  error=name '_check_low_confidence' is not defined
+2026-06-15 21:32:29,653 INFO app.services.invoice_service receivable_create  invoice_id=97cc8958-12a1-4a8d-998e-76c2cbe0a4c0  invoice_number='REC-2026-0144'
+2026-06-15 21:32:31,775 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 21:32:31,775 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 21:32:31,776 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 21:32:31,778 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 21:32:31,781 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 21:32:31,782 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 21:32:31,783 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 21:32:31,783 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 21:32:31,785 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 21:32:31,785 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 21:32:31,785 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 21:32:31,786 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 21:32:31,786 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 21:32:31,786 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 21:32:31,787 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 21:32:31,787 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 21:32:31,787 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 21:32:31,789 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 21:32:31,838 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-15 21:32:31,838 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-15 21:32:32,173 ERROR app.services.invoice_service receivable_create  stage=storage_upload_failed  error=upload_invoice_pdf() got an unexpected keyword argument 'storage_path'
+2026-06-15 21:32:34,338 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:32:34,735 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:32:35,040 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:32:35,040 ERROR app.services.invoice_service receivable_create  stage=embedding_failed  error=Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 21:32:36,172 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  error=name '_check_low_confidence' is not defined
+2026-06-15 21:45:19,961 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 21:45:19,965 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:45:19,965 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 21:45:19,973 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 21:45:24,259 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 21:45:25,828 INFO app.main Supabase connection verified at startup
+2026-06-15 21:45:25,842 INFO app.main Storage active bucket: invoices
+2026-06-15 21:45:25,855 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 21:45:25,926 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 21:45:25,926 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 21:45:25,926 INFO apscheduler.scheduler Scheduler started
+2026-06-15 21:45:25,926 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:45:25,926 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 21:45:25,926 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 8074.073995 seconds)
+2026-06-15 21:45:26,034 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 21:45:26,034 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:45:26,034 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 21:45:26,034 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 21:45:29,386 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 21:45:30,236 INFO app.main Supabase connection verified at startup
+2026-06-15 21:45:30,241 INFO app.main Storage active bucket: invoices
+2026-06-15 21:45:30,243 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 21:45:30,249 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 21:45:30,250 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 21:45:30,251 INFO apscheduler.scheduler Scheduler started
+2026-06-15 21:45:30,251 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:45:30,251 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 8069.748194 seconds)
+2026-06-15 21:45:30,251 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 21:47:03,186 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 21:47:03,188 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:47:03,188 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 21:47:03,188 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 21:47:06,294 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 21:47:06,814 INFO app.main Supabase connection verified at startup
+2026-06-15 21:47:06,814 INFO app.main Storage active bucket: invoices
+2026-06-15 21:47:06,814 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 21:47:06,831 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 21:47:06,834 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 21:47:06,834 INFO apscheduler.scheduler Scheduler started
+2026-06-15 21:47:06,840 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:47:06,840 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 21:47:06,840 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 7973.159187 seconds)
+2026-06-15 21:47:06,968 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 21:47:06,970 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:47:06,970 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 21:47:06,970 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 21:47:09,482 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 21:47:10,059 INFO app.main Supabase connection verified at startup
+2026-06-15 21:47:10,063 INFO app.main Storage active bucket: invoices
+2026-06-15 21:47:10,063 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 21:47:10,071 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 21:47:10,075 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 21:47:10,077 INFO apscheduler.scheduler Scheduler started
+2026-06-15 21:47:10,104 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 21:47:10,144 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 7969.855892 seconds)
+2026-06-15 21:47:10,104 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 22:12:48,482 INFO app.services.invoice_service receivable_create  invoice_id=66d7e7af-343c-4cd8-9275-914a06856194  invoice_number='REC-2026-0145'
+2026-06-15 22:12:51,447 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 22:12:51,450 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 22:12:51,451 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 22:12:51,451 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 22:12:51,452 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 22:12:51,453 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 22:12:51,453 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 22:12:51,453 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 22:12:51,455 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 22:12:51,455 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 22:12:51,456 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 22:12:51,457 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 22:12:51,457 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 22:12:51,458 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 22:12:51,458 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 22:12:51,458 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 22:12:51,460 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 22:12:51,461 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 22:12:51,483 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-15 22:12:51,484 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-15 22:12:53,357 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - REC-2026-0145.pdf
+2026-06-15 22:12:56,966 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 22:12:57,751 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 22:12:58,058 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 22:12:58,059 ERROR app.services.invoice_service receivable_create  stage=embedding_failed  error=Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 22:12:59,185 ERROR app.services.invoice_service receivable_create  stage=compliance_failed  error=name '_check_low_confidence' is not defined
+2026-06-15 22:28:00,188 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 22:28:00,210 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 22:28:00,218 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 22:28:00,220 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 22:28:09,117 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 22:28:10,260 INFO app.main Supabase connection verified at startup
+2026-06-15 22:28:10,260 INFO app.main Storage active bucket: invoices
+2026-06-15 22:28:10,260 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 22:28:10,363 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 22:28:10,369 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 22:28:10,371 INFO apscheduler.scheduler Scheduler started
+2026-06-15 22:28:10,373 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 22:28:10,375 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 5509.624380 seconds)
+2026-06-15 22:28:10,375 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 23:16:31,021 INFO app.services.invoice_service receivable_create  invoice_id=539b8e98-cc17-4532-9df9-c3fd279bc456  invoice_number='REC-2026-0146'
+2026-06-15 23:16:34,594 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 23:16:34,594 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 23:16:34,594 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 23:16:34,594 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 23:16:34,598 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 23:16:34,598 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 23:16:34,598 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 23:16:34,598 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 23:16:34,600 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 23:16:34,600 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-15 23:16:34,600 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-15 23:16:34,602 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-15 23:16:34,602 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-15 23:16:34,602 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-15 23:16:34,603 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-15 23:16:34,603 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-15 23:16:34,603 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-15 23:16:34,604 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-15 23:16:34,616 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-15 23:16:34,620 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-15 23:16:37,153 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - REC-2026-0146.pdf
+2026-06-15 23:16:40,794 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 23:16:41,059 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 23:16:41,191 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 23:16:41,195 ERROR app.services.invoice_service receivable_create  stage=embedding_failed  error=Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-15 23:16:42,740 INFO app.services.compliance_service Compliance check complete for 539b8e98-cc17-4532-9df9-c3fd279bc456: 5 checks, 0 inserted, 0 resolved
+2026-06-15 23:53:42,116 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 23:53:42,169 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:53:42,189 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 23:53:42,200 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 23:54:32,369 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 23:54:34,030 INFO app.main Supabase connection verified at startup
+2026-06-15 23:54:34,035 INFO app.main Storage active bucket: invoices
+2026-06-15 23:54:34,040 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 23:54:34,149 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 23:54:34,149 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 23:54:34,164 INFO apscheduler.scheduler Scheduler started
+2026-06-15 23:54:34,177 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:54:34,179 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 23:54:34,182 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 325.817482 seconds)
+2026-06-15 23:54:34,298 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 23:54:34,303 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:54:34,309 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 23:54:34,315 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 23:55:04,005 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 23:55:05,308 INFO app.main Supabase connection verified at startup
+2026-06-15 23:55:05,314 INFO app.main Storage active bucket: invoices
+2026-06-15 23:55:05,319 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 23:55:05,395 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 23:55:05,403 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 23:55:05,409 INFO apscheduler.scheduler Scheduler started
+2026-06-15 23:55:05,427 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:55:05,428 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 23:55:05,431 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 294.568650 seconds)
+2026-06-15 23:55:05,548 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 23:55:05,553 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:55:05,558 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 23:55:05,562 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 23:55:37,319 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 23:55:38,517 INFO app.main Supabase connection verified at startup
+2026-06-15 23:55:38,523 INFO app.main Storage active bucket: invoices
+2026-06-15 23:55:38,528 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 23:55:38,594 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 23:55:38,601 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 23:55:38,606 INFO apscheduler.scheduler Scheduler started
+2026-06-15 23:55:38,621 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:55:38,622 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 23:55:38,625 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 261.374651 seconds)
+2026-06-15 23:56:01,831 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 23:56:01,836 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:56:01,840 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 23:56:01,843 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 23:56:38,848 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 23:56:40,108 INFO app.main Supabase connection verified at startup
+2026-06-15 23:56:40,114 INFO app.main Storage active bucket: invoices
+2026-06-15 23:56:40,118 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 23:56:40,188 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 23:56:40,200 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 23:56:40,203 INFO apscheduler.scheduler Scheduler started
+2026-06-15 23:56:40,220 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:56:40,220 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 23:56:40,224 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 199.775503 seconds)
+2026-06-15 23:59:15,942 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 23:59:15,946 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:59:15,946 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 23:59:15,946 INFO app.main [overdue_check] scheduler stopped
+2026-06-15 23:59:48,122 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-15 23:59:49,004 INFO app.main Supabase connection verified at startup
+2026-06-15 23:59:49,009 INFO app.main Storage active bucket: invoices
+2026-06-15 23:59:49,014 DEBUG tzlocal Looking up time zone info from registry
+2026-06-15 23:59:49,058 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-15 23:59:49,065 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-15 23:59:49,069 INFO apscheduler.scheduler Scheduler started
+2026-06-15 23:59:49,080 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:59:49,081 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-15 23:59:49,083 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-16 00:00:00+03:00 (in 10.916526 seconds)
+2026-06-15 23:59:51,108 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-15 23:59:51,108 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-15 23:59:51,108 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-15 23:59:51,119 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 00:00:20,040 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 00:00:20,996 INFO app.main Supabase connection verified at startup
+2026-06-16 00:00:20,998 INFO app.main Storage active bucket: invoices
+2026-06-16 00:00:21,002 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 00:00:21,050 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 00:00:21,056 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 00:00:21,060 INFO apscheduler.scheduler Scheduler started
+2026-06-16 00:00:21,069 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:00:21,070 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 00:00:21,072 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 86378.927130 seconds)
+2026-06-16 00:00:21,188 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 00:00:21,188 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:00:21,194 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 00:00:21,198 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 00:00:44,071 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 00:00:45,073 INFO app.main Supabase connection verified at startup
+2026-06-16 00:00:45,076 INFO app.main Storage active bucket: invoices
+2026-06-16 00:00:45,078 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 00:00:45,121 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 00:00:45,125 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 00:00:45,130 INFO apscheduler.scheduler Scheduler started
+2026-06-16 00:00:45,144 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:00:45,145 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 00:00:45,148 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 86354.851727 seconds)
+2026-06-16 00:01:11,386 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 00:01:11,390 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:01:11,393 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 00:01:11,396 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 00:01:43,967 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 00:01:45,575 INFO app.main Supabase connection verified at startup
+2026-06-16 00:01:45,575 INFO app.main Storage active bucket: invoices
+2026-06-16 00:01:45,591 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 00:01:45,657 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 00:01:45,666 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 00:01:45,672 INFO apscheduler.scheduler Scheduler started
+2026-06-16 00:01:45,689 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:01:45,690 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 00:01:45,695 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 86294.304815 seconds)
+2026-06-16 00:01:45,822 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 00:01:45,827 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:01:45,827 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 00:01:45,827 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 00:02:13,699 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 00:02:14,880 INFO app.main Supabase connection verified at startup
+2026-06-16 00:02:14,885 INFO app.main Storage active bucket: invoices
+2026-06-16 00:02:14,887 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 00:02:14,921 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 00:02:14,921 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 00:02:14,921 INFO apscheduler.scheduler Scheduler started
+2026-06-16 00:02:14,942 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:02:14,942 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 00:02:14,945 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 86265.055582 seconds)
+2026-06-16 00:18:45,525 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 00:18:46,294 INFO app.main Supabase connection verified at startup
+2026-06-16 00:18:46,294 INFO app.main Storage active bucket: invoices
+2026-06-16 00:18:46,294 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 00:18:46,314 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 00:18:46,317 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 00:18:46,318 INFO apscheduler.scheduler Scheduler started
+2026-06-16 00:18:46,321 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 00:18:46,321 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 00:18:46,322 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 85273.677022 seconds)
+2026-06-16 01:27:02,394 INFO app.routers.query Query received: Are there any compliance issues I should know about?
+2026-06-16 01:27:02,412 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-16 01:27:04,622 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}. Defaulting to rag_invoice.
+2026-06-16 01:27:04,622 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-16 01:27:04,880 WARNING app.services.query_service Multi-query generation failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 01:27:04,882 INFO app.services.query_service Query variants: ['Are there any compliance issues I should know about?']
+2026-06-16 01:27:05,380 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 01:27:05,606 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 01:27:05,726 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 01:27:05,728 ERROR app.routers.query Query failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+Traceback (most recent call last):
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\services\query_service.py", line 957, in handle_query
+    query_vectors = embedder.embed(variants)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\providers\openai_provider.py", line 53, in embed
+    response = self._client.embeddings.create(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\resources\embeddings.py", line 136, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+
+2026-06-16 02:31:37,883 INFO app.services.invoice_service receivable_create  invoice_id=4a12aa0f-41ab-4399-8c46-c7a74555bff8  invoice_number='REC-2026-0147'
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-16 02:31:41,095 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-16 02:31:41,111 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-16 02:31:41,145 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-16 02:31:41,145 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-16 02:31:43,095 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - REC-2026-0147.pdf
+2026-06-16 02:31:45,479 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:31:45,778 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:31:45,871 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:31:45,871 ERROR app.services.invoice_service receivable_create  stage=embedding_failed  error=Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:31:47,114 INFO app.services.compliance_service Compliance flag inserted: missing_required_fields (medium) on 4a12aa0f-41ab-4399-8c46-c7a74555bff8
+2026-06-16 02:31:47,314 INFO app.services.compliance_service Compliance check complete for 4a12aa0f-41ab-4399-8c46-c7a74555bff8: 5 checks, 1 inserted, 0 resolved
+2026-06-16 02:34:03,249 INFO app.services.invoice_service receivable_create  invoice_id=e773c229-01c3-4840-a99c-e4a1745b759b  invoice_number='REC-2026-0148'
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
+2026-06-16 02:34:04,881 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
+2026-06-16 02:34:04,892 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
+2026-06-16 02:34:04,892 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
+2026-06-16 02:34:04,894 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
+2026-06-16 02:34:04,895 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
+2026-06-16 02:34:04,895 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
+2026-06-16 02:34:04,901 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
+2026-06-16 02:34:04,901 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
+2026-06-16 02:34:06,082 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - REC-2026-0148.pdf
+2026-06-16 02:34:07,426 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:34:07,651 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:34:07,745 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:34:07,745 ERROR app.services.invoice_service receivable_create  stage=embedding_failed  error=Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 02:34:08,793 INFO app.services.compliance_service Compliance check complete for e773c229-01c3-4840-a99c-e4a1745b759b: 5 checks, 0 inserted, 0 resolved
+2026-06-16 02:47:32,730 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 02:47:32,741 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 02:47:32,746 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 02:47:32,748 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 02:47:39,646 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 02:47:40,080 INFO app.main Supabase connection verified at startup
+2026-06-16 02:47:40,080 INFO app.main Storage active bucket: invoices
+2026-06-16 02:47:40,080 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 02:47:40,122 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 02:47:40,124 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 02:47:40,124 INFO apscheduler.scheduler Scheduler started
+2026-06-16 02:47:40,128 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 02:47:40,128 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 02:47:40,130 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 76339.869275 seconds)
+2026-06-16 02:48:29,600 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 02:48:29,601 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 02:48:29,601 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 02:48:29,602 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 02:48:32,165 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 02:48:32,583 INFO app.main Supabase connection verified at startup
+2026-06-16 02:48:32,585 INFO app.main Storage active bucket: invoices
+2026-06-16 02:48:32,585 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 02:48:32,595 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 02:48:32,596 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 02:48:32,596 INFO apscheduler.scheduler Scheduler started
+2026-06-16 02:48:32,599 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 02:48:32,599 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 02:48:32,599 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 76287.400991 seconds)
+2026-06-16 02:48:32,710 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 02:48:32,710 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 02:48:32,710 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 02:48:32,710 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 02:48:35,261 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 02:48:35,599 INFO app.main Supabase connection verified at startup
+2026-06-16 02:48:35,599 INFO app.main Storage active bucket: invoices
+2026-06-16 02:48:35,600 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 02:48:35,608 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 02:48:35,609 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 02:48:35,610 INFO apscheduler.scheduler Scheduler started
+2026-06-16 02:48:35,612 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 02:48:35,612 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 02:48:35,613 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 76284.387393 seconds)
+2026-06-16 03:14:29,388 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:14:29,388 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:14:29,388 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:14:29,394 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:14:32,889 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:14:33,295 INFO app.main Supabase connection verified at startup
+2026-06-16 03:14:33,295 INFO app.main Storage active bucket: invoices
+2026-06-16 03:14:33,295 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:14:33,313 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:14:33,313 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:14:33,313 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:14:33,319 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:14:33,319 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:14:33,319 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 74726.680119 seconds)
+2026-06-16 03:14:33,435 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:14:33,437 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:14:33,437 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:14:33,437 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:14:36,084 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:14:36,424 INFO app.main Supabase connection verified at startup
+2026-06-16 03:14:36,424 INFO app.main Storage active bucket: invoices
+2026-06-16 03:14:36,424 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:14:36,424 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:14:36,424 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:14:36,443 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:14:36,446 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:14:36,448 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 74723.551992 seconds)
+2026-06-16 03:14:36,448 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:23:13,795 INFO app.routers.query Query received: REC-2026-0148 what is this invoice
+2026-06-16 03:23:13,795 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-16 03:23:15,583 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}. Defaulting to rag_invoice.
+2026-06-16 03:23:15,586 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-16 03:23:15,844 WARNING app.services.query_service Multi-query generation failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:23:15,852 INFO app.services.query_service Query variants: ['REC-2026-0148 what is this invoice']
+2026-06-16 03:23:16,249 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:23:16,521 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:23:16,609 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:23:16,625 ERROR app.routers.query Query failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+Traceback (most recent call last):
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\services\query_service.py", line 957, in handle_query
+    query_vectors = embedder.embed(variants)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\providers\openai_provider.py", line 53, in embed
+    response = self._client.embeddings.create(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\resources\embeddings.py", line 136, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+
+2026-06-16 03:28:35,024 INFO app.routers.query Query received: REC-2026-0148 what is this invoice
+2026-06-16 03:28:35,024 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-16 03:28:35,493 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}. Defaulting to rag_invoice.
+2026-06-16 03:28:35,493 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-16 03:28:35,827 WARNING app.services.query_service Multi-query generation failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:35,829 INFO app.services.query_service Query variants: ['REC-2026-0148 what is this invoice']
+2026-06-16 03:28:36,198 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:36,274 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:36,371 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:36,375 ERROR app.routers.query Query failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+Traceback (most recent call last):
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\services\query_service.py", line 957, in handle_query
+    query_vectors = embedder.embed(variants)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\providers\openai_provider.py", line 53, in embed
+    response = self._client.embeddings.create(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\resources\embeddings.py", line 136, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+
+2026-06-16 03:28:41,540 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-06-16 03:28:41,540 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-16 03:28:41,859 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}. Defaulting to rag_invoice.
+2026-06-16 03:28:41,861 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-16 03:28:42,099 WARNING app.services.query_service Multi-query generation failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:42,099 INFO app.services.query_service Query variants: ['Show me all overdue invoices from last month']
+2026-06-16 03:28:42,332 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:42,429 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:42,669 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:28:42,673 ERROR app.routers.query Query failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+Traceback (most recent call last):
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\services\query_service.py", line 957, in handle_query
+    query_vectors = embedder.embed(variants)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\providers\openai_provider.py", line 53, in embed
+    response = self._client.embeddings.create(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\resources\embeddings.py", line 136, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+
+2026-06-16 03:30:19,142 INFO app.routers.query Query received: كسمك
+2026-06-16 03:30:19,142 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-06-16 03:30:19,644 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}. Defaulting to rag_invoice.
+2026-06-16 03:30:19,646 INFO app.services.query_service Intent: rag_invoice, doc_types: []
+2026-06-16 03:30:19,938 WARNING app.services.query_service Multi-query generation failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:30:19,938 INFO app.services.query_service Query variants: ['كسمك']
+2026-06-16 03:30:20,306 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 1): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:30:20,822 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 2): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:30:20,918 ERROR app.providers.openai_provider OpenAI embedding failed (attempt 3): Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+2026-06-16 03:30:20,918 ERROR app.routers.query Query failed: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+Traceback (most recent call last):
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
+    result = handle_query(db=db, company_id=company_id, question=body.question)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\services\query_service.py", line 957, in handle_query
+    query_vectors = embedder.embed(variants)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\Desktop\CP_PROJ\backend\app\providers\openai_provider.py", line 53, in embed
+    response = self._client.embeddings.create(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\resources\embeddings.py", line 136, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1332, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\saloo\AppData\Local\Programs\Python\Python311\Lib\site-packages\openai\_base_client.py", line 1105, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************mgcA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
+
+2026-06-16 03:32:45,069 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:32:45,069 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:32:45,069 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:32:45,069 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:37:14,513 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:37:14,982 INFO app.main Supabase connection verified at startup
+2026-06-16 03:37:14,982 INFO app.main Storage active bucket: invoices
+2026-06-16 03:37:14,982 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:37:14,998 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:37:14,998 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:37:14,998 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:37:15,007 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:37:15,007 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:37:15,008 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 73364.991169 seconds)
+2026-06-16 03:40:59,893 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:40:59,894 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:40:59,894 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:40:59,895 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:41:02,697 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:41:03,057 INFO app.main Supabase connection verified at startup
+2026-06-16 03:41:03,057 INFO app.main Storage active bucket: invoices
+2026-06-16 03:41:03,057 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:41:03,071 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:41:03,072 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:41:03,073 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:41:03,074 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:03,075 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 73136.924730 seconds)
+2026-06-16 03:41:03,074 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:41:07,889 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:41:07,893 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:07,893 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:41:07,893 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:41:10,405 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:41:10,751 INFO app.main Supabase connection verified at startup
+2026-06-16 03:41:10,752 INFO app.main Storage active bucket: invoices
+2026-06-16 03:41:10,753 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:41:10,759 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:41:10,760 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:41:10,760 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:41:10,762 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:10,762 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:41:10,763 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 73129.236074 seconds)
+2026-06-16 03:41:10,874 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:41:10,877 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:10,877 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:41:10,877 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:41:13,557 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:41:13,872 INFO app.main Supabase connection verified at startup
+2026-06-16 03:41:13,872 INFO app.main Storage active bucket: invoices
+2026-06-16 03:41:13,873 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:41:13,883 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:41:13,883 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:41:13,885 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:41:13,885 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:13,885 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:41:13,885 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 73126.114377 seconds)
+2026-06-16 03:41:14,005 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:41:14,005 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:14,005 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:41:14,007 INFO app.main [overdue_check] scheduler stopped
+2026-06-16 03:41:16,663 INFO app.main Logging configured — file: C:\Users\saloo\Desktop\CP_PROJ\backend\logs\backend.log
+2026-06-16 03:41:16,983 INFO app.main Supabase connection verified at startup
+2026-06-16 03:41:16,985 INFO app.main Storage active bucket: invoices
+2026-06-16 03:41:16,985 DEBUG tzlocal Looking up time zone info from registry
+2026-06-16 03:41:16,992 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-06-16 03:41:16,992 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-06-16 03:41:16,993 INFO apscheduler.scheduler Scheduler started
+2026-06-16 03:41:16,994 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:41:16,994 DEBUG apscheduler.scheduler Next wakeup is due at 2026-06-17 00:00:00+03:00 (in 73123.005265 seconds)
+2026-06-16 03:41:16,994 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-06-16 03:42:42,322 INFO apscheduler.scheduler Scheduler has been shut down
+2026-06-16 03:42:42,322 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-06-16 03:42:42,322 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-06-16 03:42:42,322 INFO app.main [overdue_check] scheduler stopped

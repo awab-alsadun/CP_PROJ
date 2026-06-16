@@ -75,7 +75,7 @@ def list_clients(
 @router.get("/{client_id}", response_model=ClientRead)
 def get_client(client_id: uuid.UUID, db: SupabaseClient = Depends(get_supabase)):
     return _handle(client_service.get_client, db, client_id)
-@router.get("/{client_id}/latest-address")
+
 
 @router.get("/{client_id}/latest-address")
 def get_latest_address(

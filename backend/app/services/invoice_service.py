@@ -631,3 +631,356 @@ def create_raw_document(db, data):
     if not result.data:
         raise DatabaseError("Insert returned no data")
     return result.data[0]
+
+    # ============================================================
+# ADD TO: app/services/invoice_service.py
+# Place all three helpers + create_payable_invoice directly
+# after the create_receivable_invoice() function.
+# No existing code changes — pure addition.
+# ============================================================
+
+
+def _fetch_vendor_for_payable(db, vendor_id, vendor_address_id):
+    if not vendor_id:
+        return {"address": {}}
+    try:
+        vr = (db.table("vendors").select("name, tax_id, email, phone")
+              .eq("id", str(vendor_id)).single().execute())
+        vendor = vr.data or {}
+    except Exception as e:
+        log.error(f"vendor fetch failed for {vendor_id}: {e}")
+        vendor = {}
+    address: dict = {}
+    if vendor_address_id:
+        try:
+            ar = (db.table("addresses")
+                  .select("street, city, state, postal_code, country")
+                  .eq("id", str(vendor_address_id)).single().execute())
+            address = ar.data or {}
+        except Exception as e:
+            log.error(f"address fetch failed for {vendor_address_id}: {e}")
+    return {**vendor, "address": address}
+ 
+ 
+def _build_payable_raw_text(invoice, vendor, line_items):
+    lines: list[str] = []
+    lines.append(f"Invoice: {invoice.get('invoice_number')}")
+    lines.append("Type: payable")
+    lines.append("")
+    lines.append(f"From: {vendor.get('name', 'Unknown')}")
+    lines.append("To: K4Y")
+    lines.append(f"Issue date: {invoice.get('issue_date')}")
+    if invoice.get("due_date"):
+        lines.append(f"Due date: {invoice['due_date']}")
+    lines.append(f"Currency: {invoice.get('currency')}")
+    lines.append("Line items:")
+    for i, li in enumerate(line_items, 1):
+        lines.append(
+            f"  {i}. {li.get('description')} | "
+            f"qty={li.get('quantity')} | "
+            f"unit_price={li.get('unit_price')} | "
+            f"subtotal={li.get('line_subtotal')}"
+        )
+    lines.append(f"Subtotal: {invoice.get('subtotal')}")
+    lines.append(f"Tax ({invoice.get('tax_percent')}%): {invoice.get('total_tax')}")
+    lines.append(f"Grand total: {invoice.get('grand_total')}")
+    return "\n".join(lines)
+ 
+ 
+def _build_payable_extraction_json(invoice, vendor, line_items):
+    return {
+        "schema_version": "1.0",
+        "document_metadata": {
+            "document_type":        "invoice",
+            "extraction_timestamp": datetime.utcnow().isoformat(),
+            "confidence_score":     1.0,
+            "source":               "form_input",
+        },
+        "invoice": {
+            "invoice_number": invoice.get("invoice_number"),
+            "issue_date":     invoice.get("issue_date"),
+            "due_date":       invoice.get("due_date"),
+            "currency":       invoice.get("currency"),
+            "tax_percent":    invoice.get("tax_percent"),
+            "subtotal":       invoice.get("subtotal"),
+            "total_tax":      invoice.get("total_tax"),
+            "grand_total":    invoice.get("grand_total"),
+            "discount":       invoice.get("discount"),
+            "payment_method": invoice.get("payment_method"),
+            "description":    invoice.get("description"),
+            "status":         invoice.get("status"),
+        },
+        "vendor": {
+            "name":    vendor.get("name"),
+            "tax_id":  vendor.get("tax_id"),
+            "email":   vendor.get("email"),
+            "phone":   vendor.get("phone"),
+            "address": vendor.get("address") or {},
+        },
+        "client": None,
+        "line_items": [
+            {
+                "description":   li.get("description"),
+                "quantity":      li.get("quantity"),
+                "unit_price":    li.get("unit_price"),
+                "line_subtotal": li.get("line_subtotal"),
+                "discount":      li.get("discount", 0),
+            } for li in line_items
+        ],
+        "payments": [],
+    }
+ 
+ 
+def create_payable_invoice(db, payload):
+    """
+    Create a payable invoice from structured form input.
+    - invoice_type = 'payable'
+    - links vendor_id, no client_id
+    - status = 'unpaid' (no draft state for payables)
+    - invoice_number auto-generated as PAY-{year}-{n:04d}
+    - stores raw_doc + extraction_json, generates embeddings, runs compliance
+    - no PDF rendered (OCR upload path handles that)
+    """
+    data = payload.model_dump(mode="json")
+    line_items_input = data.pop("line_items", []) or []
+    company_id = data.get("company_id")
+ 
+    year = datetime.utcnow().year
+    try:
+        result = (
+            db.table("invoices").select("id", count="exact")
+            .eq("company_id", company_id)
+            .eq("invoice_type", "payable")
+            .execute()
+        )
+        n = (result.count or 0) + 1
+    except Exception as e:
+        log.error(f"payable_invoice_number_count_failed: {e}")
+        n = int(datetime.utcnow().strftime("%H%M%S"))
+    if not data.get("invoice_number"):
+        data["invoice_number"] = f"PAY-{year}-{n:04d}"
+    data["status"]         = "unpaid"
+    data["invoice_type"]   = "payable"
+ 
+    try:
+        result = db.table("invoices").insert(data).execute()
+    except Exception as e:
+        raise DatabaseError("Failed to create payable invoice", detail=str(e))
+    if not result.data:
+        raise DatabaseError("Invoice insert returned no data")
+ 
+    invoice    = result.data[0]
+    invoice_id = invoice["id"]
+    inv_num    = invoice.get("invoice_number", "Unknown")
+ 
+    log.info(f"payable_create  invoice_id={invoice_id}  invoice_number={inv_num!r}")
+ 
+    line_items_rows: list[dict] = []
+    if line_items_input:
+        rows = [{
+            "company_id":    company_id,
+            "invoice_id":    invoice_id,
+            "description":   li.get("description", ""),
+            "quantity":      li.get("quantity", 1),
+            "unit_price":    li.get("unit_price", 0),
+            "line_subtotal": li.get("line_subtotal", 0),
+            "discount":      li.get("discount", 0),
+        } for li in line_items_input]
+        try:
+            li_result = db.table("line_items").insert(rows).execute()
+            line_items_rows = li_result.data or rows
+        except Exception as e:
+            log.error(f"payable_create  stage=line_items_insert_failed  error={e}")
+            line_items_rows = rows
+ 
+    vendor_data     = _fetch_vendor_for_payable(db, invoice.get("vendor_id"), invoice.get("vendor_address_id"))
+    raw_text        = _build_payable_raw_text(invoice, vendor_data, line_items_rows)
+    extraction_json = _build_payable_extraction_json(invoice, vendor_data, line_items_rows)
+ 
+    try:
+        db.table("invoice_raw_documents").insert({
+            "company_id":      company_id,
+            "invoice_id":      invoice_id,
+            "raw_text":        raw_text,
+            "extraction_json": extraction_json,
+            "schema_version":  "1.0",
+            "storage_path":    None,
+        }).execute()
+    except Exception as e:
+        log.error(f"payable_create  stage=raw_doc_insert_failed  error={e}")
+ 
+    try:
+        from app.services.embedding_service import generate_and_store_embeddings
+        generate_and_store_embeddings(db, company_id, invoice_id, raw_text, extraction_json)
+    except Exception as e:
+        log.error(f"payable_create  stage=embedding_failed  error={e}")
+        _insert_compliance_flag(db, company_id, invoice_id, "embedding_failed", "low", f"Embedding failed: {e}")
+ 
+    try:
+        from app.services.compliance_service import validate_invoice_compliance
+        validate_invoice_compliance(db, company_id, invoice_id)
+    except Exception as e:
+        log.error(f"payable_create  stage=compliance_failed  error={e}")
+ 
+    return invoice
+ 
+def _build_payable_raw_text(invoice, vendor, line_items):
+    lines: list[str] = []
+    lines.append(f"Invoice: {invoice.get('invoice_number')}")
+    lines.append("Type: payable")
+    lines.append("")
+    lines.append(f"From: {vendor.get('name', 'Unknown')}")
+    lines.append("To: K4Y")
+    lines.append(f"Issue date: {invoice.get('issue_date')}")
+    if invoice.get("due_date"):
+        lines.append(f"Due date: {invoice['due_date']}")
+    lines.append(f"Currency: {invoice.get('currency')}")
+    lines.append("Line items:")
+    for i, li in enumerate(line_items, 1):
+        lines.append(
+            f"  {i}. {li.get('description')} | "
+            f"qty={li.get('quantity')} | "
+            f"unit_price={li.get('unit_price')} | "
+            f"subtotal={li.get('line_subtotal')}"
+        )
+    lines.append(f"Subtotal: {invoice.get('subtotal')}")
+    lines.append(f"Tax ({invoice.get('tax_percent')}%): {invoice.get('total_tax')}")
+    lines.append(f"Grand total: {invoice.get('grand_total')}")
+    return "\n".join(lines)
+
+
+def _build_payable_extraction_json(invoice, vendor, line_items):
+    return {
+        "schema_version": "1.0",
+        "document_metadata": {
+            "document_type":        "invoice",
+            "extraction_timestamp": datetime.utcnow().isoformat(),
+            "confidence_score":     1.0,
+            "source":               "form_input",
+        },
+        "invoice": {
+            "invoice_number": invoice.get("invoice_number"),
+            "issue_date":     invoice.get("issue_date"),
+            "due_date":       invoice.get("due_date"),
+            "currency":       invoice.get("currency"),
+            "tax_percent":    invoice.get("tax_percent"),
+            "subtotal":       invoice.get("subtotal"),
+            "total_tax":      invoice.get("total_tax"),
+            "grand_total":    invoice.get("grand_total"),
+            "discount":       invoice.get("discount"),
+            "payment_method": invoice.get("payment_method"),
+            "description":    invoice.get("description"),
+            "status":         invoice.get("status"),
+        },
+        "vendor": {
+            "name":    vendor.get("name"),
+            "tax_id":  vendor.get("tax_id"),
+            "email":   vendor.get("email"),
+            "phone":   vendor.get("phone"),
+            "address": vendor.get("address") or {},
+        },
+        "client": None,
+        "line_items": [
+            {
+                "description":   li.get("description"),
+                "quantity":      li.get("quantity"),
+                "unit_price":    li.get("unit_price"),
+                "line_subtotal": li.get("line_subtotal"),
+                "discount":      li.get("discount", 0),
+            } for li in line_items
+        ],
+        "payments": [],
+    }
+
+
+def create_payable_invoice(db, payload):
+    """
+    Create a payable invoice from structured form input.
+    - invoice_type = 'payable'
+    - links vendor_id, no client_id
+    - status = 'unpaid' (no draft state for payables)
+    - invoice_number auto-generated as PAY-{year}-{n:04d}
+    - stores raw_doc + extraction_json, generates embeddings, runs compliance
+    - no PDF rendered (OCR upload path handles that)
+    """
+    data = payload.model_dump(mode="json")
+    line_items_input = data.pop("line_items", []) or []
+    company_id = data.get("company_id")
+
+    year = datetime.utcnow().year
+    try:
+        result = (
+            db.table("invoices").select("id", count="exact")
+            .eq("company_id", company_id)
+            .eq("invoice_type", "payable")
+            .execute()
+        )
+        n = (result.count or 0) + 1
+    except Exception as e:
+        log.error(f"payable_invoice_number_count_failed: {e}")
+        n = int(datetime.utcnow().strftime("%H%M%S"))
+    data["invoice_number"] = f"PAY-{year}-{n:04d}"
+    data["status"]         = "unpaid"
+    data["invoice_type"]   = "payable"
+
+    try:
+        result = db.table("invoices").insert(data).execute()
+    except Exception as e:
+        raise DatabaseError("Failed to create payable invoice", detail=str(e))
+    if not result.data:
+        raise DatabaseError("Invoice insert returned no data")
+
+    invoice    = result.data[0]
+    invoice_id = invoice["id"]
+    inv_num    = invoice.get("invoice_number", "Unknown")
+
+    log.info(f"payable_create  invoice_id={invoice_id}  invoice_number={inv_num!r}")
+
+    line_items_rows: list[dict] = []
+    if line_items_input:
+        rows = [{
+            "company_id":    company_id,
+            "invoice_id":    invoice_id,
+            "description":   li.get("description", ""),
+            "quantity":      li.get("quantity", 1),
+            "unit_price":    li.get("unit_price", 0),
+            "line_subtotal": li.get("line_subtotal", 0),
+            "discount":      li.get("discount", 0),
+        } for li in line_items_input]
+        try:
+            li_result = db.table("line_items").insert(rows).execute()
+            line_items_rows = li_result.data or rows
+        except Exception as e:
+            log.error(f"payable_create  stage=line_items_insert_failed  error={e}")
+            line_items_rows = rows
+
+    vendor_data     = _fetch_vendor_for_payable(db, invoice.get("vendor_id"), invoice.get("vendor_address_id"))
+    raw_text        = _build_payable_raw_text(invoice, vendor_data, line_items_rows)
+    extraction_json = _build_payable_extraction_json(invoice, vendor_data, line_items_rows)
+
+    try:
+        db.table("invoice_raw_documents").insert({
+            "company_id":      company_id,
+            "invoice_id":      invoice_id,
+            "raw_text":        raw_text,
+            "extraction_json": extraction_json,
+            "schema_version":  "1.0",
+            "storage_path":    None,
+        }).execute()
+    except Exception as e:
+        log.error(f"payable_create  stage=raw_doc_insert_failed  error={e}")
+
+    try:
+        from app.services.embedding_service import generate_and_store_embeddings
+        generate_and_store_embeddings(db, company_id, invoice_id, raw_text, extraction_json)
+    except Exception as e:
+        log.error(f"payable_create  stage=embedding_failed  error={e}")
+        _insert_compliance_flag(db, company_id, invoice_id, "embedding_failed", "low", f"Embedding failed: {e}")
+
+    try:
+        from app.services.compliance_service import validate_invoice_compliance
+        validate_invoice_compliance(db, company_id, invoice_id)
+    except Exception as e:
+        log.error(f"payable_create  stage=compliance_failed  error={e}")
+
+    return invoice
