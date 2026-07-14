@@ -216,26 +216,3 @@ async def upload_logo(
 
     return {"logo_url": public_url}
 
-
-# ===========================================================================
-# Tax rates
-# ===========================================================================
-
-@router.get("/tax-rates")
-def get_tax_rates():
-    rates = settings_service.get_tax_rates()
-    return {
-        "tax_rates": [
-            {"country": country, "rate": rate}
-            for country, rate in rates.items()
-        ]
-    }
-
-
-# ===========================================================================
-# Pipeline config
-# ===========================================================================
-
-@router.get("/pipeline")
-def get_pipeline_config():
-    return settings_service.get_pipeline_config()

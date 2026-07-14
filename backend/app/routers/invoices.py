@@ -94,27 +94,15 @@ class CreateInvoicePayload(InvoiceCreate):
 # ---------------------------------------------------------------------------
 # CRUD
 # ---------------------------------------------------------------------------
-
 @router.post("/", response_model=InvoiceRead, status_code=201)
 def create_invoice(
     payload: CreateInvoicePayload,
     db: Client = Depends(get_supabase),
 ):
-    """
-    Create a receivable invoice from structured form input.
-
-    The endpoint renders a K4Y-branded PDF, persists a raw_document row,
-    uploads the PDF to private Supabase Storage, generates pgvector
-    embeddings, and runs compliance — all in invoice_service.
-
-    Payables are NOT created here. Send PDFs to POST /api/v1/upload instead.
-    """
-    if payload.invoice_type == InvoiceType.payable:
-        raise HTTPException(
-            400,
-            "Payables must be created via /upload endpoint",
-        )
-    return _handle(invoice_service.create_receivable_invoice, db, payload)
+    if payload.invoice_type == InvoiceType.receivable:
+        return _handle(invoice_service.create_receivable_invoice, db, payload)
+    else:
+        return _handle(invoice_service.create_payable_invoice, db, payload)
 
 
 @router.get("/")
@@ -382,28 +370,12 @@ def process_refund(
     )
 
 
-# ============================================================
-# REPLACE IN: app/routers/invoices.py
-# Replace the entire @router.post("/") create_invoice function.
-# Everything else in the file stays unchanged.
-# ============================================================
-
 @router.post("/", response_model=InvoiceRead, status_code=201)
 def create_invoice(
     payload: CreateInvoicePayload,
     db: Client = Depends(get_supabase),
 ):
-    """
-    Create a receivable OR payable invoice from structured form input.
-
-    Receivable: renders K4Y-branded PDF, uploads to Storage,
-                generates embeddings, runs compliance.
-    Payable:    stores raw_doc + extraction_json, generates embeddings,
-                runs compliance. No PDF rendered (OCR path handles uploads).
-
-    Both types auto-generate invoice_number and trigger embeddings.
-    """
     if payload.invoice_type == InvoiceType.receivable:
         return _handle(invoice_service.create_receivable_invoice, db, payload)
     else:
-        return _handle(invoice_service.create_payable_invoice, db, payload) 
+        return _handle(invoice_service.create_payable_invoice, db, payload)

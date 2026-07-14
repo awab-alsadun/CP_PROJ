@@ -175,33 +175,4 @@ def update_company_settings(db: Client, company_id: str, data: dict) -> dict:
     return get_company_settings(db, company_id)
 
 
-# ---------------------------------------------------------------------------
-# Tax rates
-# ---------------------------------------------------------------------------
 
-def get_tax_rates() -> dict:
-    return COUNTRY_TAX_RATES
-
-
-def get_tax_rate_for_country(country_code: str) -> float | None:
-    return COUNTRY_TAX_RATES.get(country_code.upper())
-
-
-# ---------------------------------------------------------------------------
-# Pipeline config (read-only)
-# ---------------------------------------------------------------------------
-
-def get_pipeline_config() -> dict:
-    from app.core.config import get_settings
-    settings = get_settings()
-    return {
-        "llm_provider":          settings.LLM_PROVIDER,
-        "llm_model":             settings.OPENAI_MODEL if settings.LLM_PROVIDER == "openai" else settings.OLLAMA_MODEL,
-        "embedding_model":       settings.OPENAI_EMBEDDING_MODEL if settings.LLM_PROVIDER == "openai" else settings.OLLAMA_EMBEDDING_MODEL,
-        "embedding_dimension":   settings.EMBEDDING_DIMENSION,
-        "ocr_engine":            "PyMuPDF + Tesseract fallback",
-        "tesseract_path":        settings.TESSERACT_PATH or "not configured",
-        "rerank_model":          settings.COHERE_RERANK_MODEL,
-        "chunk_size_tokens":     settings.DOCUMENT_CHUNK_SIZE_TOKENS,
-        "chunk_overlap_tokens":  settings.DOCUMENT_CHUNK_OVERLAP_TOKENS,
-    }

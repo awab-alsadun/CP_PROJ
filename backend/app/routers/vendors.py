@@ -49,6 +49,15 @@ def get_vendor(vendor_id: uuid.UUID, db: Client = Depends(get_supabase)):
     return _handle(vendor_service.get_vendor, db, vendor_id)
 
 
+# ============================================================
+# ADD TO: app/routers/vendors.py
+# 1. Add this import at the top with the existing imports:
+#    from app.core.config import get_settings
+#    settings = get_settings()
+#
+# 2. Paste the endpoint below after get_vendor, before update_vendor.
+# ============================================================
+
 @router.get("/{vendor_id}/latest-address")
 def get_latest_vendor_address(
     vendor_id: uuid.UUID,

@@ -59,23 +59,6 @@ class RefundRequest(BaseModel):
     amount:     Decimal
 
 
-# ---------------------------------------------------------------------------
-# Webhook (future bank integration)
-# ---------------------------------------------------------------------------
-
-@router.post("/webhook")
-def payment_webhook(body: WebhookRequest):
-    """
-    Future bank integration endpoint.
-    Not implemented yet — returns 501 with explanation.
-    """
-    raise HTTPException(
-        status_code=501,
-        detail=(
-            "Webhook payment matching not yet implemented. "
-            "Use POST /api/v1/invoices/{id}/payments instead."
-        ),
-    )
 
 
 # ---------------------------------------------------------------------------

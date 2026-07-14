@@ -47,6 +47,8 @@ def get_or_create_vendor(
     return create_vendor(db, payload)
 
 
+
+
 def list_vendors(
     db: Client,
     company_id: uuid.UUID,
@@ -70,15 +72,15 @@ def list_vendors(
             .eq("company_id", str(company_id))
             .is_("deleted_at", "null")
         )
- 
+
         if search:
             or_filter = f"name.ilike.%{search}%,tax_id.ilike.%{search}%"
             count_query = count_query.or_(or_filter)
             data_query  = data_query.or_(or_filter)
- 
+
         count_result = count_query.execute()
         total = count_result.count or 0
- 
+
         result = (
             data_query
             .order("created_at", desc=True)
@@ -88,7 +90,7 @@ def list_vendors(
         vendors = result.data or []
     except Exception as e:
         raise DatabaseError("Failed to list vendors", detail=str(e))
- 
+
     # Attach invoice_count per vendor
     if vendors:
         vendor_ids = [v["id"] for v in vendors]
@@ -110,7 +112,7 @@ def list_vendors(
         except Exception:
             for v in vendors:
                 v["invoice_count"] = None
- 
+
     return {
         "data":   vendors,
         "total":  total,
@@ -170,6 +172,13 @@ def soft_delete_vendor(db: Client, vendor_id: uuid.UUID) -> None:
         raise NotFoundError(f"Vendor {vendor_id} not found")
     
     
+# ============================================================
+# ADD TO: app/services/vendor_service.py
+# Paste both functions at the bottom of the file.
+# No existing code changes — pure addition.
+# ============================================================
+
+
 def get_or_create_vendor_by_name(
     db: Client,
     company_id: uuid.UUID,
@@ -184,7 +193,7 @@ def get_or_create_vendor_by_name(
     Creates a new vendor if no match found.
     """
     name_clean = name.strip().lower()
- 
+
     try:
         result = (
             db.table("vendors")
@@ -198,7 +207,7 @@ def get_or_create_vendor_by_name(
                 return row
     except Exception as e:
         raise DatabaseError("Failed to lookup vendor by name", detail=str(e))
- 
+
     if tax_id and tax_id != "N/A":
         try:
             result = (
@@ -214,7 +223,7 @@ def get_or_create_vendor_by_name(
                 return result.data[0]
         except Exception as e:
             raise DatabaseError("Failed to lookup vendor by tax_id", detail=str(e))
- 
+
     payload = VendorCreate(
         company_id=company_id,
         name=name,
@@ -223,8 +232,8 @@ def get_or_create_vendor_by_name(
         phone=phone,
     )
     return create_vendor(db, payload)
- 
- 
+
+
 def get_latest_vendor_address(
     db: Client,
     company_id: str,
@@ -237,7 +246,7 @@ def get_latest_vendor_address(
     Returns {id, street, city} or None.
     """
     address_id = None
- 
+
     try:
         inv = (
             db.table("invoices")
@@ -254,7 +263,7 @@ def get_latest_vendor_address(
             address_id = inv.data[0]["vendor_address_id"]
     except Exception:
         pass
- 
+
     if not address_id:
         try:
             addr_row = (
@@ -271,10 +280,10 @@ def get_latest_vendor_address(
                 address_id = addr_row.data[0]["id"]
         except Exception:
             pass
- 
+
     if not address_id:
         return None
- 
+
     try:
         addr = (
             db.table("addresses")
@@ -291,5 +300,5 @@ def get_latest_vendor_address(
             }
     except Exception:
         pass
- 
+
     return None
