@@ -42,11 +42,11 @@ export const invoicesApi = {
     if (invoice_type) q.set('invoice_type', invoice_type)
     return request(`/invoices/?${q}`)
   },
-  get:          (id)       => request(`/invoices/${id}`),
-  create:       (body)     => request('/invoices/', { method: 'POST', body: JSON.stringify(body) }),
-  update:       (id, body) => request(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
-  delete:       (id)       => request(`/invoices/${id}`, { method: 'DELETE' }),
-  transition:   (id, newStatus) => request(`/invoices/${id}/transition`, {
+  get:           (id)       => request(`/invoices/${id}`),
+  create:        (body)     => request('/invoices/', { method: 'POST', body: JSON.stringify(body) }),
+  update:        (id, body) => request(`/invoices/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  delete:        (id)       => request(`/invoices/${id}`, { method: 'DELETE' }),
+  transition:    (id, newStatus) => request(`/invoices/${id}/transition`, {
     method: 'POST',
     body: JSON.stringify({ new_status: newStatus }),
   }),
@@ -83,6 +83,9 @@ export const vendorsApi = {
   create: (body)     => request('/vendors/', { method: 'POST', body: JSON.stringify(body) }),
   update: (id, body) => request(`/vendors/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
   delete: (id)       => request(`/vendors/${id}`, { method: 'DELETE' }),
+  getLatestAddress(vendorId) {
+    return request(`/vendors/${vendorId}/latest-address`)
+  },
 }
 
 // ── Clients ───────────────────────────────────────────────────────────────────
@@ -119,6 +122,7 @@ export const uploadApi = {
     }
     return res.json()
   },
+
   uploadBatch: async (files, invoiceType = 'payable') => {
     const form = new FormData()
     const list = Array.isArray(files) ? files : Array.from(files)
@@ -244,6 +248,11 @@ export const settingsApi = {
     body: JSON.stringify({ ...data, company_id: getCompanyId() }),
   }),
   taxRates: () => request('/settings/tax-rates'),
+  setPassword: (newPassword, currentPassword = '') => request('/settings/set-password', {
+    method: 'POST',
+    headers: { 'X-Settings-Password': currentPassword },
+    body: JSON.stringify({ password: newPassword, company_id: getCompanyId() }),
+  }),
   pipeline: () => {
     const q = new URLSearchParams({ company_id: getCompanyId() })
     return request(`/settings/pipeline?${q}`)
