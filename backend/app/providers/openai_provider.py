@@ -6,7 +6,7 @@ Implements EmbeddingProvider and LLMProvider using the OpenAI API.
 Handles:
 - Batch embedding with rate-limit retry (429 backoff)
 - Chat completion with configurable model
-- Vector dimension enforcement (always returns EMBEDDING_DIMENSION floats)
+- Vector dimension validation
 """
 
 import logging
@@ -23,13 +23,15 @@ _RETRY_WAIT_SECONDS = 60
 _MAX_RETRIES = 3
 
 
-def _pad_or_truncate(vector: list[float], target_dim: int) -> list[float]:
-    """Ensure vector is exactly target_dim floats. Pads with 0.0 or truncates."""
+def _validate_dimension(vector: list[float], target_dim: int, model: str) -> list[float]:
+    """Ensure the embedding model output matches the configured pgvector size."""
     if len(vector) == target_dim:
         return vector
-    if len(vector) < target_dim:
-        return vector + [0.0] * (target_dim - len(vector))
-    return vector[:target_dim]
+    raise ValueError(
+        f"Embedding model '{model}' returned {len(vector)} dimensions, "
+        f"but EMBEDDING_DIMENSION is {target_dim}. Update the DB vector "
+        "dimension or choose a matching embedding model."
+    )
 
 
 class OpenAIEmbeddingProvider(EmbeddingProvider):
@@ -55,7 +57,7 @@ class OpenAIEmbeddingProvider(EmbeddingProvider):
                     input=texts,
                 )
                 vectors = [item.embedding for item in response.data]
-                return [_pad_or_truncate(v, self._target_dim) for v in vectors]
+                return [_validate_dimension(v, self._target_dim, self._model) for v in vectors]
 
             except RateLimitError:
                 if attempt == _MAX_RETRIES:

@@ -12,7 +12,9 @@ Usage in any service:
     llm = get_llm_provider()
     answer = llm.chat([{"role": "user", "content": "question"}])
 
-Switching providers: change LLM_PROVIDER in .env. No other code changes.
+Switching generation providers: change LLM_PROVIDER in .env.
+Switching embedding providers: change EMBEDDING_PROVIDER only when the
+database/index is isolated by embedding profile or has been re-embedded.
 
 Providers are instantiated fresh per call (not singletons) to avoid
 stale config after settings reload. For high-throughput use, cache at
@@ -27,13 +29,15 @@ def get_embedding_provider() -> EmbeddingProvider:
     """Return the configured embedding provider."""
     settings = get_settings()
 
-    if settings.LLM_PROVIDER == "ollama":
+    if settings.EMBEDDING_PROVIDER == "ollama":
         from app.providers.ollama_provider import OllamaEmbeddingProvider
         return OllamaEmbeddingProvider()
 
-    # Default: openai
-    from app.providers.openai_provider import OpenAIEmbeddingProvider
-    return OpenAIEmbeddingProvider()
+    if settings.EMBEDDING_PROVIDER == "openai":
+        from app.providers.openai_provider import OpenAIEmbeddingProvider
+        return OpenAIEmbeddingProvider()
+
+    raise ValueError(f"Unsupported embedding provider: {settings.EMBEDDING_PROVIDER}")
 
 
 def get_llm_provider() -> LLMProvider:
@@ -44,6 +48,28 @@ def get_llm_provider() -> LLMProvider:
         from app.providers.ollama_provider import OllamaLLMProvider
         return OllamaLLMProvider()
 
-    # Default: openai
-    from app.providers.openai_provider import OpenAILLMProvider
-    return OpenAILLMProvider()
+    if settings.LLM_PROVIDER == "grok":
+        from app.providers.grok_provider import GrokLLMProvider
+        return GrokLLMProvider()
+
+    if settings.LLM_PROVIDER == "gemini":
+        from app.providers.gemini_provider import GeminiLLMProvider
+        return GeminiLLMProvider()
+
+    raise ValueError(f"Unsupported LLM provider: {settings.LLM_PROVIDER}")
+
+
+def rerank_chunks(
+    query,
+    chunks,
+    top_n: int = 6,
+):
+    """Dispatch reranking to the configured provider."""
+    settings = get_settings()
+
+    if settings.RERANK_PROVIDER == "bge":
+        from app.providers.bge_reranker import rerank_chunks as provider
+    else:
+        from app.providers.cohere_reranker import rerank_chunks as provider
+
+    return provider(query, chunks, top_n)

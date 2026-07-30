@@ -119,7 +119,8 @@ def process_invoice(
     if lower.endswith((".jpg", ".jpeg", ".png", ".bmp", ".tiff")):
         raw_text, used_fallback = extract_text_from_image(file_bytes), False
     elif lower.endswith(".pdf"):
-        raw_text, used_fallback = extract_text_from_pdf(file_bytes)
+        raw_text = extract_text_from_pdf(file_bytes)
+        used_fallback = False
     else:
         raise ValueError(f"Unsupported file type: {filename}")
 
@@ -143,19 +144,17 @@ def process_invoice(
     _stage("llm_extract_start", tag)
     t2 = time.monotonic()
 
-    extraction, signals, had_retry = extract_structured_data(raw_text)
+    extraction = extract_structured_data(raw_text)
 
-    from app.services.extraction_service import compute_confidence
-    ocr_signals = []
+    all_signals = []
     if len(raw_text) < 400:
-        ocr_signals.append({"flag_type": "ocr_low_quality", "severity": "high",
-                            "reason": f"OCR text length {len(raw_text)} < 400 chars"})
+        all_signals.append({"flag_type": "ocr_low_quality", "severity": "high",
+                        "reason": f"OCR text length {len(raw_text)} < 400 chars"})
     if used_fallback:
-        ocr_signals.append({"flag_type": "ocr_fallback_used", "severity": "medium",
-                            "reason": "Tesseract fallback used for PDF text extraction"})
+        all_signals.append({"flag_type": "ocr_fallback_used", "severity": "medium",
+                        "reason": "Tesseract fallback used for PDF text extraction"})
 
-    all_signals = signals + ocr_signals
-    confidence  = compute_confidence(all_signals)
+    confidence = 0.85
 
     inv = extraction.get("invoice", {})
     invoice_number = inv.get("invoice_number") or f"UPLOAD-{filename}"

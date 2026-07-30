@@ -13,7 +13,8 @@ from app.core.config import get_settings
 from app.providers import get_embedding_provider, get_llm_provider
 
 settings = get_settings()
-print(f"Provider: {settings.LLM_PROVIDER}")
+print(f"LLM provider: {settings.LLM_PROVIDER}")
+print(f"Embedding provider: {settings.EMBEDDING_PROVIDER}")
 
 # Test 1: Embedding — single text
 print("\n--- Embedding test ---")
@@ -21,7 +22,9 @@ embedder = get_embedding_provider()
 vectors = embedder.embed(["test invoice for server equipment"])
 print(f"Vector count: {len(vectors)}")
 print(f"Vector dimension: {len(vectors[0])}")
-assert len(vectors[0]) == 1536, f"Expected 1536, got {len(vectors[0])}"
+assert len(vectors[0]) == settings.EMBEDDING_DIMENSION, (
+    f"Expected {settings.EMBEDDING_DIMENSION}, got {len(vectors[0])}"
+)
 print("PASS: Single embedding")
 
 # Test 2: Embedding — batch

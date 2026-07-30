@@ -1,27 +1,16 @@
 """
 Extraction Service
 ------------------
-Sends OCR text to OpenAI and receives structured invoice JSON.
-
-Extracted from rag_pipeline/ingest_invoices.py and adapted for FastAPI:
-- Uses Settings for OpenAI config (key, model)
-- Same extraction prompt and retry logic
-- Returns validated dict matching schema_version 1.0
+Sends OCR text to the configured LLM provider and receives structured invoice JSON.
+Uses get_llm_provider() — never calls OpenAI directly.
 """
 
 import json
-import time
 import logging
 
-from openai import OpenAI
-
-from app.core.config import get_settings
+from app.providers import get_llm_provider
 
 log = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# LLM Extraction Prompt (from ingest_invoices.py — kept identical)
-# ---------------------------------------------------------------------------
 
 EXTRACTION_PROMPT = """You are an expert financial document parser specialized in extracting structured data from invoices.
 
@@ -119,41 +108,24 @@ Return ONLY the JSON object. No markdown. No explanation.
 """
 
 
-def _get_openai_client() -> OpenAI:
-    settings = get_settings()
-    return OpenAI(api_key=settings.OPENAI_API_KEY)
-
-
 def extract_structured_data(raw_text: str) -> dict:
     """
-    Send raw OCR text to OpenAI and get structured invoice JSON.
-
-    Args:
-        raw_text: The OCR-extracted text from an invoice.
+    Send raw OCR text to the configured LLM and get structured invoice JSON.
 
     Returns:
         Dict matching the extraction schema (schema_version 1.0).
 
     Raises:
-        ValueError: If the LLM response cannot be parsed as JSON.
-        Exception: On unrecoverable API errors.
+        ValueError: If the LLM response cannot be parsed as JSON after retries.
     """
-    settings = get_settings()
-    client = _get_openai_client()
+    llm = get_llm_provider()
+    messages = [{"role": "user", "content": EXTRACTION_PROMPT + raw_text}]
 
-    max_retries = 5
-
-    for attempt in range(max_retries):
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
         try:
-            response = client.chat.completions.create(
-                model=settings.OPENAI_MODEL,
-                max_tokens=2000,
-                messages=[
-                    {"role": "user", "content": EXTRACTION_PROMPT + raw_text}
-                ],
-            )
-
-            content = response.choices[0].message.content.strip()
+            content = llm.chat(messages, temperature=0.0, max_tokens=2000)
+            content = content.strip()
 
             # Strip markdown fences if model ignores instructions
             if content.startswith("```"):
@@ -162,19 +134,15 @@ def extract_structured_data(raw_text: str) -> dict:
                     content = content[4:]
 
             parsed = json.loads(content)
-            log.info(f"LLM extraction succeeded (attempt {attempt + 1})")
+            log.info(f"LLM extraction succeeded (attempt {attempt})")
             return parsed
 
         except json.JSONDecodeError as e:
-            log.error(f"LLM returned invalid JSON (attempt {attempt + 1}): {e}")
-            if attempt == max_retries - 1:
+            log.error(f"LLM returned invalid JSON (attempt {attempt}): {e}")
+            if attempt == max_retries:
                 raise ValueError(f"Failed to parse LLM response as JSON after {max_retries} attempts")
 
         except Exception as e:
-            error_str = str(e)
-            if "429" in error_str and attempt < max_retries - 1:
-                wait = 60
-                log.warning(f"Rate limit hit, waiting {wait}s (attempt {attempt + 1}/{max_retries})")
-                time.sleep(wait)
-            else:
+            log.error(f"LLM extraction failed (attempt {attempt}): {e}")
+            if attempt == max_retries:
                 raise

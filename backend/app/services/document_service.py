@@ -40,6 +40,15 @@ CHARS_PER_TOKEN = 4
 CHUNK_SIZE_CHARS = CHUNK_SIZE_TOKENS * CHARS_PER_TOKEN
 CHUNK_OVERLAP_CHARS = CHUNK_OVERLAP_TOKENS * CHARS_PER_TOKEN
 
+
+def _embedding_model_name(settings) -> str:
+    return (
+        settings.OPENAI_EMBEDDING_MODEL
+        if settings.EMBEDDING_PROVIDER == "openai"
+        else settings.OLLAMA_EMBEDDING_MODEL
+    )
+
+
 # ── Section detection ────────────────────────────────────────────────────────
 
 _SECTION_PATTERN = re.compile(
@@ -352,11 +361,7 @@ def upload_and_embed_document(
             "section_number": chunk.section_number,
             "page_number": chunk.page_number,
             "embedding": vector,
-            "model_name": (
-                settings.OPENAI_EMBEDDING_MODEL
-                if settings.LLM_PROVIDER == "openai"
-                else settings.OLLAMA_EMBEDDING_MODEL
-            ),
+            "model_name": _embedding_model_name(settings),
             "metadata": {
                 "filename": filename,
                 "document_type": document_type,

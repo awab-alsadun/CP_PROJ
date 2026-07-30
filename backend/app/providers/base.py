@@ -17,8 +17,9 @@ class EmbeddingProvider(ABC):
     """
     Contract for embedding providers.
 
-    embed() always returns vectors padded/truncated to EMBEDDING_DIMENSION
-    (1536 by default) so the pgvector column never receives a wrong-size vector.
+    embed() returns vectors with exactly EMBEDDING_DIMENSION values.
+    Providers raise if the configured dimension does not match the model output;
+    embeddings from different models/profiles must not be mixed in retrieval.
     """
 
     @abstractmethod

@@ -13,7 +13,8 @@ Full RAG pipeline with Option C SQL routing:
   RAG path (unchanged from v3):
     - Multi-query rewriting -> embed -> retrieve -> soft boost -> rerank -> compress -> answer
     - Hybrid split reranking for compliance queries
-    - Provider-agnostic (OpenAI / Ollama toggle via .env)
+    - Provider-agnostic generation (OpenAI / Ollama / Grok / Gemini via LLM_PROVIDER)
+    - Retrieval embeddings selected separately via EMBEDDING_PROVIDER
 
   Date awareness:
     - Today's date injected into LLM template selector prompt
@@ -38,8 +39,7 @@ from datetime import date
 from supabase import Client
 
 from app.core.config import get_settings
-from app.providers import get_embedding_provider, get_llm_provider
-from app.providers.cohere_provider import rerank_chunks
+from app.providers import get_embedding_provider, get_llm_provider,rerank_chunks
 from app.services.intent_classifier import classify_intent
 from app.services.retrieval import get_source, RetrievedChunk
 

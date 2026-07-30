@@ -9,8 +9,8 @@ Run from the backend/ directory:
 
 Requirements:
     - venv activated: backend/venv/Scripts/activate  (Windows)
-    - .env present in backend/ with SUPABASE_URL, SUPABASE_SERVICE_KEY, OPENAI_API_KEY
-    - LLM_PROVIDER set in .env (default: openai)
+    - .env present in backend/ with SUPABASE_URL and SUPABASE_SERVICE_KEY
+    - EMBEDDING_PROVIDER set in .env (default: openai)
 
 Checkpoint file: backfill_checkpoint.json (in backend/ directory)
     - Stores successfully processed invoice_ids
@@ -19,9 +19,8 @@ Checkpoint file: backfill_checkpoint.json (in backend/ directory)
 
 Batching:
     - Embeddings are generated per invoice (3 chunks per invoice)
-    - OpenAI rate limit: ~30k TPM. At ~500 tokens per invoice, this is
-    ~60 invoices per minute. Script includes 60s backoff on 429.
-    - Ollama: no rate limits, runs as fast as local hardware allows.
+    - OpenAI: script includes 60s backoff on 429.
+    - Ollama: no API rate limits, runs as fast as local hardware allows.
 """
 
 import json
@@ -76,7 +75,7 @@ def main():
     settings = get_settings()
     company_id = settings.MVP_COMPANY_ID
 
-    log.info(f"Provider: {settings.LLM_PROVIDER}")
+    log.info(f"Embedding provider: {settings.EMBEDDING_PROVIDER}")
     log.info(f"Company ID: {company_id}")
 
     # Connect to Supabase

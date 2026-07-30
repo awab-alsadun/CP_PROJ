@@ -25,21 +25,38 @@ class Settings(BaseSettings):
     OPENAI_MODEL: str = "gpt-4o"
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
 
+    # --- xAI / Grok (cloud LLM) ---    
+    XAI_API_KEY: str = ""
+    GROK_MODEL: str = "grok-4.3"
+
+    # --- Google Gemini (cloud LLM) ---
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+
     # --- Ollama (local LLM) ---
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3"
-    OLLAMA_EMBEDDING_MODEL: str = "nomic-embed-text"
+    OLLAMA_MODEL: str = "llama3:8b"
+    OLLAMA_EMBEDDING_MODEL: str = "bge-m3"
 
-    # --- LLM Provider ---
-    # "openai" → OpenAI API  |  "ollama" → local Ollama instance
-    LLM_PROVIDER: Literal["openai", "ollama"] = "openai"
+    # --- Provider selection ---
+    # LLM_PROVIDER controls text generation only.
+    # EMBEDDING_PROVIDER controls retrieval/index vectors and should be changed
+    # only with an embedding-profile migration/re-embedding plan.
+    LLM_PROVIDER: Literal["openai", "ollama", "grok", "gemini"] = "gemini"
+    EMBEDDING_PROVIDER: Literal["openai", "ollama", ] = "ollama"
 
     # --- Cohere (reranking) ---
     CO_API_KEY: str = ""
     COHERE_RERANK_MODEL: str = "rerank-v3.5"
+    # ---------- Reranking ----------
+    RERANK_PROVIDER: Literal["cohere", "bge"] = "bge"
+
+    # Local BGE
+    BGE_RERANK_MODEL: str = "BAAI/bge-reranker-v2-m3"
+
 
     # --- Embedding config ---
-    EMBEDDING_DIMENSION: int = 1536
+    EMBEDDING_DIMENSION: int = 1024
 
     # --- Document processing ---
     MAX_DOCUMENT_PAGES: int = 100

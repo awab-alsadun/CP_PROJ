@@ -69,7 +69,7 @@ def _embedding_model_name() -> str:
     settings = get_settings()
     return (
         settings.OPENAI_EMBEDDING_MODEL
-        if settings.LLM_PROVIDER == "openai"
+        if settings.EMBEDDING_PROVIDER == "openai"
         else settings.OLLAMA_EMBEDDING_MODEL
     )
 
