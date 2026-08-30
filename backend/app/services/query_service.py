@@ -42,6 +42,7 @@ from app.core.config import get_settings
 from app.providers import get_embedding_provider, get_llm_provider,rerank_chunks
 from app.services.intent_classifier import classify_intent
 from app.services.retrieval import get_source, RetrievedChunk
+from app.services.token_metrics import estimate_message_tokens, estimate_tokens, token_savings
 
 log = logging.getLogger(__name__)
 
@@ -146,11 +147,16 @@ def _select_template(question: str) -> dict:
 
     try:
         llm      = get_llm_provider()
+        messages = [
+            {"role": "system", "content": prompt},
+            {"role": "user",   "content": question},
+        ]
+        log.info(
+            "Template selector prompt estimate: %s tokens",
+            estimate_message_tokens(messages),
+        )
         response = llm.chat(
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user",   "content": question},
-            ],
+            messages=messages,
             temperature=0.0,
             max_tokens=200,
         )
@@ -789,11 +795,16 @@ Output: ["What invoices reference IT hardware?", "Find invoices containing serve
 def _generate_query_variants(question: str) -> list[str]:
     try:
         llm      = get_llm_provider()
+        messages = [
+            {"role": "system", "content": _MULTI_QUERY_PROMPT},
+            {"role": "user",   "content": question},
+        ]
+        log.info(
+            "Multi-query rewrite prompt estimate: %s tokens",
+            estimate_message_tokens(messages),
+        )
         response = llm.chat(
-            messages=[
-                {"role": "system", "content": _MULTI_QUERY_PROMPT},
-                {"role": "user",   "content": question},
-            ],
+            messages=messages,
             temperature=0.3,
             max_tokens=200,
         )
@@ -852,22 +863,36 @@ def _compress_context(question: str, chunks: list[RetrievedChunk]) -> str:
         f"[Source {i} - {c.citation}]:\n{c.chunk_text}"
         for i, c in enumerate(chunks, 1)
     )
+    raw_estimate = estimate_tokens(raw_context)
     try:
         llm = get_llm_provider()
-        return llm.chat(
-            messages=[
-                {"role": "system", "content": _COMPRESSION_PROMPT},
-                {"role": "user",   "content": (
-                    f"Question: {question}\n\n"
-                    f"Chunks:\n{raw_context}\n\n"
-                    "Extract only relevant sentences."
-                )},
-            ],
+        messages = [
+            {"role": "system", "content": _COMPRESSION_PROMPT},
+            {"role": "user",   "content": (
+                f"Question: {question}\n\n"
+                f"Chunks:\n{raw_context}\n\n"
+                "Extract only relevant sentences."
+            )},
+        ]
+        log.info(
+            "Compression prompt estimate before pruning: %s tokens",
+            estimate_message_tokens(messages),
+        )
+        compressed = llm.chat(
+            messages=messages,
             temperature=0.0,
             max_tokens=1024,
         ).strip()
+        before, after, saved = token_savings(raw_context, compressed)
+        log.info(
+            "Compression reduced estimated context from %s to %s tokens (%s saved)",
+            before,
+            after,
+            saved,
+        )
+        return compressed
     except Exception as e:
-        log.warning(f"Compression failed: {e}. Using raw context.")
+        log.warning(f"Compression failed: {e}. Using raw context (~{raw_estimate} estimated tokens).")
         return raw_context
 
 
@@ -903,15 +928,20 @@ def _generate_answer(question: str, compressed_context: str, query_type: str) ->
             "Flag any potential compliance issues you detect based on the actual data."
         ),
     }
+    messages = [
+        {"role": "system", "content": system_prompts.get(query_type, system_prompts["rag_invoice"])},
+        {"role": "user",   "content": (
+            f"Question: {question}\n\n"
+            f"Context:\n{compressed_context}\n\n"
+            "Answer based on the above context only."
+        )},
+    ]
+    log.info(
+        "Answer prompt estimate: %s tokens",
+        estimate_message_tokens(messages),
+    )
     return llm.chat(
-        messages=[
-            {"role": "system", "content": system_prompts.get(query_type, system_prompts["rag_invoice"])},
-            {"role": "user",   "content": (
-                f"Question: {question}\n\n"
-                f"Context:\n{compressed_context}\n\n"
-                "Answer based on the above context only."
-            )},
-        ],
+        messages=messages,
         temperature=0.0,
         max_tokens=768,
     )

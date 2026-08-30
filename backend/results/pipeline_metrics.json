@@ -1,0 +1,201 @@
+{
+  "tiktoken_available": true,
+  "total_queries_measured": 15,
+  "keyword_pct": 73.3,
+  "llm_pct": 26.7,
+  "avg_tokens_avoided_per_keyword_query": 273.2,
+  "total_tokens_avoided_classification": 3005,
+  "rag_queries_measured": 5,
+  "avg_context_compression_pct": 82.9,
+  "avg_tokens_saved_per_rag_query": 1653.6,
+  "total_tokens_saved_compression": 8268,
+  "classification_detail": [
+    {
+      "query": "What is the total spending on payable invoices?",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 274,
+      "tokens_avoided": 274,
+      "latency_ms": 0.8
+    },
+    {
+      "query": "How many invoices do we have?",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 272,
+      "tokens_avoided": 272,
+      "latency_ms": 0.5
+    },
+    {
+      "query": "Show me the top vendors by amount spent this year",
+      "expected_path": "sql",
+      "actual_path": "llm",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 275,
+      "tokens_avoided": 0,
+      "latency_ms": 4557.5
+    },
+    {
+      "query": "Give me a monthly breakdown of invoices",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 272,
+      "tokens_avoided": 272,
+      "latency_ms": 0.8
+    },
+    {
+      "query": "How many clients do we have?",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 272,
+      "tokens_avoided": 272,
+      "latency_ms": 0.8
+    },
+    {
+      "query": "What is the total income from receivables?",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 275,
+      "tokens_avoided": 275,
+      "latency_ms": 0.8
+    },
+    {
+      "query": "Show me overdue invoices",
+      "expected_path": "sql",
+      "actual_path": "llm",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 269,
+      "tokens_avoided": 0,
+      "latency_ms": 1401.8
+    },
+    {
+      "query": "What is our net income?",
+      "expected_path": "sql",
+      "actual_path": "llm",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 271,
+      "tokens_avoided": 0,
+      "latency_ms": 1739.9
+    },
+    {
+      "query": "Give me the compliance summary",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 270,
+      "tokens_avoided": 270,
+      "latency_ms": 0.9
+    },
+    {
+      "query": "How many vendors do we have?",
+      "expected_path": "sql",
+      "actual_path": "keyword",
+      "intent": "sql_aggregation",
+      "prompt_tokens": 272,
+      "tokens_avoided": 272,
+      "latency_ms": 0.9
+    },
+    {
+      "query": "Which invoices mention cloud hosting or server infrastructure?",
+      "expected_path": "rag",
+      "actual_path": "keyword",
+      "intent": "rag_invoice",
+      "prompt_tokens": 274,
+      "tokens_avoided": 274,
+      "latency_ms": 1.7
+    },
+    {
+      "query": "Find invoices that contain software license charges",
+      "expected_path": "rag",
+      "actual_path": "keyword",
+      "intent": "rag_invoice",
+      "prompt_tokens": 272,
+      "tokens_avoided": 272,
+      "latency_ms": 1.3
+    },
+    {
+      "query": "What services were billed on the most recent invoice?",
+      "expected_path": "rag",
+      "actual_path": "llm",
+      "intent": "rag_invoice",
+      "prompt_tokens": 275,
+      "tokens_avoided": 0,
+      "latency_ms": 2233.9
+    },
+    {
+      "query": "Do our invoices comply with VAT documentation requirements?",
+      "expected_path": "hybrid",
+      "actual_path": "keyword",
+      "intent": "rag_compliance",
+      "prompt_tokens": 274,
+      "tokens_avoided": 274,
+      "latency_ms": 0.9
+    },
+    {
+      "query": "Are e-invoicing requirements being met by our current invoices?",
+      "expected_path": "hybrid",
+      "actual_path": "keyword",
+      "intent": "rag_compliance",
+      "prompt_tokens": 278,
+      "tokens_avoided": 278,
+      "latency_ms": 0.8
+    }
+  ],
+  "compression_detail": [
+    {
+      "query": "Which invoices mention cloud hosting or server infrastructure?",
+      "intent": "rag_invoice",
+      "chunks_retrieved": 6,
+      "tokens_before": 1577,
+      "tokens_after": 331,
+      "tokens_saved": 1246,
+      "reduction_pct": 79.0,
+      "compression_ms": 2742.1
+    },
+    {
+      "query": "Find invoices that contain software license charges",
+      "intent": "rag_invoice",
+      "chunks_retrieved": 6,
+      "tokens_before": 1395,
+      "tokens_after": 792,
+      "tokens_saved": 603,
+      "reduction_pct": 43.2,
+      "compression_ms": 3899.3
+    },
+    {
+      "query": "What services were billed on the most recent invoice?",
+      "intent": "rag_invoice",
+      "chunks_retrieved": 6,
+      "tokens_before": 1737,
+      "tokens_after": 115,
+      "tokens_saved": 1622,
+      "reduction_pct": 93.4,
+      "compression_ms": 2120.6
+    },
+    {
+      "query": "Do our invoices comply with VAT documentation requirements?",
+      "intent": "rag_compliance",
+      "chunks_retrieved": 6,
+      "tokens_before": 2865,
+      "tokens_after": 37,
+      "tokens_saved": 2828,
+      "reduction_pct": 98.7,
+      "compression_ms": 2528.0
+    },
+    {
+      "query": "Are e-invoicing requirements being met by our current invoices?",
+      "intent": "rag_compliance",
+      "chunks_retrieved": 6,
+      "tokens_before": 1969,
+      "tokens_after": 0,
+      "tokens_saved": 1969,
+      "reduction_pct": 100.0,
+      "compression_ms": 2172.7
+    }
+  ]
+}

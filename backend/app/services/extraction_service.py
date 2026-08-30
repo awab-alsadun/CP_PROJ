@@ -9,6 +9,7 @@ import json
 import logging
 
 from app.providers import get_llm_provider
+from app.services.token_metrics import estimate_message_tokens, estimate_tokens, token_savings
 
 log = logging.getLogger(__name__)
 
@@ -120,6 +121,11 @@ def extract_structured_data(raw_text: str) -> dict:
     """
     llm = get_llm_provider()
     messages = [{"role": "user", "content": EXTRACTION_PROMPT + raw_text}]
+    log.info(
+      "Extraction prompt estimate: %s tokens (raw OCR text ~%s tokens)",
+      estimate_message_tokens(messages),
+      estimate_tokens(raw_text),
+    )
 
     max_retries = 3
     for attempt in range(1, max_retries + 1):
@@ -134,6 +140,13 @@ def extract_structured_data(raw_text: str) -> dict:
                     content = content[4:]
 
             parsed = json.loads(content)
+            before, after, saved = token_savings(raw_text, content)
+            log.info(
+                "Extraction output estimated %s tokens from %s-token input; raw-text-vs-output delta is %s tokens",
+                after,
+                before,
+                saved,
+            )
             log.info(f"LLM extraction succeeded (attempt {attempt})")
             return parsed
 
@@ -146,3 +159,5 @@ def extract_structured_data(raw_text: str) -> dict:
             log.error(f"LLM extraction failed (attempt {attempt}): {e}")
             if attempt == max_retries:
                 raise
+
+    raise RuntimeError("LLM extraction did not complete successfully")

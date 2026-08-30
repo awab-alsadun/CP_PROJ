@@ -25,6 +25,7 @@ import re
 from dataclasses import dataclass, field
 
 from app.providers import get_llm_provider
+from app.services.token_metrics import estimate_message_tokens
 
 log = logging.getLogger(__name__)
 
@@ -157,18 +158,32 @@ def classify_intent(question: str) -> ClassificationResult:
     # Stage 1: Keyword pre-filter
     keyword_result = _keyword_classify(question)
     if keyword_result:
-        log.info(f"Intent classified by keywords: {keyword_result.intent}, doc_types: {keyword_result.relevant_doc_types}")
+        avoided_prompt = estimate_message_tokens([
+            {"role": "system", "content": _CLASSIFIER_SYSTEM_PROMPT},
+            {"role": "user", "content": question},
+        ])
+        log.info(
+            "Intent classified by keywords: %s, doc_types: %s; skipped LLM call (~%s estimated prompt tokens avoided)",
+            keyword_result.intent,
+            keyword_result.relevant_doc_types,
+            avoided_prompt,
+        )
         return keyword_result
 
     # Stage 2: LLM classifier
     log.info("Intent ambiguous — using LLM classifier")
     try:
         llm = get_llm_provider()
+        messages = [
+            {"role": "system", "content": _CLASSIFIER_SYSTEM_PROMPT},
+            {"role": "user", "content": question},
+        ]
+        log.info(
+            "Intent classifier prompt estimate: %s tokens",
+            estimate_message_tokens(messages),
+        )
         response = llm.chat(
-            messages=[
-                {"role": "system", "content": _CLASSIFIER_SYSTEM_PROMPT},
-                {"role": "user", "content": question},
-            ],
+            messages=messages,
             temperature=0.0,
             max_tokens=100,
         )

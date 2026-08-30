@@ -1,831 +1,94 @@
-2026-07-28 22:46:26,589 INFO app.routers.query Query received: What is the total amount paid this quarter?
-2026-07-28 22:46:26,589 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
-2026-07-28 22:46:26,589 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
-2026-07-28 22:47:24,806 INFO app.services.query_service Template selector raw response: ''
-2026-07-28 22:47:24,806 ERROR app.services.query_service Template selector failed: Expecting value: line 1 column 1 (char 0)
-2026-07-28 22:47:24,807 INFO app.services.query_service No template matched — falling back to RAG
-2026-07-28 22:47:24,807 INFO app.services.query_service SQL fallback: routing to RAG
-2026-07-28 22:47:58,489 WARNING app.services.query_service Multi-query generation failed: Expecting value: line 1 column 1 (char 0)
-2026-07-28 22:47:58,489 INFO app.services.query_service Query variants: ['What is the total amount paid this quarter?']
-2026-07-28 22:48:10,012 INFO app.services.query_service Retrieved 10 chunks from Invoice Data
-2026-07-28 22:48:26,662 INFO app.providers.bge_reranker Loading BGE reranker 'BAAI/bge-reranker-v2-m3' on cuda
-2026-07-28 22:48:27,227 WARNING huggingface_hub.utils._http Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-2026-07-28 22:48:37,026 INFO app.providers.bge_reranker BGE reranker loaded
-2026-07-28 22:49:02,374 INFO app.services.query_service Chunks after reranking: 6
-2026-07-28 23:18:13,558 INFO app.routers.query Query received: what invoices have cloud infrastructure as items
-2026-07-28 23:18:13,564 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-28 23:18:33,799 ERROR app.services.intent_classifier LLM intent classification failed: Expecting value: line 1 column 1 (char 0). Defaulting to rag_invoice.
-2026-07-28 23:18:33,799 INFO app.services.query_service Intent: rag_invoice, doc_types: []
-2026-07-28 23:19:06,275 WARNING app.services.query_service Multi-query generation failed: Expecting value: line 1 column 1 (char 0)
-2026-07-28 23:19:06,276 INFO app.services.query_service Query variants: ['what invoices have cloud infrastructure as items']
-2026-07-28 23:19:20,481 INFO app.services.query_service Retrieved 10 chunks from Invoice Data
-2026-07-28 23:19:56,039 INFO app.services.query_service Chunks after reranking: 6
-2026-07-28 23:22:55,060 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-28 23:22:57,061 INFO app.main Supabase connection verified at startup
-2026-07-28 23:22:57,061 INFO app.main Storage active bucket: invoices
-2026-07-28 23:22:57,062 DEBUG tzlocal Looking up time zone info from registry
-2026-07-28 23:22:57,112 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-28 23:22:57,113 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-28 23:22:57,114 INFO apscheduler.scheduler Scheduler started
-2026-07-28 23:22:57,115 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-28 23:22:57,116 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-29 00:00:00+04:00 (in 2222.883448 seconds)
-2026-07-28 23:22:57,116 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-28 23:23:20,157 INFO app.routers.query Query received: what invoices have cloud infrastructure as items
-2026-07-28 23:23:20,157 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-28 23:23:56,832 INFO app.services.intent_classifier Intent classified by LLM: rag_invoice, doc_types: []
-2026-07-28 23:23:56,832 INFO app.services.query_service Intent: rag_invoice, doc_types: []
-2026-07-28 23:24:09,500 INFO app.services.query_service Query variants: ['what invoices have cloud infrastructure as items', 'What invoices list cloud services expenses?', 'Find invoices with cloud computing or hosting charges']
-2026-07-28 23:24:26,455 INFO app.services.query_service Retrieved 18 chunks from Invoice Data
-2026-07-28 23:24:54,133 INFO app.providers.bge_reranker Loading BGE reranker 'BAAI/bge-reranker-v2-m3' on cuda
-2026-07-28 23:24:55,535 WARNING huggingface_hub.utils._http Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-2026-07-28 23:25:09,247 INFO app.providers.bge_reranker BGE reranker loaded
-2026-07-28 23:25:51,777 INFO app.services.query_service Chunks after reranking: 6
-2026-07-28 23:30:45,280 INFO app.routers.query Query received: how many invoices do we have?
-2026-07-28 23:30:45,281 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
-2026-07-28 23:30:45,281 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
-2026-07-28 23:31:01,896 INFO app.services.query_service Template selector raw response: '{"template": "invoice_count", "filters": {}}'
-2026-07-28 23:31:01,897 INFO app.services.query_service Template: invoice_count, filters: {}
-2026-07-28 23:31:02,956 INFO app.services.query_service Template 'invoice_count' executed successfully
-2026-07-28 23:34:30,676 INFO app.routers.query Query received: how many invoices do we have?
-2026-07-28 23:34:30,677 INFO app.services.intent_classifier Intent classified by keywords: sql_aggregation, doc_types: []
-2026-07-28 23:34:30,677 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
-2026-07-28 23:34:37,953 INFO app.services.query_service Template selector raw response: '{"template": "invoice_count", "filters": {}}'
-2026-07-28 23:34:37,953 INFO app.services.query_service Template: invoice_count, filters: {}
-2026-07-28 23:34:38,971 INFO app.services.query_service Template 'invoice_count' executed successfully
-2026-07-28 23:35:04,375 INFO app.routers.query Query received: list me 3 invoices that align with the irs requirements
-2026-07-28 23:35:04,376 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-28 23:35:14,704 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:35:14,705 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:35:28,693 INFO app.services.query_service Query variants: ['list me 3 invoices that align with the irs requirements', 'Can you provide three invoices that comply with IRS regulations?', 'What are the names of three invoices that meet tax authority standards?']
-2026-07-28 23:35:43,731 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
-2026-07-28 23:35:43,732 INFO app.services.query_service Chunks after reranking: 0
-2026-07-28 23:36:26,408 INFO app.routers.query Query received: do our invoices meet the irs requirements?
-2026-07-28 23:36:26,409 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-28 23:36:56,138 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:36:56,138 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:37:10,123 INFO app.services.query_service Query variants: ['do our invoices meet the irs requirements?', 'Are our financial statements compliant with IRS regulations?', 'Do our invoices adhere to IRS guidelines and standards?']
-2026-07-28 23:37:23,779 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
-2026-07-28 23:37:23,780 INFO app.services.query_service Chunks after reranking: 0
-2026-07-28 23:38:59,914 INFO app.routers.query Query received: A married couple jointly owns an unincorporated business and shares profits but files no partnership
-2026-07-28 23:38:59,916 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-28 23:39:30,674 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:39:30,675 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:39:53,052 INFO app.services.query_service Query variants: ['A married couple jointly owns an unincorporated business and shares profits but files no partnership agreement. How must they report the business by default, and what exception allows different treatment?', 'How do married co-owners of a sole proprietorship report their shared income?', 'What is the default reporting method for a husband-and-wife owned unincorporated business with no partnership agreement?']
-2026-07-28 23:40:08,252 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
-2026-07-28 23:40:08,253 INFO app.services.query_service Chunks after reranking: 0
-2026-07-28 23:40:36,396 INFO app.routers.query Query received: A single-member LLC earns business income. Explain how it is treated for federal tax purposes and ho
-2026-07-28 23:40:36,396 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-28 23:41:05,421 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:41:05,422 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation']
-2026-07-28 23:41:33,847 INFO app.services.query_service Query variants: ['A single-member LLC earns business income. Explain how it is treated for federal tax purposes and how income is reported.', 'How does a solo proprietorship, such as an individual-owned LLC, report business revenue on their personal tax return?', "What are the federal tax implications of a one-person limited liability company's commercial profits being passed through to its sole owner's individual return?"]
-2026-07-28 23:42:02,564 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
-2026-07-28 23:42:02,568 INFO app.services.query_service Chunks after reranking: 0
-2026-07-29 00:34:29,447 INFO app.routers.query Query received: Are there any compliance issues I should know about?
-2026-07-29 00:34:29,449 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 00:34:54,559 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
-2026-07-29 00:34:54,559 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
-2026-07-29 00:35:07,537 INFO app.services.query_service Query variants: ['Are there any compliance issues I should know about?', 'Do I need to be aware of any regulatory concerns?', 'Are there any financial regulations I should consider?']
-2026-07-29 00:35:19,332 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
-2026-07-29 00:35:19,332 INFO app.services.query_service Chunks after reranking: 0
-2026-07-29 00:35:43,280 INFO app.routers.query Query received: A single-member LLC earns business income. Explain how it is treated for federal tax purposes and ho
-2026-07-29 00:35:43,281 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 00:36:07,959 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation']
-2026-07-29 00:36:07,959 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation']
-2026-07-29 00:36:32,919 INFO app.services.query_service Query variants: ['A single-member LLC earns business income. Explain how it is treated for federal tax purposes and how income is reported.', 'How does a sole proprietorship, like a one-person LLC, report business earnings on their personal tax return?', 'What are the federal tax implications when an individual operates a single-member LLC as a pass-through entity?']
-2026-07-29 00:36:46,673 INFO app.services.query_service Retrieved 0 chunks from Regulatory Documents
-2026-07-29 00:36:46,675 INFO app.services.query_service Chunks after reranking: 0
-2026-07-29 00:37:53,253 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 00:37:53,254 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-29 00:37:53,254 DEBUG python_multipart.multipart Calling on_header_value with data[63:126]
-2026-07-29 00:37:53,254 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:37:53,254 DEBUG python_multipart.multipart Calling on_header_field with data[128:140]
-2026-07-29 00:37:53,255 DEBUG python_multipart.multipart Calling on_header_value with data[142:157]
-2026-07-29 00:37:53,255 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:37:53,255 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 00:37:53,257 DEBUG python_multipart.multipart Calling on_part_data with data[161:16384]
-2026-07-29 00:37:53,260 DEBUG python_multipart.multipart Calling on_part_data with data[0:262144]
-2026-07-29 00:37:53,261 DEBUG python_multipart.multipart Calling on_part_data with data[0:196608]
-2026-07-29 00:37:53,262 DEBUG python_multipart.multipart Calling on_part_data with data[0:196608]
-2026-07-29 00:37:53,262 DEBUG python_multipart.multipart Calling on_part_data with data[0:65536]
-2026-07-29 00:37:53,263 DEBUG python_multipart.multipart Calling on_part_data with data[0:65536]
-2026-07-29 00:37:53,263 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,264 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,264 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,265 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,265 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,265 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,265 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,265 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,265 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,267 DEBUG python_multipart.multipart Calling on_part_data with data[0:65536]
-2026-07-29 00:37:53,268 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,269 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,278 DEBUG python_multipart.multipart Calling on_part_data with data[0:311296]
-2026-07-29 00:37:53,279 DEBUG python_multipart.multipart Calling on_part_data with data[0:262144]
-2026-07-29 00:37:53,280 DEBUG python_multipart.multipart Calling on_part_data with data[0:114688]
-2026-07-29 00:37:53,281 DEBUG python_multipart.multipart Calling on_part_data with data[0:81920]
-2026-07-29 00:37:53,281 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,282 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,283 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,284 DEBUG python_multipart.multipart Calling on_part_data with data[0:65536]
-2026-07-29 00:37:53,285 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,286 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,286 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,287 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,287 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,288 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,289 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,289 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,290 DEBUG python_multipart.multipart Calling on_part_data with data[0:65536]
-2026-07-29 00:37:53,291 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,292 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,292 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:37:53,293 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,293 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,294 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,294 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,295 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:37:53,295 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:37:53,296 DEBUG python_multipart.multipart Calling on_part_data with data[0:11585]
-2026-07-29 00:37:53,296 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_header_field with data[11629:11648]
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_header_value with data[11650:11681]
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_part_data with data[11685:11699]
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 00:37:53,297 DEBUG python_multipart.multipart Calling on_header_field with data[11743:11762]
-2026-07-29 00:37:53,298 DEBUG python_multipart.multipart Calling on_header_value with data[11764:11789]
-2026-07-29 00:37:53,298 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:37:53,298 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 00:37:53,298 DEBUG python_multipart.multipart Calling on_part_data with data[11793:11795]
-2026-07-29 00:37:53,298 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 00:37:53,298 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-29 00:37:53,671 INFO app.services.document_service Extracting text from taxGuideForSmallBusiness.pdf...
-2026-07-29 00:37:54,155 INFO app.services.document_service Document classified as: regulation
-2026-07-29 00:37:54,181 INFO app.services.document_service Generated 271 chunks from 57 pages
-2026-07-29 00:37:55,129 INFO app.services.document_service Embedding 271 chunks...
-2026-07-29 00:42:35,841 INFO app.services.document_service Stored 271/271 chunks for document 'taxGuideForSmallBusiness.pdf'
-2026-07-29 00:43:04,673 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 00:43:04,674 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-29 00:43:04,675 DEBUG python_multipart.multipart Calling on_header_value with data[63:131]
-2026-07-29 00:43:04,676 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:43:04,677 DEBUG python_multipart.multipart Calling on_header_field with data[133:145]
-2026-07-29 00:43:04,678 DEBUG python_multipart.multipart Calling on_header_value with data[147:162]
-2026-07-29 00:43:04,679 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:43:04,680 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 00:43:04,682 DEBUG python_multipart.multipart Calling on_part_data with data[166:16384]
-2026-07-29 00:43:04,684 DEBUG python_multipart.multipart Calling on_part_data with data[0:163840]
-2026-07-29 00:43:04,686 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,688 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,689 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,690 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,691 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,692 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,693 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,694 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,695 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,696 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,698 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,699 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,700 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,701 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,702 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,704 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,705 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,706 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,707 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,709 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,711 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:43:04,712 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,716 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,718 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,719 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,721 DEBUG python_multipart.multipart Calling on_part_data with data[0:49152]
-2026-07-29 00:43:04,723 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,724 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,726 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,728 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,729 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,730 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,732 DEBUG python_multipart.multipart Calling on_part_data with data[0:16384]
-2026-07-29 00:43:04,733 DEBUG python_multipart.multipart Calling on_part_data with data[0:32768]
-2026-07-29 00:43:04,744 DEBUG python_multipart.multipart Calling on_part_data with data[0:81920]
-2026-07-29 00:43:04,746 DEBUG python_multipart.multipart Calling on_part_data with data[0:62302]
-2026-07-29 00:43:04,747 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 00:43:04,747 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 00:43:04,747 DEBUG python_multipart.multipart Calling on_header_field with data[62346:62365]
-2026-07-29 00:43:04,748 DEBUG python_multipart.multipart Calling on_header_value with data[62367:62398]
-2026-07-29 00:43:04,748 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:43:04,748 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 00:43:04,749 DEBUG python_multipart.multipart Calling on_part_data with data[62402:62416]
-2026-07-29 00:43:04,749 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 00:43:04,749 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 00:43:04,750 DEBUG python_multipart.multipart Calling on_header_field with data[62460:62479]
-2026-07-29 00:43:04,750 DEBUG python_multipart.multipart Calling on_header_value with data[62481:62506]
-2026-07-29 00:43:04,750 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 00:43:04,751 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 00:43:04,751 DEBUG python_multipart.multipart Calling on_part_data with data[62510:62512]
-2026-07-29 00:43:04,751 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 00:43:04,752 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-29 00:43:06,263 INFO app.services.document_service Extracting text from accountingPeriodsAndMethodsUS.pdf...
-2026-07-29 00:43:06,572 INFO app.services.document_service Document classified as: regulation
-2026-07-29 00:43:06,581 INFO app.services.document_service Generated 97 chunks from 22 pages
-2026-07-29 00:43:09,506 INFO app.services.document_service Embedding 97 chunks...
-2026-07-29 00:44:42,582 INFO app.services.document_service Stored 97/97 chunks for document 'accountingPeriodsAndMethodsUS.pdf'
-2026-07-29 00:45:08,956 INFO app.routers.query Query received: A single-member LLC earns business income. Explain how it is treated for federal tax purposes and ho
-2026-07-29 00:45:08,956 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 00:45:39,137 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation']
-2026-07-29 00:45:39,138 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation']
-2026-07-29 00:46:04,426 INFO app.services.query_service Query variants: ['A single-member LLC earns business income. Explain how it is treated for federal tax purposes and how income is reported?', 'How does a sole proprietorship, such as a one-person LLC, report business income on their personal tax return?', "What are the federal tax implications for a single-member limited liability company's business income, and how is it reflected on individual tax returns?"]
-2026-07-29 00:46:19,393 INFO app.services.query_service Retrieved 16 chunks from Regulatory Documents
-2026-07-29 00:46:19,399 INFO app.services.query_service Soft boost: 16 chunks matched ['tax_regulation']
-2026-07-29 00:47:01,621 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 00:47:01,641 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-30 00:00:00+04:00 (in 83578.359219 seconds)
-2026-07-29 00:47:01,639 WARNING apscheduler.executors.default Run time of job "lifespan.<locals>._run_overdue_check (trigger: cron[hour='0', minute='0'], next run at: 2026-07-30 00:00:00 +04)" was missed by 0:47:01.638489
-2026-07-29 00:48:00,915 INFO app.services.query_service Chunks after reranking: 6
-2026-07-29 01:17:07,747 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-29 01:17:07,748 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:17:07,748 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-29 01:17:07,763 INFO app.main [overdue_check] scheduler stopped
-2026-07-29 01:17:35,140 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-29 01:17:37,410 INFO app.main Supabase connection verified at startup
-2026-07-29 01:17:37,410 INFO app.main Storage active bucket: invoices
-2026-07-29 01:17:37,411 DEBUG tzlocal Looking up time zone info from registry
-2026-07-29 01:17:37,459 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-29 01:17:37,460 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-29 01:17:37,461 INFO apscheduler.scheduler Scheduler started
-2026-07-29 01:17:37,464 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:17:37,465 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-30 00:00:00+04:00 (in 81742.534842 seconds)
-2026-07-29 01:17:37,464 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-29 01:17:37,576 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-29 01:17:37,577 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:17:37,577 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-29 01:17:37,578 INFO app.main [overdue_check] scheduler stopped
-2026-07-29 01:17:50,885 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-29 01:17:52,572 INFO app.main Supabase connection verified at startup
-2026-07-29 01:17:52,573 INFO app.main Storage active bucket: invoices
-2026-07-29 01:17:52,574 DEBUG tzlocal Looking up time zone info from registry
-2026-07-29 01:17:52,600 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-29 01:17:52,601 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-29 01:17:52,602 INFO apscheduler.scheduler Scheduler started
-2026-07-29 01:17:52,604 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:17:52,604 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-30 00:00:00+04:00 (in 81727.395477 seconds)
-2026-07-29 01:17:52,604 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-29 01:18:30,813 INFO app.routers.query Query received: how many invoices mention cloud subscriptions?
-2026-07-29 01:18:30,814 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 01:18:37,008 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 503 - [{'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}]. Defaulting to rag_invoice.
-2026-07-29 01:18:37,009 INFO app.services.query_service Intent: rag_invoice, doc_types: []
-2026-07-29 01:18:40,592 WARNING app.services.query_service Multi-query generation failed: Error code: 503 - [{'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}]
-2026-07-29 01:18:40,593 INFO app.services.query_service Query variants: ['how many invoices mention cloud subscriptions?']
-2026-07-29 01:18:52,162 INFO app.services.query_service Retrieved 10 chunks from Invoice Data
-2026-07-29 01:19:13,501 INFO app.providers.bge_reranker Loading BGE reranker 'BAAI/bge-reranker-v2-m3' on cuda
-2026-07-29 01:19:14,386 WARNING huggingface_hub.utils._http Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-2026-07-29 01:19:28,486 INFO app.providers.bge_reranker BGE reranker loaded
-2026-07-29 01:19:55,669 INFO app.services.query_service Chunks after reranking: 6
-2026-07-29 01:20:00,158 WARNING app.services.query_service Compression failed: Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.5-flash\nPlease retry in 690.633283ms.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '0s'}]}}]. Using raw context.
-2026-07-29 01:20:06,227 ERROR app.routers.query Query failed: Error code: 503 - [{'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}]
-Traceback (most recent call last):
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
-    result = handle_query(db=db, company_id=company_id, question=body.question)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 1006, in handle_query
-    answer = _generate_answer(question, compressed, intent)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 906, in _generate_answer
-    return llm.chat(
-           ~~~~~~~~^
-        messages=[
-        ^^^^^^^^^^
-    ...<8 lines>...
-        max_tokens=768,
-        ^^^^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\providers\gemini_provider.py", line 37, in chat
-    response = self._client.chat.completions.create(
-        model=self._model,
-    ...<2 lines>...
-        max_tokens=max_tokens,
-    )
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_utils\_utils.py", line 286, in wrapper
-    return func(*args, **kwargs)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1211, in create
-    return self._post(
-           ~~~~~~~~~~^
-        "/chat/completions",
-        ^^^^^^^^^^^^^^^^^^^^
-    ...<47 lines>...
-        stream_cls=Stream[ChatCompletionChunk],
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_base_client.py", line 1314, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_base_client.py", line 1087, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.InternalServerError: Error code: 503 - [{'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}]
-
-2026-07-29 01:22:50,962 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-29 01:22:50,962 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:22:50,962 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-29 01:22:50,963 INFO app.main [overdue_check] scheduler stopped
-2026-07-29 01:23:02,806 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-29 01:23:04,176 INFO app.main Supabase connection verified at startup
-2026-07-29 01:23:04,176 INFO app.main Storage active bucket: invoices
-2026-07-29 01:23:04,177 DEBUG tzlocal Looking up time zone info from registry
-2026-07-29 01:23:04,220 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-29 01:23:04,222 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-29 01:23:04,222 INFO apscheduler.scheduler Scheduler started
-2026-07-29 01:23:04,224 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:23:04,225 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-30 00:00:00+04:00 (in 81415.774512 seconds)
-2026-07-29 01:23:04,225 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-29 01:23:04,924 INFO app.routers.query Query received: how many invoices mention cloud subscriptions?
-2026-07-29 01:23:04,924 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 01:23:07,552 ERROR app.services.intent_classifier LLM intent classification failed: Error code: 404 - [{'error': {'code': 404, 'message': 'models/gemini-3.5 is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}]. Defaulting to rag_invoice.
-2026-07-29 01:23:07,553 INFO app.services.query_service Intent: rag_invoice, doc_types: []
-2026-07-29 01:23:08,679 WARNING app.services.query_service Multi-query generation failed: Error code: 404 - [{'error': {'code': 404, 'message': 'models/gemini-3.5 is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}]
-2026-07-29 01:23:08,680 INFO app.services.query_service Query variants: ['how many invoices mention cloud subscriptions?']
-2026-07-29 01:23:14,005 INFO app.services.query_service Retrieved 10 chunks from Invoice Data
-2026-07-29 01:23:34,855 INFO app.providers.bge_reranker Loading BGE reranker 'BAAI/bge-reranker-v2-m3' on cuda
-2026-07-29 01:23:36,226 WARNING huggingface_hub.utils._http Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-2026-07-29 01:23:44,454 INFO app.providers.bge_reranker BGE reranker loaded
-2026-07-29 01:24:09,380 INFO app.services.query_service Chunks after reranking: 6
-2026-07-29 01:24:10,854 WARNING app.services.query_service Compression failed: Error code: 404 - [{'error': {'code': 404, 'message': 'models/gemini-3.5 is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}]. Using raw context.
-2026-07-29 01:24:13,303 ERROR app.routers.query Query failed: Error code: 404 - [{'error': {'code': 404, 'message': 'models/gemini-3.5 is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}]
-Traceback (most recent call last):
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\routers\query.py", line 89, in query_invoices
-    result = handle_query(db=db, company_id=company_id, question=body.question)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 1006, in handle_query
-    answer = _generate_answer(question, compressed, intent)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\query_service.py", line 906, in _generate_answer
-    return llm.chat(
-           ~~~~~~~~^
-        messages=[
-        ^^^^^^^^^^
-    ...<8 lines>...
-        max_tokens=768,
-        ^^^^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\providers\gemini_provider.py", line 37, in chat
-    response = self._client.chat.completions.create(
-        model=self._model,
-    ...<2 lines>...
-        max_tokens=max_tokens,
-    )
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_utils\_utils.py", line 286, in wrapper
-    return func(*args, **kwargs)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1211, in create
-    return self._post(
-           ~~~~~~~~~~^
-        "/chat/completions",
-        ^^^^^^^^^^^^^^^^^^^^
-    ...<47 lines>...
-        stream_cls=Stream[ChatCompletionChunk],
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_base_client.py", line 1314, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_base_client.py", line 1087, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.NotFoundError: Error code: 404 - [{'error': {'code': 404, 'message': 'models/gemini-3.5 is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}]
-
-2026-07-29 01:27:41,084 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-29 01:27:41,084 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:27:41,085 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-29 01:27:41,086 INFO app.main [overdue_check] scheduler stopped
-2026-07-29 01:27:56,913 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-29 01:27:58,687 INFO app.main Supabase connection verified at startup
-2026-07-29 01:27:58,688 INFO app.main Storage active bucket: invoices
-2026-07-29 01:27:58,689 DEBUG tzlocal Looking up time zone info from registry
-2026-07-29 01:27:58,728 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-29 01:27:58,730 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-29 01:27:58,731 INFO apscheduler.scheduler Scheduler started
-2026-07-29 01:27:58,733 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-29 01:27:58,734 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-30 00:00:00+04:00 (in 81121.265342 seconds)
-2026-07-29 01:27:58,734 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-29 01:27:59,270 INFO app.routers.query Query received: how many invoices mention cloud subscriptions?
-2026-07-29 01:27:59,270 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 01:28:02,905 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
-2026-07-29 01:28:02,906 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
-2026-07-29 01:28:05,337 INFO app.services.query_service Template selector raw response: '{\n  "template": "invoice_count",\n  "filters": {\n    "date_from": null,\n    "date_to": null,\n    "vendor_name": null,\n    "client_name": null,\n    "status": null,\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
-2026-07-29 01:28:05,338 INFO app.services.query_service Template: invoice_count, filters: {'date_from': None, 'date_to': None, 'vendor_name': None, 'client_name': None, 'status': None, 'invoice_type': None, 'currency': None, 'limit': None}
-2026-07-29 01:28:06,786 INFO app.services.query_service Template 'invoice_count' executed successfully
-2026-07-29 01:28:38,026 INFO app.routers.query Query received: which incvoices mention cloud subscrptions
-2026-07-29 01:28:38,026 INFO app.services.intent_classifier Intent classified by keywords: rag_invoice, doc_types: []
-2026-07-29 01:28:38,026 INFO app.services.query_service Intent: rag_invoice, doc_types: []
-2026-07-29 01:28:40,256 INFO app.services.query_service Query variants: ['which incvoices mention cloud subscrptions', 'Which bills include software-as-a-service or cloud hosting fees?', 'Find statements referencing cloud computing platforms.']
-2026-07-29 01:28:51,928 INFO app.services.query_service Retrieved 20 chunks from Invoice Data
-2026-07-29 01:29:07,319 INFO app.providers.bge_reranker Loading BGE reranker 'BAAI/bge-reranker-v2-m3' on cuda
-2026-07-29 01:29:08,312 WARNING huggingface_hub.utils._http Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-2026-07-29 01:29:16,921 INFO app.providers.bge_reranker BGE reranker loaded
-2026-07-29 01:29:59,916 INFO app.services.query_service Chunks after reranking: 6
-2026-07-29 01:31:54,612 INFO app.routers.query Query received: show all invoices that mention cloud subscriptions
-2026-07-29 01:31:54,612 INFO app.services.intent_classifier Intent classified by keywords: rag_invoice, doc_types: []
-2026-07-29 01:31:54,612 INFO app.services.query_service Intent: rag_invoice, doc_types: []
-2026-07-29 01:31:56,661 INFO app.services.query_service Query variants: ['show all invoices that mention cloud subscriptions', 'List all bills referencing SaaS or cloud-based software services', 'Find invoices containing cloud hosting or platform charges']
-2026-07-29 01:32:03,010 INFO app.services.query_service Retrieved 16 chunks from Invoice Data
-2026-07-29 01:33:15,399 INFO app.services.query_service Chunks after reranking: 6
-2026-07-29 01:44:52,325 INFO app.routers.query Query received: A single-member LLC earns business income. Explain how it is treated for federal tax purposes and ho
-2026-07-29 01:44:52,348 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
-2026-07-29 01:44:54,089 INFO app.services.intent_classifier Intent classified by LLM: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
-2026-07-29 01:44:54,090 INFO app.services.query_service Intent: rag_compliance, doc_types: ['tax_regulation', 'compliance_guide']
-2026-07-29 01:45:09,142 INFO app.services.query_service Query variants: ['A single-member LLC earns business income. Explain how it is treated for federal tax purposes and how income is reported.', 'How are federal taxes handled for a single-member limited liability company, and what is the reporting procedure for its profits?', 'What is the IRS tax classification for a single-member LLC, and how should business earnings be filed on federal returns?']
-2026-07-29 01:45:22,044 INFO app.services.query_service Retrieved 16 chunks from Regulatory Documents
-2026-07-29 01:45:22,045 INFO app.services.query_service Soft boost: 16 chunks matched ['tax_regulation', 'compliance_guide']
-2026-07-29 01:46:47,296 INFO app.services.query_service Chunks after reranking: 6
-2026-07-29 18:55:11,373 INFO app.services.invoice_service receivable_create  invoice_id=f137678d-84f7-40ab-a396-979c9b7cb63a  invoice_number='REC-2026-0150'
-2026-07-29 18:55:19,164 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
-2026-07-29 18:55:19,165 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
-2026-07-29 18:55:19,165 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
-2026-07-29 18:55:19,165 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
-2026-07-29 18:55:19,165 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
-2026-07-29 18:55:19,166 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
-2026-07-29 18:55:19,166 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
-2026-07-29 18:55:19,167 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
-2026-07-29 18:55:19,167 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
-2026-07-29 18:55:19,169 DEBUG PIL.PngImagePlugin STREAM b'IHDR' 16 13
-2026-07-29 18:55:19,169 DEBUG PIL.PngImagePlugin STREAM b'gAMA' 41 4
-2026-07-29 18:55:19,170 DEBUG PIL.PngImagePlugin STREAM b'cHRM' 57 32
-2026-07-29 18:55:19,170 DEBUG PIL.PngImagePlugin STREAM b'bKGD' 101 6
-2026-07-29 18:55:19,171 DEBUG PIL.PngImagePlugin b'bKGD' 101 6 (unknown)
-2026-07-29 18:55:19,171 DEBUG PIL.PngImagePlugin STREAM b'pHYs' 119 9
-2026-07-29 18:55:19,171 DEBUG PIL.PngImagePlugin STREAM b'tIME' 140 7
-2026-07-29 18:55:19,172 DEBUG PIL.PngImagePlugin b'tIME' 140 7 (unknown)
-2026-07-29 18:55:19,172 DEBUG PIL.PngImagePlugin STREAM b'IDAT' 159 17346
-2026-07-29 18:55:19,206 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17517 37
-2026-07-29 18:55:19,207 DEBUG PIL.PngImagePlugin STREAM b'tEXt' 17566 37
-2026-07-29 18:55:21,722 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - REC-2026-0150.pdf
-2026-07-29 18:55:44,857 INFO app.services.compliance_service Compliance flag inserted: tax_mismatch (high) on f137678d-84f7-40ab-a396-979c9b7cb63a
-2026-07-29 18:55:45,471 INFO app.services.compliance_service Compliance check complete for f137678d-84f7-40ab-a396-979c9b7cb63a: 5 checks, 1 inserted, 0 resolved
-2026-07-29 18:58:39,658 INFO app.services.invoice_service payable_create  invoice_id=f10c2afe-d3b4-4321-95f1-308d2c6c7916  invoice_number='hyiuiyvuvyyydyfg'
-2026-07-29 18:58:49,993 INFO app.services.compliance_service Compliance flag inserted: tax_mismatch (high) on f10c2afe-d3b4-4321-95f1-308d2c6c7916
-2026-07-29 18:58:50,505 INFO app.services.compliance_service Compliance check complete for f10c2afe-d3b4-4321-95f1-308d2c6c7916: 5 checks, 1 inserted, 0 resolved
-2026-07-29 19:42:50,622 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 19:42:50,624 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-29 19:42:50,625 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-29 19:42:50,625 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 19:42:50,626 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-29 19:42:50,626 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-29 19:42:50,626 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 19:42:50,626 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 19:42:50,632 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-29 19:42:50,633 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 19:42:50,635 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 19:42:50,636 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-29 19:42:50,636 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-29 19:42:50,637 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 19:42:50,637 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 19:42:50,638 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-29 19:42:50,638 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 19:42:50,638 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-29 19:42:52,012 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-29 19:42:52,014 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-29 19:42:52,189 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-29 19:42:52,190 ERROR app.routers.upload upload_failed  stage=process_invoice  filename='INV-2023-1111.pdf'  error_type=ValueError  error=too many values to unpack (expected 2)
-2026-07-29 19:43:26,789 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 19:43:26,790 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-29 19:43:26,791 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-29 19:43:26,792 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 19:43:26,793 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-29 19:43:26,794 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-29 19:43:26,794 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 19:43:26,795 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 19:43:26,796 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-29 19:43:26,796 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 19:43:26,797 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-29 19:43:26,797 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-29 19:43:26,798 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-29 19:43:26,798 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-29 19:43:26,799 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-29 19:43:26,800 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-29 19:43:26,801 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-29 19:43:26,802 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-29 19:43:27,737 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-29 19:43:27,738 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-29 19:43:27,750 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-29 19:43:27,750 ERROR app.routers.upload upload_failed  stage=process_invoice  filename='INV-2023-1111.pdf'  error_type=ValueError  error=too many values to unpack (expected 2)
-2026-07-30 04:05:05,761 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-30 04:05:05,767 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:05:05,770 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-30 04:05:05,789 INFO app.main [overdue_check] scheduler stopped
-2026-07-30 04:05:40,629 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-30 04:05:43,742 INFO app.main Supabase connection verified at startup
-2026-07-30 04:05:43,742 INFO app.main Storage active bucket: invoices
-2026-07-30 04:05:43,743 DEBUG tzlocal Looking up time zone info from registry
-2026-07-30 04:05:43,802 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-30 04:05:43,804 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-30 04:05:43,804 INFO apscheduler.scheduler Scheduler started
-2026-07-30 04:05:43,805 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:05:43,806 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 71656.193873 seconds)
-2026-07-30 04:05:43,805 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-30 04:12:20,570 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-30 04:12:20,571 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:12:20,571 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-30 04:12:20,571 INFO app.main [overdue_check] scheduler stopped
-2026-07-30 04:12:31,548 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-30 04:12:33,241 INFO app.main Supabase connection verified at startup
-2026-07-30 04:12:33,241 INFO app.main Storage active bucket: invoices
-2026-07-30 04:12:33,241 DEBUG tzlocal Looking up time zone info from registry
-2026-07-30 04:12:33,256 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-30 04:12:33,258 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-30 04:12:33,258 INFO apscheduler.scheduler Scheduler started
-2026-07-30 04:12:33,259 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:12:33,260 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-30 04:12:33,260 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 71246.739539 seconds)
-2026-07-30 04:12:34,707 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:12:34,707 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 04:12:34,710 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 04:12:34,714 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:12:34,714 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 04:12:34,714 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 04:12:34,714 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:12:34,714 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:12:34,715 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 04:12:34,715 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:12:34,715 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:12:34,716 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 04:12:34,716 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 04:12:34,717 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:12:34,717 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:12:34,717 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 04:12:34,718 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:12:34,718 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 04:12:35,396 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 04:12:35,396 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 04:12:35,403 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 04:12:35,403 ERROR app.routers.upload upload_failed  stage=process_invoice  filename='INV-2023-1111.pdf'  error_type=ValueError  error=too many values to unpack (expected 2)
-2026-07-30 04:20:31,493 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-30 04:20:31,494 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:20:31,494 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-30 04:20:31,495 INFO app.main [overdue_check] scheduler stopped
-2026-07-30 04:20:39,819 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-30 04:20:41,290 INFO app.main Supabase connection verified at startup
-2026-07-30 04:20:41,291 INFO app.main Storage active bucket: invoices
-2026-07-30 04:20:41,292 DEBUG tzlocal Looking up time zone info from registry
-2026-07-30 04:20:41,326 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-30 04:20:41,328 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-30 04:20:41,329 INFO apscheduler.scheduler Scheduler started
-2026-07-30 04:20:41,331 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:20:41,332 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 70758.667800 seconds)
-2026-07-30 04:20:41,331 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-30 04:20:45,202 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:20:45,202 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 04:20:45,202 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 04:20:45,203 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:20:45,203 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 04:20:45,203 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 04:20:45,203 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:20:45,203 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 04:20:45,204 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:20:45,205 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 04:20:45,664 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 04:20:45,665 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 04:20:45,674 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 04:20:45,674 ERROR app.routers.upload upload_failed  stage=process_invoice  filename='INV-2023-1111.pdf'  error_type=ValueError  error=too many values to unpack (expected 2)
-2026-07-30 04:22:16,965 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-30 04:22:16,966 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:22:16,967 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-30 04:22:16,969 INFO app.main [overdue_check] scheduler stopped
-2026-07-30 04:22:25,365 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-30 04:22:27,176 INFO app.main Supabase connection verified at startup
-2026-07-30 04:22:27,180 INFO app.main Storage active bucket: invoices
-2026-07-30 04:22:27,183 DEBUG tzlocal Looking up time zone info from registry
-2026-07-30 04:22:27,200 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-30 04:22:27,200 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-30 04:22:27,201 INFO apscheduler.scheduler Scheduler started
-2026-07-30 04:22:27,202 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:22:27,202 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 70652.797354 seconds)
-2026-07-30 04:22:27,202 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-30 04:22:29,707 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:22:29,707 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 04:22:29,707 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 04:22:29,708 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:22:29,708 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 04:22:29,708 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 04:22:29,708 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:22:29,708 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:22:29,708 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 04:22:29,709 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:22:29,709 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:22:29,709 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 04:22:29,709 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 04:22:29,709 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:22:29,710 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:22:29,710 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 04:22:29,711 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:22:29,711 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 04:22:30,556 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 04:22:30,557 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 04:22:30,562 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 04:22:30,562 ERROR app.routers.upload upload_failed  stage=process_invoice  filename='INV-2023-1111.pdf'  error_type=ValueError  error=too many values to unpack (expected 2)
-2026-07-30 04:24:34,091 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-30 04:24:34,092 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:24:34,093 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-30 04:24:34,094 INFO app.main [overdue_check] scheduler stopped
-2026-07-30 04:24:41,843 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-30 04:24:43,570 INFO app.main Supabase connection verified at startup
-2026-07-30 04:24:43,571 INFO app.main Storage active bucket: invoices
-2026-07-30 04:24:43,571 DEBUG tzlocal Looking up time zone info from registry
-2026-07-30 04:24:43,610 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-30 04:24:43,612 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-30 04:24:43,613 INFO apscheduler.scheduler Scheduler started
-2026-07-30 04:24:43,615 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 04:24:43,616 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 70516.384031 seconds)
-2026-07-30 04:24:43,616 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-30 04:24:44,868 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:24:44,868 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 04:24:44,869 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 04:24:44,870 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:24:44,870 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 04:24:44,871 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 04:24:44,871 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:24:44,871 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:24:44,872 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 04:24:44,872 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:24:44,873 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 04:24:44,873 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 04:24:44,873 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 04:24:44,873 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 04:24:44,874 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 04:24:44,874 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 04:24:44,875 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 04:24:44,875 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 04:24:46,015 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 04:24:46,015 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 04:24:46,024 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 04:24:46,024 DEBUG app.services.invoice_processor stage=ocr_done  invoice='INV-2023-1111.pdf'  duration_s=0.009  chars=715
-2026-07-30 04:24:46,024 DEBUG app.services.invoice_processor stage=llm_extract_start  invoice='INV-2023-1111.pdf'
-2026-07-30 04:24:48,486 ERROR app.routers.upload upload_failed  stage=process_invoice  filename='INV-2023-1111.pdf'  error_type=AuthenticationError
-Traceback (most recent call last):
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\routers\upload.py", line 104, in _process_single_upload
-    result = process_invoice(db, company_id, file_bytes, filename)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\invoice_processor.py", line 147, in process_invoice
-    extraction = extract_structured_data(raw_text)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\extraction_service.py", line 148, in extract_structured_data
-    response = client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-    ...<3 lines>...
-        ],
-    )
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_utils\_utils.py", line 286, in wrapper
-    return func(*args, **kwargs)
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\resources\chat\completions\completions.py", line 1211, in create
-    return self._post(
-           ~~~~~~~~~~^
-        "/chat/completions",
-        ^^^^^^^^^^^^^^^^^^^^
-    ...<47 lines>...
-        stream_cls=Stream[ChatCompletionChunk],
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_base_client.py", line 1314, in post
-    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
-                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\user\Documents\GitHub\CP_PROJ\backend\venv\Lib\site-packages\openai\_base_client.py", line 1087, in request
-    raise self._make_status_error_from_response(err.response) from None
-openai.AuthenticationError: Error code: 401 - {'error': {'message': 'Incorrect API key provided: sk-proj-********************************************************************************************************************************************************s_wA. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'code': 'invalid_api_key', 'param': None}, 'status': 401}
-2026-07-30 05:50:05,700 INFO apscheduler.scheduler Scheduler has been shut down
-2026-07-30 05:50:05,701 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 05:50:05,701 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
-2026-07-30 05:50:05,701 INFO app.main [overdue_check] scheduler stopped
-2026-07-30 05:50:11,751 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
-2026-07-30 05:50:13,827 INFO app.main Supabase connection verified at startup
-2026-07-30 05:50:13,828 INFO app.main Storage active bucket: invoices
-2026-07-30 05:50:13,828 DEBUG tzlocal Looking up time zone info from registry
-2026-07-30 05:50:13,846 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
-2026-07-30 05:50:13,846 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
-2026-07-30 05:50:13,847 INFO apscheduler.scheduler Scheduler started
-2026-07-30 05:50:13,849 DEBUG apscheduler.scheduler Looking for jobs to run
-2026-07-30 05:50:13,849 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 65386.150331 seconds)
-2026-07-30 05:50:13,849 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:50:25,895 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 05:50:25,896 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 05:50:26,480 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 05:50:26,481 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 05:50:26,490 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 05:50:26,490 DEBUG app.services.invoice_processor stage=ocr_done  invoice='INV-2023-1111.pdf'  duration_s=0.009  chars=715
-2026-07-30 05:50:26,490 DEBUG app.services.invoice_processor stage=llm_extract_start  invoice='INV-2023-1111.pdf'
-2026-07-30 05:50:34,616 INFO app.services.extraction_service LLM extraction succeeded (attempt 1)
-2026-07-30 05:50:34,616 DEBUG app.services.invoice_processor stage=llm_extract_done  invoice='INV-2023-1003'  duration_s=8.126  confidence=0.85
-2026-07-30 05:50:36,116 DEBUG app.services.invoice_processor stage=db_write_start  invoice='INV-2023-1003'  vendor=Vertex Networks LLC
-2026-07-30 05:50:36,937 DEBUG app.services.invoice_processor stage=db_write_done  invoice='INV-2023-1003'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  line_items=3  duration_s=0.821
-2026-07-30 05:50:36,937 WARNING app.services.invoice_processor stage=unmatched_vendor  invoice='INV-2023-1003'  vendor_name='Vertex Networks LLC'  tax_id='990-11-7733'
-2026-07-30 05:50:37,477 DEBUG app.services.invoice_processor stage=storage_upload_start  invoice='INV-2023-1003'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  bucket=invoices
-2026-07-30 05:50:39,489 INFO app.services.storage_service PDF uploaded  bucket=invoices  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - INV-2023-1003.pdf
-2026-07-30 05:50:39,773 DEBUG app.services.invoice_processor stage=storage_upload_done  invoice='INV-2023-1003'  path=7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - INV-2023-1003.pdf  duration_s=2.296
-2026-07-30 05:50:39,773 DEBUG app.services.invoice_processor stage=embedding_start  invoice='INV-2023-1003'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d
-2026-07-30 05:50:52,804 DEBUG app.services.invoice_processor stage=embedding_done  invoice='INV-2023-1003'  chunks=3  duration_s=13.031
-2026-07-30 05:50:52,804 ERROR app.services.invoice_processor stage=compliance_failed  invoice='INV-2023-1003'  error=cannot import name 'write_phase_a_flags' from 'app.services.compliance_service' (C:\Users\user\Documents\GitHub\CP_PROJ\backend\app\services\compliance_service.py)
-2026-07-30 05:50:52,805 INFO app.services.invoice_processor pipeline_complete  invoice='INV-2023-1003'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  vendor='Vertex Networks LLC'  vendor_matched=False  grand_total=9314.1  confidence=0.85  embeddings=3  flags=0  storage_path='7bf697fc-7220-40c7-9678-542d624d22ad/K4Y - INV-2023-1003.pdf'
-2026-07-30 05:50:52,805 INFO app.routers.upload upload_success  filename='INV-2023-1111.pdf'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  invoice_number='INV-2023-1003'
-2026-07-30 05:51:28,044 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 05:51:28,044 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 05:51:28,045 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 05:51:28,046 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:51:28,046 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 05:51:28,047 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 05:51:28,047 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:51:28,047 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 05:51:28,048 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 05:51:28,049 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 05:51:28,049 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 05:51:28,049 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 05:51:28,050 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 05:51:28,050 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:51:28,050 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 05:51:28,051 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 05:51:28,051 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 05:51:28,051 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 05:51:28,954 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 05:51:28,954 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 05:51:28,958 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 05:51:28,958 DEBUG app.services.invoice_processor stage=ocr_done  invoice='INV-2023-1111.pdf'  duration_s=0.004  chars=715
-2026-07-30 05:51:28,958 DEBUG app.services.invoice_processor stage=llm_extract_start  invoice='INV-2023-1111.pdf'
-2026-07-30 05:51:31,863 INFO app.services.extraction_service LLM extraction succeeded (attempt 1)
-2026-07-30 05:51:31,864 DEBUG app.services.invoice_processor stage=llm_extract_done  invoice='INV-2023-1003'  duration_s=2.905  confidence=0.85
-2026-07-30 05:51:34,314 WARNING app.services.invoice_processor stage=duplicate_detected  invoice='INV-2023-1003'  existing_id=92176dc2-5994-433d-bc46-0801c5dcc18d
-2026-07-30 05:51:34,722 INFO app.routers.upload upload_success  filename='INV-2023-1111.pdf'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  invoice_number='INV-2023-1003'
-2026-07-30 05:52:39,667 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 05:52:39,668 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 05:52:39,669 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 05:52:39,670 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:52:39,670 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 05:52:39,671 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 05:52:39,671 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:52:39,671 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 05:52:39,672 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 05:52:39,673 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 05:52:39,673 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 05:52:39,673 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 05:52:39,674 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 05:52:39,674 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 05:52:39,675 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 05:52:39,675 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 05:52:39,675 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 05:52:39,676 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 05:52:40,818 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 05:52:40,819 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 05:52:40,822 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 05:52:40,823 DEBUG app.services.invoice_processor stage=ocr_done  invoice='INV-2023-1111.pdf'  duration_s=0.004  chars=715
-2026-07-30 05:52:40,823 DEBUG app.services.invoice_processor stage=llm_extract_start  invoice='INV-2023-1111.pdf'
-2026-07-30 05:52:43,564 INFO app.services.extraction_service LLM extraction succeeded (attempt 1)
-2026-07-30 05:52:43,565 DEBUG app.services.invoice_processor stage=llm_extract_done  invoice='INV-2023-1003'  duration_s=2.742  confidence=0.85
-2026-07-30 05:52:45,397 WARNING app.services.invoice_processor stage=duplicate_detected  invoice='INV-2023-1003'  existing_id=92176dc2-5994-433d-bc46-0801c5dcc18d
-2026-07-30 05:52:45,992 INFO app.routers.upload upload_success  filename='INV-2023-1111.pdf'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  invoice_number='INV-2023-1003'
-2026-07-30 06:15:26,985 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 06:15:26,986 DEBUG python_multipart.multipart Calling on_header_field with data[42:61]
-2026-07-30 06:15:26,987 DEBUG python_multipart.multipart Calling on_header_value with data[63:115]
-2026-07-30 06:15:26,987 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 06:15:26,988 DEBUG python_multipart.multipart Calling on_header_field with data[117:129]
-2026-07-30 06:15:26,988 DEBUG python_multipart.multipart Calling on_header_value with data[131:146]
-2026-07-30 06:15:26,988 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 06:15:26,989 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 06:15:26,989 DEBUG python_multipart.multipart Calling on_part_data with data[150:3089]
-2026-07-30 06:15:26,990 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 06:15:26,990 DEBUG python_multipart.multipart Calling on_part_begin with no data
-2026-07-30 06:15:26,990 DEBUG python_multipart.multipart Calling on_header_field with data[3133:3152]
-2026-07-30 06:15:26,990 DEBUG python_multipart.multipart Calling on_header_value with data[3154:3184]
-2026-07-30 06:15:26,991 DEBUG python_multipart.multipart Calling on_header_end with no data
-2026-07-30 06:15:26,991 DEBUG python_multipart.multipart Calling on_headers_finished with no data
-2026-07-30 06:15:26,991 DEBUG python_multipart.multipart Calling on_part_data with data[3188:3195]
-2026-07-30 06:15:26,991 DEBUG python_multipart.multipart Calling on_part_end with no data
-2026-07-30 06:15:26,992 DEBUG python_multipart.multipart Calling on_end with no data
-2026-07-30 06:15:28,352 INFO app.routers.upload upload_received  filename='INV-2023-1111.pdf'  size_bytes=2939  company_id=7bf697fc-7220-40c7-9678-542d624d22ad
-2026-07-30 06:15:28,353 DEBUG app.services.invoice_processor stage=ocr_start  invoice='INV-2023-1111.pdf'  filename=INV-2023-1111.pdf  size_bytes=2939
-2026-07-30 06:15:28,359 INFO app.services.ocr_service PDF text extracted via PyMuPDF native (fast path)
-2026-07-30 06:15:28,360 DEBUG app.services.invoice_processor stage=ocr_done  invoice='INV-2023-1111.pdf'  duration_s=0.007  chars=715
-2026-07-30 06:15:28,360 DEBUG app.services.invoice_processor stage=llm_extract_start  invoice='INV-2023-1111.pdf'
-2026-07-30 06:15:32,027 INFO app.services.extraction_service LLM extraction succeeded (attempt 1)
-2026-07-30 06:15:32,028 DEBUG app.services.invoice_processor stage=llm_extract_done  invoice='INV-2023-1003'  duration_s=3.668  confidence=0.85
-2026-07-30 06:15:33,457 WARNING app.services.invoice_processor stage=duplicate_detected  invoice='INV-2023-1003'  existing_id=92176dc2-5994-433d-bc46-0801c5dcc18d
-2026-07-30 06:15:33,866 INFO app.routers.upload upload_success  filename='INV-2023-1111.pdf'  invoice_id=92176dc2-5994-433d-bc46-0801c5dcc18d  invoice_number='INV-2023-1003'
+2026-07-30 19:03:13,984 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-07-30 19:03:17,391 INFO app.main Supabase connection verified at startup
+2026-07-30 19:03:17,395 INFO app.main Storage active bucket: invoices
+2026-07-30 19:03:17,396 DEBUG tzlocal Looking up time zone info from registry
+2026-07-30 19:03:17,444 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-30 19:03:17,447 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-07-30 19:03:17,449 INFO apscheduler.scheduler Scheduler started
+2026-07-30 19:03:17,451 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-07-30 19:03:17,452 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 17802.547687 seconds)
+2026-07-30 19:03:17,451 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-07-30 19:03:27,538 INFO apscheduler.scheduler Scheduler has been shut down
+2026-07-30 19:03:27,539 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-07-30 19:03:27,539 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-07-30 19:03:27,540 INFO app.main [overdue_check] scheduler stopped
+2026-07-30 19:03:38,531 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-07-30 19:03:41,044 INFO app.main Supabase connection verified at startup
+2026-07-30 19:03:41,045 INFO app.main Storage active bucket: invoices
+2026-07-30 19:03:41,046 DEBUG tzlocal Looking up time zone info from registry
+2026-07-30 19:03:41,074 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-30 19:03:41,076 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-07-30 19:03:41,077 INFO apscheduler.scheduler Scheduler started
+2026-07-30 19:03:41,080 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-07-30 19:03:41,081 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 17778.918865 seconds)
+2026-07-30 19:03:41,080 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-07-30 19:03:45,457 INFO apscheduler.scheduler Scheduler has been shut down
+2026-07-30 19:03:45,458 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-07-30 19:03:45,459 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-07-30 19:03:45,461 INFO app.main [overdue_check] scheduler stopped
+2026-07-30 19:03:55,764 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-07-30 19:03:58,659 INFO app.main Supabase connection verified at startup
+2026-07-30 19:03:58,660 INFO app.main Storage active bucket: invoices
+2026-07-30 19:03:58,661 DEBUG tzlocal Looking up time zone info from registry
+2026-07-30 19:03:58,690 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-07-30 19:03:58,692 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-07-30 19:03:58,692 INFO apscheduler.scheduler Scheduler started
+2026-07-30 19:03:58,694 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-07-30 19:03:58,695 DEBUG apscheduler.scheduler Next wakeup is due at 2026-07-31 00:00:00+04:00 (in 17761.304644 seconds)
+2026-07-30 19:03:58,695 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-07-30 19:05:17,173 INFO app.routers.query Query received: Show me all overdue invoices from last month
+2026-07-30 19:05:17,173 INFO app.services.intent_classifier Intent ambiguous — using LLM classifier
+2026-07-30 19:05:19,369 INFO app.services.intent_classifier Intent classifier prompt estimate: 305 tokens
+2026-07-30 19:05:21,523 INFO app.services.intent_classifier Intent classified by LLM: sql_aggregation, doc_types: []
+2026-07-30 19:05:21,524 INFO app.services.query_service Intent: sql_aggregation, doc_types: []
+2026-07-30 19:05:22,275 INFO app.services.query_service Template selector prompt estimate: 1095 tokens
+2026-07-30 19:05:23,546 INFO app.services.query_service Template selector raw response: '{\n  "template": "overdue_invoices",\n  "filters": {\n    "date_from": "2026-06-01",\n    "date_to": "2026-06-30",\n    "vendor_name": null,\n    "client_name": null,\n    "status": "overdue",\n    "invoice_type": null,\n    "currency": null,\n    "limit": null\n  }\n}'
+2026-07-30 19:05:23,547 INFO app.services.query_service Template: overdue_invoices, filters: {'date_from': '2026-06-01', 'date_to': '2026-06-30', 'vendor_name': None, 'client_name': None, 'status': 'overdue', 'invoice_type': None, 'currency': None, 'limit': None}
+2026-07-30 19:05:24,542 INFO app.services.query_service overdue raw count: 26, filters applied: {'date_from': '2026-06-01', 'date_to': '2026-06-30', 'vendor_name': None, 'client_name': None, 'status': 'overdue', 'invoice_type': None, 'currency': None, 'limit': None}
+2026-07-30 19:05:24,542 INFO app.services.query_service Template 'overdue_invoices' executed successfully
+2026-08-01 02:21:35,643 INFO apscheduler.scheduler Scheduler has been shut down
+2026-08-01 02:21:35,650 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:21:35,653 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-08-01 02:21:35,657 INFO app.main [overdue_check] scheduler stopped
+2026-08-01 02:21:46,177 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-08-01 02:21:48,198 INFO app.main Supabase connection verified at startup
+2026-08-01 02:21:48,198 INFO app.main Storage active bucket: invoices
+2026-08-01 02:21:48,199 DEBUG tzlocal Looking up time zone info from registry
+2026-08-01 02:21:48,233 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-08-01 02:21:48,234 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-08-01 02:21:48,234 INFO apscheduler.scheduler Scheduler started
+2026-08-01 02:21:48,235 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:21:48,236 DEBUG apscheduler.scheduler Next wakeup is due at 2026-08-02 00:00:00+04:00 (in 77891.763979 seconds)
+2026-08-01 02:21:48,235 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-08-01 02:21:48,346 INFO apscheduler.scheduler Scheduler has been shut down
+2026-08-01 02:21:48,347 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:21:48,347 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-08-01 02:21:48,347 INFO app.main [overdue_check] scheduler stopped
+2026-08-01 02:21:54,154 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-08-01 02:21:56,088 INFO app.main Supabase connection verified at startup
+2026-08-01 02:21:56,090 INFO app.main Storage active bucket: invoices
+2026-08-01 02:21:56,091 DEBUG tzlocal Looking up time zone info from registry
+2026-08-01 02:21:56,136 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-08-01 02:21:56,139 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-08-01 02:21:56,140 INFO apscheduler.scheduler Scheduler started
+2026-08-01 02:21:56,142 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:21:56,143 DEBUG apscheduler.scheduler Next wakeup is due at 2026-08-02 00:00:00+04:00 (in 77883.856762 seconds)
+2026-08-01 02:21:56,142 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-08-01 02:25:26,969 INFO apscheduler.scheduler Scheduler has been shut down
+2026-08-01 02:25:26,970 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:25:26,970 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-08-01 02:25:26,972 INFO app.main [overdue_check] scheduler stopped
+2026-08-01 02:25:33,965 INFO app.main Logging configured — file: C:\Users\user\Documents\GitHub\CP_PROJ\backend\logs\backend.log
+2026-08-01 02:25:35,630 INFO app.main Supabase connection verified at startup
+2026-08-01 02:25:35,631 INFO app.main Storage active bucket: invoices
+2026-08-01 02:25:35,632 DEBUG tzlocal Looking up time zone info from registry
+2026-08-01 02:25:35,668 INFO apscheduler.scheduler Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-08-01 02:25:35,670 INFO apscheduler.scheduler Added job "lifespan.<locals>._run_overdue_check" to job store "default"
+2026-08-01 02:25:35,671 INFO apscheduler.scheduler Scheduler started
+2026-08-01 02:25:35,673 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:25:35,674 DEBUG apscheduler.scheduler Next wakeup is due at 2026-08-02 00:00:00+04:00 (in 77664.325676 seconds)
+2026-08-01 02:25:35,673 INFO app.main [overdue_check] scheduler started — job runs daily at 00:00
+2026-08-01 02:28:40,141 INFO apscheduler.scheduler Scheduler has been shut down
+2026-08-01 02:28:40,142 DEBUG apscheduler.scheduler Looking for jobs to run
+2026-08-01 02:28:40,142 DEBUG apscheduler.scheduler No jobs; waiting until a job is added
+2026-08-01 02:28:40,143 INFO app.main [overdue_check] scheduler stopped

@@ -33,6 +33,7 @@ from supabase import Client
 
 from app.core.config import get_settings
 from app.providers import get_embedding_provider
+from app.services.token_metrics import estimate_tokens, token_savings
 
 log = logging.getLogger(__name__)
 
@@ -300,6 +301,17 @@ def generate_and_store_embeddings(
 
     if not chunk_texts:
         return 0
+
+    raw_text_estimate = estimate_tokens(raw_text)
+    excerpt_estimate = estimate_tokens(chunk_map.get(2) or "")
+    if raw_text_estimate and excerpt_estimate:
+        before, after, saved = token_savings(raw_text, chunk_map.get(2) or "")
+        log.info(
+            "Invoice embedding raw excerpt reduced from ~%s to ~%s tokens (%s saved)",
+            before,
+            after,
+            saved,
+        )
 
     embedder   = get_embedding_provider()
     vectors    = embedder.embed(chunk_texts)
