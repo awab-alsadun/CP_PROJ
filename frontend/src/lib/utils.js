@@ -1,4 +1,5 @@
 import { clsx } from 'clsx'
+import i18n from '../i18n'
 
 export function cn(...args) {
   return clsx(...args)
@@ -51,20 +52,20 @@ export function confidenceColor(score) {
 }
 
 export function confidenceLabel(score) {
-  if (score === null || score === undefined) return 'N/A'
-  if (score >= 0.85) return 'High'
-  if (score >= 0.6) return 'Medium'
-  return 'Low'
+  if (score === null || score === undefined) return i18n.t('confidence.na')
+  if (score >= 0.85) return i18n.t('confidence.high')
+  if (score >= 0.6) return i18n.t('confidence.medium')
+  return i18n.t('confidence.low')
 }
 
 export function statusConfig(status) {
   const configs = {
-    draft:          { label: 'Draft',   class: 'badge-draft',          dot: '#A8A89F' },
-    sent:           { label: 'Sent',    class: 'badge-sent',           dot: '#3B82F6' },
-    paid:           { label: 'Paid',    class: 'badge-paid',           dot: '#22C55E' },
-    overdue:        { label: 'Overdue', class: 'badge-overdue',        dot: '#EF4444' },
-    unpaid:         { label: 'Unpaid',  class: 'badge-unpaid',         dot: '#6B7280' },
-    partially_paid: { label: 'Partial', class: 'badge-partially-paid', dot: '#F59E0B' },
+    draft:          { label: i18n.t('common.status.draft'),   class: 'badge-draft',          dot: '#A8A89F' },
+    sent:           { label: i18n.t('common.status.sent'),    class: 'badge-sent',           dot: '#3B82F6' },
+    paid:           { label: i18n.t('common.status.paid'),    class: 'badge-paid',           dot: '#22C55E' },
+    overdue:        { label: i18n.t('common.status.overdue'), class: 'badge-overdue',        dot: '#EF4444' },
+    unpaid:         { label: i18n.t('common.status.unpaid'),  class: 'badge-unpaid',         dot: '#6B7280' },
+    partially_paid: { label: i18n.t('common.status.partially_paid'), class: 'badge-partially-paid', dot: '#F59E0B' },
   }
   return configs[status] || { label: status, class: 'badge-draft', dot: '#A8A89F' }
 }

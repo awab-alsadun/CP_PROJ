@@ -73,5 +73,11 @@
       "discount": "Discount",
       "subtotal": "Subtotal"
     }
+  },
+  "confidence": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "na": "N/A"
   }
 }
