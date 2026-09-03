@@ -9,3 +9,5 @@ node_modules/
 backend/logs/
 *.log
 frontend/.vite/
+
+.superpowers/

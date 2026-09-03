@@ -146,7 +146,11 @@ needs no special handling; JS numbers are Western-digit by default.
 `UploadExtract`, `CompanyDocuments`, `Analytics`, `AiChat`, `Payables`,
 `Receivables`, `Settings`.
 
-**Components:** `ChatPanel.jsx`, `PaymentSimulator.jsx`.
+**Components:** `ChatPanel.jsx`, `PaymentSimulator.jsx`, `components/ui/index.jsx` (shared
+primitives — `StatusBadge`, `EmptyState`, `ErrorState`, `MetricCard`, `InvoiceTypeBadge`,
+`ComplianceFlagBadge`, `ConfirmDialog`, `ToastProvider` — used across nearly every page;
+found during implementation scanning, not in the original page-by-page read, but in scope
+for the same reason `lib/utils.js` is: it's shared infrastructure other pages depend on).
 
 **Shared:** `lib/utils.js` (`statusConfig`, `confidenceLabel` label strings),
 routed through the i18next singleton import rather than the component hook.
