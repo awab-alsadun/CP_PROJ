@@ -80,6 +80,24 @@
     "low": "Low",
     "na": "N/A"
   },
+  "nav": {
+    "dashboard": "Dashboard",
+    "invoicingSection": "Invoicing",
+    "payables": "Payables",
+    "receivables": "Receivables",
+    "createInvoice": "Create Invoice",
+    "uploadExtract": "Upload & Extract",
+    "directorySection": "Directory",
+    "vendors": "Vendors",
+    "clients": "Clients",
+    "intelligenceSection": "Intelligence",
+    "analytics": "Analytics",
+    "jarvis": "Jarvis",
+    "systemSection": "System",
+    "settings": "Settings",
+    "expandSidebar": "Expand sidebar",
+    "collapseSidebar": "Collapse sidebar"
+  },
   "pageMeta": {
     "dashboard": { "title": "Dashboard", "subtitle": "Overview of your financial activity" },
     "payables": { "title": "Payables", "subtitle": "Accounts payable — invoices you owe" },

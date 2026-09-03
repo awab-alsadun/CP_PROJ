@@ -80,6 +80,24 @@
     "low": "منخفضة",
     "na": "غير متاح"
   },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "invoicingSection": "الفوترة",
+    "payables": "المدفوعات",
+    "receivables": "المقبوضات",
+    "createInvoice": "إنشاء فاتورة",
+    "uploadExtract": "الرفع والاستخراج",
+    "directorySection": "الدليل",
+    "vendors": "الموردون",
+    "clients": "العملاء",
+    "intelligenceSection": "الذكاء",
+    "analytics": "التحليلات",
+    "jarvis": "جارفيس",
+    "systemSection": "النظام",
+    "settings": "الإعدادات",
+    "expandSidebar": "توسيع الشريط الجانبي",
+    "collapseSidebar": "طي الشريط الجانبي"
+  },
   "pageMeta": {
     "dashboard": { "title": "لوحة التحكم", "subtitle": "نظرة عامة على نشاطك المالي" },
     "payables": { "title": "المدفوعات", "subtitle": "الحسابات الدائنة — الفواتير المستحقة عليك" },

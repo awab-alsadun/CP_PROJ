@@ -5,53 +5,43 @@ import {
   Zap, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '../../lib/utils'
+import { getDirection } from '../../i18n'
 
-const NAV_SECTIONS = [
-  {
-    items: [
-      { to: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-    ],
-  },
-  {
-    label: 'Invoicing',
-    items: [
-      { to: '/payables',    icon: FileDown,  label: 'Payables'        },
-      { to: '/receivables', icon: FileUp,    label: 'Receivables'     },
-      { to: '/create',      icon: FilePlus,  label: 'Create Invoice'  },
-      { to: '/upload',      icon: Upload,    label: 'Upload & Extract'},
-    ],
-  },
-  {
-    label: 'Directory',
-    items: [
-      { to: '/vendors', icon: Building2, label: 'Vendors' },
-      { to: '/clients', icon: Users,     label: 'Clients' },
-    ],
-  },
-  {
-    label: 'Intelligence',
-    items: [
-      { to: '/analytics', icon: BarChart3,     label: 'Analytics' },
-      { to: '/chat',      icon: MessageSquare, label: 'AI Chat'   },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
-      { to: '/settings', icon: Settings, label: 'Settings' },
-    ],
-  },
-]
+function buildNavSections(t) {
+  return [
+    { items: [{ to: '/', icon: LayoutDashboard, label: t('nav.dashboard'), exact: true }] },
+    { label: t('nav.invoicingSection'), items: [
+      { to: '/payables',    icon: FileDown,  label: t('nav.payables')       },
+      { to: '/receivables', icon: FileUp,    label: t('nav.receivables')    },
+      { to: '/create',      icon: FilePlus,  label: t('nav.createInvoice')  },
+      { to: '/upload',      icon: Upload,    label: t('nav.uploadExtract') },
+    ]},
+    { label: t('nav.directorySection'), items: [
+      { to: '/vendors', icon: Building2, label: t('nav.vendors') },
+      { to: '/clients', icon: Users,     label: t('nav.clients') },
+    ]},
+    { label: t('nav.intelligenceSection'), items: [
+      { to: '/analytics', icon: BarChart3,     label: t('nav.analytics') },
+      { to: '/chat',      icon: MessageSquare, label: t('nav.jarvis')    },
+    ]},
+    { label: t('nav.systemSection'), items: [
+      { to: '/settings', icon: Settings, label: t('nav.settings') },
+    ]},
+  ]
+}
 
 export default function Sidebar() {
+  const { t } = useTranslation()
+  const NAV_SECTIONS = buildNavSections(t)
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
 
   return (
     <aside
       className={cn(
-        'flex flex-col h-screen sticky top-0 border-r transition-all duration-200 z-30',
+        'flex flex-col h-screen sticky top-0 border-e transition-all duration-200 z-30',
         collapsed ? 'w-16' : 'w-56'
       )}
       style={{ background: 'var(--bg-sidebar)', borderColor: 'var(--border)' }}
@@ -84,10 +74,12 @@ export default function Sidebar() {
         )}
         <button
           onClick={() => setCollapsed(c => !c)}
-          className={cn('btn-ghost p-1.5 rounded-lg', collapsed && 'ml-0')}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className={cn('btn-ghost p-1.5 rounded-lg', collapsed && 'me-0')}
+          aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
         >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          {(collapsed ? getDirection() === 'rtl' : getDirection() !== 'rtl')
+            ? <ChevronLeft size={14} />
+            : <ChevronRight size={14} />}
         </button>
       </div>
 
@@ -125,7 +117,7 @@ export default function Sidebar() {
                   <Icon size={17} strokeWidth={active ? 2.2 : 1.8} className="flex-shrink-0" />
                   {!collapsed && <span>{label}</span>}
                   {!collapsed && active && (
-                    <span className="nav-dot ml-auto w-1.5 h-1.5 rounded-full"
+                    <span className="nav-dot me-auto w-1.5 h-1.5 rounded-full"
                       style={{ background: 'var(--accent)' }} />
                   )}
                 </NavLink>
