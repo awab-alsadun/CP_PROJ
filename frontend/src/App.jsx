@@ -32,25 +32,25 @@ function RequireAuth({ children }) {
   return children
 }
 
-const PAGE_META = {
-  '/':                  { title: 'Dashboard',         subtitle: 'Overview of your financial activity' },
-  '/payables':          { title: 'Payables',          subtitle: 'Accounts payable — invoices you owe' },
-  '/receivables':       { title: 'Receivables',       subtitle: 'Accounts receivable — invoices owed to you' },
-  '/invoices':          { title: 'Invoices',          subtitle: 'All invoices across vendors and clients' },
-  '/create':            { title: 'Create Invoice',    subtitle: 'New outbound invoice' },
-  '/vendors':           { title: 'Vendors',           subtitle: 'Manage and view vendor relationships' },
-  '/vendors/create':    { title: 'Create Vendor',     subtitle: 'Add a new vendor' },
-  '/clients':           { title: 'Clients',           subtitle: 'Manage and view client relationships' },
-  '/clients/create':    { title: 'Create Client',     subtitle: 'Add a new client' },
-  '/upload':            { title: 'Upload & Extract',  subtitle: 'AI-powered invoice ingestion pipeline' },
-  '/documents':         { title: 'Company Documents', subtitle: 'Regulation and compliance document library' },
-  '/analytics':         { title: 'Analytics',         subtitle: 'Spending trends and financial metrics' },
-  '/chat':              { title: 'Jarvis',            subtitle: 'Hybrid SQL + RAG invoice assistant' },
-  '/settings':          { title: 'Settings',          subtitle: 'Company configuration and preferences' },
-}
-
 function ShellWrapper() {
   const location = useLocation()
+  const { t } = useTranslation()
+  const PAGE_META = {
+    '/':                  t('pageMeta.dashboard',    { returnObjects: true }),
+    '/payables':          t('pageMeta.payables',     { returnObjects: true }),
+    '/receivables':       t('pageMeta.receivables',  { returnObjects: true }),
+    '/invoices':          t('pageMeta.invoices',     { returnObjects: true }),
+    '/create':            t('pageMeta.create',       { returnObjects: true }),
+    '/vendors':           t('pageMeta.vendors',      { returnObjects: true }),
+    '/vendors/create':    t('pageMeta.vendorsCreate',{ returnObjects: true }),
+    '/clients':           t('pageMeta.clients',      { returnObjects: true }),
+    '/clients/create':    t('pageMeta.clientsCreate',{ returnObjects: true }),
+    '/upload':            t('pageMeta.upload',       { returnObjects: true }),
+    '/documents':         t('pageMeta.documents',    { returnObjects: true }),
+    '/analytics':         t('pageMeta.analytics',    { returnObjects: true }),
+    '/chat':              t('pageMeta.chat',         { returnObjects: true }),
+    '/settings':          t('pageMeta.settings',     { returnObjects: true }),
+  }
   const base = '/' + location.pathname.split('/').slice(1, 3).join('/')
   const meta = PAGE_META[base] || PAGE_META['/' + location.pathname.split('/')[1]] || { title: 'K4Y', subtitle: '' }
   return (
