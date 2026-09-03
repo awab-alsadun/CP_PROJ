@@ -74,7 +74,7 @@ export default function Sidebar() {
         )}
         <button
           onClick={() => setCollapsed(c => !c)}
-          className={cn('btn-ghost p-1.5 rounded-lg', collapsed && 'me-0')}
+          className={cn('btn-ghost p-1.5 rounded-lg', collapsed && 'ms-0')}
           aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
         >
           {(collapsed ? getDirection() === 'rtl' : getDirection() !== 'rtl')
