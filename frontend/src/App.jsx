@@ -1,6 +1,9 @@
+import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import { ChatProvider } from './context/ChatContext'
+import { setStoredLanguage } from './i18n'
 
 // Layout
 import AppShell from './components/layout/AppShell'
@@ -42,7 +45,7 @@ const PAGE_META = {
   '/upload':            { title: 'Upload & Extract',  subtitle: 'AI-powered invoice ingestion pipeline' },
   '/documents':         { title: 'Company Documents', subtitle: 'Regulation and compliance document library' },
   '/analytics':         { title: 'Analytics',         subtitle: 'Spending trends and financial metrics' },
-  '/chat':              { title: 'AI Chat',           subtitle: 'Hybrid SQL + RAG invoice assistant' },
+  '/chat':              { title: 'Jarvis',            subtitle: 'Hybrid SQL + RAG invoice assistant' },
   '/settings':          { title: 'Settings',          subtitle: 'Company configuration and preferences' },
 }
 
@@ -56,6 +59,15 @@ function ShellWrapper() {
 }
 
 export default function App() {
+  const { i18n } = useTranslation()
+
+  useEffect(() => {
+    const dir = i18n.language === 'ar' ? 'rtl' : 'ltr'
+    document.documentElement.dir = dir
+    document.documentElement.lang = i18n.language
+    setStoredLanguage(i18n.language)
+  }, [i18n.language])
+
   return (
     <ThemeProvider>
       <ChatProvider>

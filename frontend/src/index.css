@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+[dir="rtl"] {
+  font-family: 'Cairo', sans-serif;
+}
+[dir="rtl"] .font-display {
+  font-family: 'Cairo', sans-serif;
+}
+[dir="rtl"] .font-mono {
+  font-family: 'Cairo', sans-serif;
+}
+
 @layer base {
   :root {
     --bg-primary: #f8f8f7;
