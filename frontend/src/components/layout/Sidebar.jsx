@@ -7,7 +7,6 @@ import {
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '../../lib/utils'
-import { getDirection } from '../../i18n'
 
 function buildNavSections(t) {
   return [
@@ -33,7 +32,8 @@ function buildNavSections(t) {
 }
 
 export default function Sidebar() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const dir = i18n.language === 'ar' ? 'rtl' : 'ltr'
   const NAV_SECTIONS = buildNavSections(t)
   const [collapsed, setCollapsed] = useState(false)
   const location = useLocation()
@@ -77,7 +77,7 @@ export default function Sidebar() {
           className={cn('btn-ghost p-1.5 rounded-lg', collapsed && 'ms-0')}
           aria-label={collapsed ? t('nav.expandSidebar') : t('nav.collapseSidebar')}
         >
-          {(collapsed ? getDirection() === 'rtl' : getDirection() !== 'rtl')
+          {(collapsed ? dir === 'rtl' : dir !== 'rtl')
             ? <ChevronLeft size={14} />
             : <ChevronRight size={14} />}
         </button>
