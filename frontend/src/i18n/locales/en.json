@@ -394,5 +394,10 @@
     "createdRedirecting": "Vendor created — redirecting…",
     "creating": "Creating…",
     "createButton": "Create Vendor"
+  },
+  "vendorsPage": {
+    "searchPlaceholder": "Search vendors…",
+    "createVendor": "Create Vendor",
+    "noVendorsFound": "No vendors found"
   }
 }

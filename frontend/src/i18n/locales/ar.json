@@ -394,5 +394,10 @@
     "createdRedirecting": "تم إنشاء المورد — جارٍ إعادة التوجيه…",
     "creating": "جارٍ الإنشاء…",
     "createButton": "إنشاء مورد"
+  },
+  "vendorsPage": {
+    "searchPlaceholder": "ابحث عن الموردين…",
+    "createVendor": "إضافة مورد",
+    "noVendorsFound": "لا يوجد موردون"
   }
 }
