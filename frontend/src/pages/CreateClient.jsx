@@ -1,20 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, UserPlus, Loader2, ChevronDown } from 'lucide-react'
 import { clientsApi } from '../lib/api'
 
-const CLIENT_COUNTRIES = [
-  { code: 'USA', label: 'United States' },
-  { code: 'TUR', label: 'Turkey' },
-  { code: 'SAU', label: 'Saudi Arabia' },
-  { code: 'ARE', label: 'UAE' },
-  { code: 'GBR', label: 'United Kingdom' },
-  { code: 'DEU', label: 'Germany' },
-  { code: 'EGY', label: 'Egypt' },
-  { code: 'DNK', label: 'Denmark' },
-  { code: 'BHR', label: 'Bahrain' },
-  { code: 'FIN', label: 'Finland' },
-]
+function buildClientCountries(t) {
+  const codeMap = { USA: 'US', TUR: 'TR', SAU: 'SA', ARE: 'AE', GBR: 'GB', DEU: 'DE', EGY: 'EG', DNK: 'DK', BHR: 'BH', FIN: 'FI' }
+  return Object.entries(codeMap).map(([code, common]) => ({ code, label: t(`common.countries.${common}`) }))
+}
 
 const EMPTY = {
   name: '', tax_id: '', email: '', phone: '',
@@ -34,6 +27,7 @@ function Field({ label, required, children }) {
 
 export default function CreateClient() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [form,     setForm]     = useState(EMPTY)
   const [saving,   setSaving]   = useState(false)
   const [error,    setError]    = useState('')
@@ -43,8 +37,8 @@ export default function CreateClient() {
 
   const submit = async () => {
     setError('')
-    if (!form.name.trim())   { setError('Name is required.'); return }
-    if (!form.tax_id.trim()) { setError('Tax ID is required.'); return }
+    if (!form.name.trim())   { setError(t('createClient.nameRequired')); return }
+    if (!form.tax_id.trim()) { setError(t('createClient.taxIdRequired')); return }
 
     const addressFields = ['street', 'city', 'state', 'postal_code', 'country']
     const hasAddress    = addressFields.some(f => form[f].trim())
@@ -69,14 +63,16 @@ export default function CreateClient() {
     } catch (e) {
       const msg = e.message || ''
       if (/tax_id already exists/i.test(msg) || msg.includes('409')) {
-        setError('A client with this Tax ID already exists.')
+        setError(t('createClient.taxIdExists'))
       } else {
-        setError(msg || 'Failed to create client.')
+        setError(msg || t('createClient.createFailed'))
       }
     } finally {
       setSaving(false)
     }
   }
+
+  const CLIENT_COUNTRIES = buildClientCountries(t)
 
   return (
     <div className="p-6 max-w-2xl animate-fade-up">
@@ -86,65 +82,65 @@ export default function CreateClient() {
         </button>
         <div>
           <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Create Client
+            {t('createClient.title')}
           </h1>
           <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            Add a new client for receivable invoices
+            {t('createClient.subtitle')}
           </p>
         </div>
       </div>
 
       <div className="card p-6 space-y-5">
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Name" required>
+          <Field label={t('createClient.name')} required>
             <input className="input h-9 text-sm" value={form.name}
-              onChange={e => set('name', e.target.value)} placeholder="Acme Corp" />
+              onChange={e => set('name', e.target.value)} placeholder={t('createClient.namePlaceholder')} />
           </Field>
-          <Field label="Tax ID" required>
+          <Field label={t('createClient.taxId')} required>
             <input className="input h-9 text-sm font-mono" value={form.tax_id}
-              onChange={e => set('tax_id', e.target.value)} placeholder="12-3456789" />
+              onChange={e => set('tax_id', e.target.value)} placeholder={t('createClient.taxIdPlaceholder')} />
           </Field>
-          <Field label="Email">
+          <Field label={t('createClient.email')}>
             <input className="input h-9 text-sm" type="email" value={form.email}
-              onChange={e => set('email', e.target.value)} placeholder="billing@acme.com" />
+              onChange={e => set('email', e.target.value)} placeholder={t('createClient.emailPlaceholder')} />
           </Field>
-          <Field label="Phone">
+          <Field label={t('createClient.phone')}>
             <input className="input h-9 text-sm" value={form.phone}
-              onChange={e => set('phone', e.target.value)} placeholder="+1 555 000 0000" />
+              onChange={e => set('phone', e.target.value)} placeholder={t('createClient.phonePlaceholder')} />
           </Field>
         </div>
 
         <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
           <p className="text-xs font-medium mb-3" style={{ color: 'var(--text-muted)' }}>
-            Address (optional)
+            {t('createClient.addressOptional')}
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Street">
+            <Field label={t('createClient.street')}>
               <input className="input h-9 text-sm" value={form.street}
                 onChange={e => set('street', e.target.value)} />
             </Field>
-            <Field label="City">
+            <Field label={t('createClient.city')}>
               <input className="input h-9 text-sm" value={form.city}
                 onChange={e => set('city', e.target.value)} />
             </Field>
-            <Field label="State">
+            <Field label={t('createClient.state')}>
               <input className="input h-9 text-sm" value={form.state}
                 onChange={e => set('state', e.target.value)} />
             </Field>
-            <Field label="Postal Code">
+            <Field label={t('createClient.postalCode')}>
               <input className="input h-9 text-sm font-mono" value={form.postal_code}
                 onChange={e => set('postal_code', e.target.value)} />
             </Field>
-            <Field label="Country">
+            <Field label={t('createClient.country')}>
               <div className="relative">
-                <select className="input h-9 text-sm appearance-none pr-8" value={form.country}
+                <select className="input h-9 text-sm appearance-none pe-8" value={form.country}
                   onChange={e => set('country', e.target.value)}>
-                  <option value="">No country</option>
+                  <option value="">{t('common.noCountry')}</option>
                   {CLIENT_COUNTRIES.map(c => (
                     <option key={c.code} value={c.code}>{c.label}</option>
                   ))}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                <ChevronDown size={13} className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none"
                   style={{ color: 'var(--text-muted)' }} />
               </div>
             </Field>
@@ -161,18 +157,18 @@ export default function CreateClient() {
         {success && (
           <div className="px-3 py-2 rounded-lg text-xs"
             style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#16A34A' }}>
-            Client created — redirecting…
+            {t('createClient.createdRedirecting')}
           </div>
         )}
 
         <div className="flex justify-end gap-3 pt-2">
           <button onClick={() => navigate('/clients')} className="btn-secondary text-sm">
-            Cancel
+            {t('common.cancel')}
           </button>
           <button onClick={submit} disabled={saving} className="btn-primary text-sm disabled:opacity-50">
             {saving
-              ? <><Loader2 size={14} className="animate-spin" /> Creating…</>
-              : <><UserPlus size={14} /> Create Client</>}
+              ? <><Loader2 size={14} className="animate-spin" /> {t('createClient.creating')}</>
+              : <><UserPlus size={14} /> {t('createClient.createButton')}</>}
           </button>
         </div>
       </div>
