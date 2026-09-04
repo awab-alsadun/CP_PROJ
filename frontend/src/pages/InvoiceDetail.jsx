@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft, DollarSign, Send,
   CheckCircle, AlertTriangle, X, FileText,
@@ -16,7 +17,7 @@ import {
 function Toast({ toasts, remove }) {
   if (!toasts.length) return null
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <div className="fixed bottom-4 end-4 z-50 flex flex-col gap-2 pointer-events-none">
       {toasts.map(t => (
         <div key={t.id}
           className="flex items-center gap-3 px-4 py-3 rounded-xl shadow-panel text-sm font-medium animate-fade-up pointer-events-auto"
@@ -100,28 +101,34 @@ function FieldRow({ label, children }) {
 }
 
 // ── Transition config ──────────────────────────────────────────────────────────
-const TRANSITIONS_PAYABLE = {
-  unpaid:         [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' },
-                   { to: 'overdue', label: 'Mark Overdue',   icon: AlertTriangle, color: '#EF4444' }],
-  partially_paid: [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' },
-                   { to: 'overdue', label: 'Mark Overdue',   icon: AlertTriangle, color: '#EF4444' }],
-  overdue:        [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' }],
-  paid:           [],
+function buildTransitionsPayable(t) {
+  return {
+    unpaid:         [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' },
+                     { to: 'overdue', label: t('invoiceDetail.markOverdue'), icon: AlertTriangle, color: '#EF4444' }],
+    partially_paid: [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' },
+                     { to: 'overdue', label: t('invoiceDetail.markOverdue'), icon: AlertTriangle, color: '#EF4444' }],
+    overdue:        [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' }],
+    paid:           [],
+  }
 }
 
-const TRANSITIONS_RECEIVABLE = {
-  draft:          [{ to: 'sent',    label: 'Mark as Sent',   icon: Send,          color: '#3B82F6' }],
-  sent:           [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' },
-                   { to: 'overdue', label: 'Mark Overdue',   icon: AlertTriangle, color: '#EF4444' }],
-  unpaid:         [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' },
-                   { to: 'overdue', label: 'Mark Overdue',   icon: AlertTriangle, color: '#EF4444' }],
-  partially_paid: [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' }],
-  overdue:        [{ to: 'paid',    label: 'Mark as Paid',   icon: CheckCircle,   color: '#22C55E' }],
-  paid:           [],
+function buildTransitionsReceivable(t) {
+  return {
+    draft:          [{ to: 'sent',    label: t('invoiceDetail.markAsSent'), icon: Send,          color: '#3B82F6' }],
+    sent:           [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' },
+                     { to: 'overdue', label: t('invoiceDetail.markOverdue'), icon: AlertTriangle, color: '#EF4444' }],
+    unpaid:         [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' },
+                     { to: 'overdue', label: t('invoiceDetail.markOverdue'), icon: AlertTriangle, color: '#EF4444' }],
+    partially_paid: [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' }],
+    overdue:        [{ to: 'paid',    label: t('invoiceDetail.markAsPaid'), icon: CheckCircle,   color: '#22C55E' }],
+    paid:           [],
+  }
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function InvoiceDetail() {
+  const { t, i18n } = useTranslation()
+  const dir = i18n.language === 'ar' ? 'rtl' : 'ltr'
   const { id } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
@@ -197,7 +204,7 @@ export default function InvoiceDetail() {
     try {
       const blob = await invoicesApi.getPdf(id)
       window.open(URL.createObjectURL(blob), '_blank')
-    } catch { toast('PDF not available for this invoice', 'error') }
+    } catch { toast(t('invoiceDetail.pdfNotAvailable'), 'error') }
   }
 
   const handleTransition = async (toStatus) => {
@@ -205,7 +212,7 @@ export default function InvoiceDetail() {
     try {
       await invoicesApi.transition(id, toStatus)
       await loadInvoice()
-      toast(`Invoice marked as ${toStatus}`)
+      toast(t('invoiceDetail.markedAs', { status: t(`common.status.${toStatus}`) }))
     } catch (e) {
       toast(e.message, 'error')
     } finally {
@@ -228,7 +235,7 @@ export default function InvoiceDetail() {
         payment_date: new Date().toISOString().split('T')[0],
       })
       await loadInvoice()
-      toast('Payment recorded successfully')
+      toast(t('invoiceDetail.paymentRecorded'))
     } catch (e) {
       toast(e.message, 'error')
     } finally {
@@ -243,7 +250,7 @@ export default function InvoiceDetail() {
       setShowCN(false)
       setCnData({ amount: '', reason: '' })
       await loadInvoice()
-      toast('Credit note applied')
+      toast(t('invoiceDetail.creditNoteApplied'))
     } catch (e) {
       toast(e.message, 'error')
     } finally {
@@ -258,7 +265,7 @@ export default function InvoiceDetail() {
       setRefundTarget(null)
       setRefundAmt('')
       await loadInvoice()
-      toast('Refund processed')
+      toast(t('invoiceDetail.refundProcessed'))
     } catch (e) {
       toast(e.message, 'error')
     } finally {
@@ -272,8 +279,8 @@ export default function InvoiceDetail() {
 
   const invType    = invoice.invoice_type || (isReceivable ? 'receivable' : 'payable')
   const transitions = isReceivable
-    ? (TRANSITIONS_RECEIVABLE[invoice.status] || [])
-    : (TRANSITIONS_PAYABLE[invoice.status]    || [])
+    ? (buildTransitionsReceivable(t)[invoice.status] || [])
+    : (buildTransitionsPayable(t)[invoice.status]    || [])
   const canPay    = !['paid'].includes(invoice.status)
   const canCN     = invoice.status === 'paid'
   const paid      = invoice.amount_paid_so_far || 0
@@ -295,17 +302,17 @@ export default function InvoiceDetail() {
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  {invoice.invoice_number || 'Invoice'}
+                  {invoice.invoice_number || t('invoiceDetail.invoice')}
                 </h1>
                 <StatusBadge invoice={invoice} />
                 <InvoiceTypeBadge type={invType} />
               </div>
               <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                Issued {formatDate(invoice.issue_date)}
+                {t('invoiceDetail.issued', { date: formatDate(invoice.issue_date) })}
                 {invoice.due_date && (
                   <span style={{ color: od > 0 ? '#EF4444' : 'inherit' }}>
-                    {' · Due '}{formatDate(invoice.due_date)}
-                    {od > 0 && ` (${od}d overdue)`}
+                    {' · '}{t('invoiceDetail.due', { date: formatDate(invoice.due_date) })}
+                    {od > 0 && ` ${t('invoiceDetail.daysOverdueSuffix', { days: od })}`}
                   </span>
                 )}
               </p>
@@ -314,7 +321,7 @@ export default function InvoiceDetail() {
 
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <button onClick={handleViewPdf} className="btn-secondary text-xs h-8">
-              <FileText size={13} /> PDF <ExternalLink size={11} />
+              <FileText size={13} /> {t('invoiceDetail.pdf')} <ExternalLink size={11} />
             </button>
 
             {transitions.map(t => {
@@ -341,13 +348,13 @@ export default function InvoiceDetail() {
                 }}
                 className="btn-primary text-xs h-8"
               >
-                <DollarSign size={13} /> Record Payment
+                <DollarSign size={13} /> {t('invoiceDetail.recordPayment')}
               </button>
             )}
 
             {canCN && (
               <button onClick={() => setShowCN(true)} className="btn-secondary text-xs h-8">
-                Apply Credit Note
+                {t('invoiceDetail.applyCreditNote')}
               </button>
             )}
           </div>
@@ -357,7 +364,7 @@ export default function InvoiceDetail() {
         {(invoice.amount_paid_so_far != null || paid > 0) && (
           <div className="card p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Payment Progress</h2>
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('invoiceDetail.paymentProgress')}</h2>
               <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                 {formatCurrency(paid, invoice.currency)} / {formatCurrency(invoice.grand_total, invoice.currency)}
               </span>
@@ -369,36 +376,36 @@ export default function InvoiceDetail() {
               height={8}
             />
             <div className="flex justify-between text-xs mt-2">
-              <span style={{ color: '#22C55E' }}>Paid: {formatCurrency(paid, invoice.currency)}</span>
-              {remaining > 0 && <span style={{ color: '#EF4444' }}>Remaining: {formatCurrency(remaining, invoice.currency)}</span>}
+              <span style={{ color: '#22C55E' }}>{t('invoiceDetail.paidLabel', { amount: formatCurrency(paid, invoice.currency) })}</span>
+              {remaining > 0 && <span style={{ color: '#EF4444' }}>{t('invoiceDetail.remainingLabel', { amount: formatCurrency(remaining, invoice.currency) })}</span>}
             </div>
           </div>
         )}
 
         {/* Main grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Section title="Invoice Details">
+          <Section title={t('invoiceDetail.invoiceDetails')}>
             <div className="grid grid-cols-2 gap-4">
-              <InfoRow label="Invoice #"      value={invoice.invoice_number} mono />
-              <InfoRow label="Currency"       value={invoice.currency} />
-              <InfoRow label="Issue Date"     value={formatDate(invoice.issue_date)} />
-              <InfoRow label="Due Date"       value={formatDate(invoice.due_date)} />
-              <InfoRow label="Payment Method" value={invoice.payment_method} />
-              <InfoRow label="Tax Rate"       value={invoice.tax_percent != null ? `${invoice.tax_percent}%` : null} />
+              <InfoRow label={t('invoiceDetail.invoiceNumberField')} value={invoice.invoice_number} mono />
+              <InfoRow label={t('invoiceDetail.currency')}       value={invoice.currency} />
+              <InfoRow label={t('invoiceDetail.issueDate')}     value={formatDate(invoice.issue_date)} />
+              <InfoRow label={t('invoiceDetail.dueDate')}       value={formatDate(invoice.due_date)} />
+              <InfoRow label={t('invoiceDetail.paymentMethod')} value={invoice.payment_method} />
+              <InfoRow label={t('invoiceDetail.taxRate')}       value={invoice.tax_percent != null ? `${invoice.tax_percent}%` : null} />
             </div>
             {invoice.description && (
               <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-                <InfoRow label="Description" value={invoice.description} />
+                <InfoRow label={t('invoiceDetail.description')} value={invoice.description} />
               </div>
             )}
           </Section>
 
-          <Section title="Financials">
+          <Section title={t('invoiceDetail.financials')}>
             <div className="space-y-3">
               {[
-                { label: 'Subtotal', value: formatCurrency(invoice.subtotal,  invoice.currency) },
-                { label: 'Discount', value: invoice.discount > 0 ? `- ${formatCurrency(invoice.discount, invoice.currency)}` : '—' },
-                { label: 'Tax',      value: formatCurrency(invoice.total_tax, invoice.currency) },
+                { label: t('invoiceDetail.subtotal'), value: formatCurrency(invoice.subtotal,  invoice.currency) },
+                { label: t('invoiceDetail.discount'), value: invoice.discount > 0 ? `- ${formatCurrency(invoice.discount, invoice.currency)}` : '—' },
+                { label: t('invoiceDetail.tax'),      value: formatCurrency(invoice.total_tax, invoice.currency) },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between text-sm">
                   <span style={{ color: 'var(--text-muted)' }}>{label}</span>
@@ -406,53 +413,53 @@ export default function InvoiceDetail() {
                 </div>
               ))}
               <div className="flex justify-between items-center pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
-                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Grand Total</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('invoiceDetail.grandTotal')}</span>
                 <span className="font-mono text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
                   {formatCurrency(invoice.grand_total, invoice.currency)}
                 </span>
               </div>
               {invoice.confidence_score != null && (
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Extraction Confidence</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('invoiceDetail.extractionConfidence')}</span>
                   <ConfidenceBar score={invoice.confidence_score} />
                 </div>
               )}
             </div>
           </Section>
 
-          <Section title={invType === 'receivable' ? 'Client' : 'Vendor'}>
+          <Section title={invType === 'receivable' ? t('invoiceDetail.client') : t('invoiceDetail.vendor')}>
             <div className="grid grid-cols-2 gap-4">
               {invType === 'receivable' ? (
                 <>
-                  <InfoRow label="Name"   value={invoice.client?.name} />
-                  <InfoRow label="Tax ID" value={invoice.client?.tax_id} mono />
-                  <InfoRow label="Email"  value={invoice.client?.email} />
-                  <InfoRow label="Phone"  value={invoice.client?.phone} />
+                  <InfoRow label={t('invoiceDetail.name')}   value={invoice.client?.name} />
+                  <InfoRow label={t('invoiceDetail.taxId')} value={invoice.client?.tax_id} mono />
+                  <InfoRow label={t('invoiceDetail.email')}  value={invoice.client?.email} />
+                  <InfoRow label={t('invoiceDetail.phone')}  value={invoice.client?.phone} />
                 </>
               ) : (
                 <>
-                  <InfoRow label="Name"   value={invoice.vendor?.name} />
-                  <InfoRow label="Tax ID" value={invoice.vendor?.tax_id} mono />
-                  <InfoRow label="Email"  value={invoice.vendor?.email} />
-                  <InfoRow label="Phone"  value={invoice.vendor?.phone} />
+                  <InfoRow label={t('invoiceDetail.name')}   value={invoice.vendor?.name} />
+                  <InfoRow label={t('invoiceDetail.taxId')} value={invoice.vendor?.tax_id} mono />
+                  <InfoRow label={t('invoiceDetail.email')}  value={invoice.vendor?.email} />
+                  <InfoRow label={t('invoiceDetail.phone')}  value={invoice.vendor?.phone} />
                 </>
               )}
             </div>
           </Section>
 
           {invType === 'receivable' && invoice.vendor && (
-            <Section title="Vendor">
+            <Section title={t('invoiceDetail.vendor')}>
               <div className="grid grid-cols-2 gap-4">
-                <InfoRow label="Name"   value={invoice.vendor?.name} />
-                <InfoRow label="Tax ID" value={invoice.vendor?.tax_id} mono />
+                <InfoRow label={t('invoiceDetail.name')}   value={invoice.vendor?.name} />
+                <InfoRow label={t('invoiceDetail.taxId')} value={invoice.vendor?.tax_id} mono />
               </div>
             </Section>
           )}
           {invType === 'payable' && invoice.client && (
-            <Section title="Client">
+            <Section title={t('invoiceDetail.client')}>
               <div className="grid grid-cols-2 gap-4">
-                <InfoRow label="Name"   value={invoice.client?.name} />
-                <InfoRow label="Tax ID" value={invoice.client?.tax_id} mono />
+                <InfoRow label={t('invoiceDetail.name')}   value={invoice.client?.name} />
+                <InfoRow label={t('invoiceDetail.taxId')} value={invoice.client?.tax_id} mono />
               </div>
             </Section>
           )}
@@ -462,13 +469,13 @@ export default function InvoiceDetail() {
         {invoice.line_items?.length > 0 && (
           <div className="card overflow-hidden">
             <div className="px-5 py-3.5 border-b" style={{ borderColor: 'var(--border)' }}>
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Line Items</h2>
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('invoiceDetail.lineItems')}</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['Description', 'Qty', 'Unit Price', 'Discount', 'Subtotal'].map(h => (
+                    {[t('common.table.description'), t('common.table.qty'), t('common.table.unitPrice'), t('common.table.discount'), t('common.table.subtotal')].map(h => (
                       <th key={h} className="text-left px-5 py-3 text-xs font-medium uppercase tracking-wide"
                         style={{ color: 'var(--text-muted)' }}>{h}</th>
                     ))}
@@ -498,7 +505,7 @@ export default function InvoiceDetail() {
 
         {/* Payment history */}
         {invoice.payments?.length > 0 && (
-          <Section title="Payment History">
+          <Section title={t('invoiceDetail.paymentHistory')}>
             <div className="space-y-2">
               {invoice.payments.map((p, i) => (
                 <div key={p.id || i}
@@ -509,8 +516,8 @@ export default function InvoiceDetail() {
                       {formatCurrency(p.amount, invoice.currency)}
                     </p>
                     <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                      {formatDate(p.payment_date)} · {p.method || 'N/A'}
-                      {p.reference && ` · Ref: ${p.reference}`}
+                      {formatDate(p.payment_date)} · {p.method || t('confidence.na')}
+                      {p.reference && ` · ${t('invoiceDetail.refPrefix', { ref: p.reference })}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -521,7 +528,7 @@ export default function InvoiceDetail() {
                         className="btn-ghost text-xs h-6 px-2"
                         style={{ color: '#EF4444', fontSize: 11 }}
                       >
-                        Refund
+                        {t('invoiceDetail.refund')}
                       </button>
                     )}
                   </div>
@@ -539,16 +546,16 @@ export default function InvoiceDetail() {
           >
             <div className="flex items-center gap-2">
               <ShieldCheck size={15} style={{ color: 'var(--text-muted)' }} />
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Compliance Status</h2>
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('invoiceDetail.complianceStatus')}</h2>
               {flags.length > 0 && (
                 <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
                   style={{ background: '#FEF2F2', color: '#EF4444' }}>
-                  {flags.length} flag{flags.length > 1 ? 's' : ''}
+                  {t('invoiceDetail.flagCount', { count: flags.length })}
                 </span>
               )}
             </div>
             {loadingFlags
-              ? <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Loading…</span>
+              ? <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('invoiceDetail.loadingShort')}</span>
               : flagsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />
             }
           </button>
@@ -557,16 +564,16 @@ export default function InvoiceDetail() {
             <div className="border-t px-5 py-4" style={{ borderColor: 'var(--border)' }}>
               {flags.length === 0 ? (
                 <div className="flex items-center gap-2 text-sm" style={{ color: '#22C55E' }}>
-                  <CheckCircle size={14} /> No compliance issues detected
+                  <CheckCircle size={14} /> {t('invoiceDetail.noComplianceIssues')}
                 </div>
               ) : (
                 <div className="space-y-2">
                   {flags.map((f, i) => (
                     <div key={f.id || i}
-                      className="flex items-start gap-3 p-3 rounded-xl border-l-4"
+                      className="flex items-start gap-3 p-3 rounded-xl border-s-4"
                       style={{
                         background: 'var(--bg-secondary)',
-                        borderLeftColor: f.severity === 'high' ? '#EF4444' : f.severity === 'medium' ? '#F59E0B' : 'var(--border)',
+                        [dir === 'rtl' ? 'borderRightColor' : 'borderLeftColor']: f.severity === 'high' ? '#EF4444' : f.severity === 'medium' ? '#F59E0B' : 'var(--border)',
                       }}>
                       <ComplianceFlagBadge severity={f.severity} />
                       <div className="flex-1">
@@ -584,48 +591,48 @@ export default function InvoiceDetail() {
 
       {/* ── Record Payment Modal ───────────────────────────────── */}
       {showPayModal && (
-        <Modal title="Record Payment" onClose={() => setShowPayModal(false)}>
+        <Modal title={t('invoiceDetail.recordPaymentTitle')} onClose={() => setShowPayModal(false)}>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <FieldRow label="Amount *">
+              <FieldRow label={t('invoiceDetail.amountRequired')}>
                 <input className="input h-9 text-sm font-mono" type="number" step="0.01"
                   value={paymentData.amount}
                   onChange={e => setPaymentData(p => ({ ...p, amount: e.target.value }))}
                   placeholder={remaining.toFixed(2)} />
               </FieldRow>
-              <FieldRow label="Date *">
+              <FieldRow label={t('invoiceDetail.dateRequired')}>
                 <input className="input h-9 text-sm" type="date"
                   value={paymentData.payment_date}
                   onChange={e => setPaymentData(p => ({ ...p, payment_date: e.target.value }))} />
               </FieldRow>
-              <FieldRow label="Method">
+              <FieldRow label={t('invoiceDetail.method')}>
                 <select className="input h-9 text-sm" value={paymentData.method}
                   onChange={e => setPaymentData(p => ({ ...p, method: e.target.value }))}>
-                  <option value="bank_transfer">Bank Transfer</option>
-                  <option value="credit_card">Credit Card</option>
-                  <option value="cash">Cash</option>
-                  <option value="cheque">Cheque</option>
-                  <option value="wire">Wire</option>
-                  <option value="other">Other</option>
+                  <option value="bank_transfer">{t('common.paymentMethods.bank_transfer')}</option>
+                  <option value="credit_card">{t('common.paymentMethods.credit_card')}</option>
+                  <option value="cash">{t('common.paymentMethods.cash')}</option>
+                  <option value="cheque">{t('common.paymentMethods.cheque')}</option>
+                  <option value="wire">{t('common.paymentMethods.wire')}</option>
+                  <option value="other">{t('common.paymentMethods.other')}</option>
                 </select>
               </FieldRow>
-              <FieldRow label="Reference">
+              <FieldRow label={t('invoiceDetail.reference')}>
                 <input className="input h-9 text-sm" value={paymentData.reference}
                   onChange={e => setPaymentData(p => ({ ...p, reference: e.target.value }))}
                   placeholder="TXN-001" />
               </FieldRow>
             </div>
             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              Remaining balance: <span className="font-mono font-medium">{formatCurrency(remaining, invoice.currency)}</span>
+              {t('invoiceDetail.remainingBalanceLabel')} <span className="font-mono font-medium">{formatCurrency(remaining, invoice.currency)}</span>
             </p>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowPayModal(false)} className="btn-secondary text-xs h-8">Cancel</button>
+              <button onClick={() => setShowPayModal(false)} className="btn-secondary text-xs h-8">{t('common.cancel')}</button>
               <button
                 onClick={handleRecordPayment}
                 disabled={savingPayment || !paymentData.amount}
                 className="btn-primary text-xs h-8 disabled:opacity-50"
               >
-                {savingPayment ? 'Saving…' : 'Confirm Payment'}
+                {savingPayment ? t('invoiceDetail.saving') : t('invoiceDetail.confirmPayment')}
               </button>
             </div>
           </div>
@@ -634,24 +641,24 @@ export default function InvoiceDetail() {
 
       {/* ── Credit Note Modal ─────────────────────────────────── */}
       {showCN && (
-        <Modal title="Apply Credit Note" onClose={() => setShowCN(false)}>
+        <Modal title={t('invoiceDetail.applyCreditNoteTitle')} onClose={() => setShowCN(false)}>
           <div className="space-y-3">
-            <FieldRow label="Amount *">
+            <FieldRow label={t('invoiceDetail.amountRequired')}>
               <input className="input h-9 text-sm font-mono" type="number" step="0.01"
                 value={cnData.amount}
                 onChange={e => setCnData(p => ({ ...p, amount: e.target.value }))} />
             </FieldRow>
-            <FieldRow label="Reason">
+            <FieldRow label={t('invoiceDetail.reason')}>
               <textarea className="input text-sm resize-none" rows={2}
                 value={cnData.reason}
                 onChange={e => setCnData(p => ({ ...p, reason: e.target.value }))}
-                placeholder="Reason for credit note" />
+                placeholder={t('invoiceDetail.reasonPlaceholder')} />
             </FieldRow>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowCN(false)} className="btn-secondary text-xs h-8">Cancel</button>
+              <button onClick={() => setShowCN(false)} className="btn-secondary text-xs h-8">{t('common.cancel')}</button>
               <button onClick={handleCreditNote} disabled={cnLoading || !cnData.amount}
                 className="btn-primary text-xs h-8 disabled:opacity-50">
-                {cnLoading ? 'Applying…' : 'Apply Credit Note'}
+                {cnLoading ? t('invoiceDetail.applying') : t('invoiceDetail.applyCreditNote')}
               </button>
             </div>
           </div>
@@ -660,19 +667,19 @@ export default function InvoiceDetail() {
 
       {/* ── Refund Modal ──────────────────────────────────────── */}
       {refundTarget && (
-        <Modal title="Process Refund" onClose={() => setRefundTarget(null)}>
+        <Modal title={t('invoiceDetail.processRefundTitle')} onClose={() => setRefundTarget(null)}>
           <div className="space-y-3">
-            <FieldRow label="Refund Amount *">
+            <FieldRow label={t('invoiceDetail.refundAmountRequired')}>
               <input className="input h-9 text-sm font-mono" type="number" step="0.01"
                 value={refundAmt}
                 onChange={e => setRefundAmt(e.target.value)} />
             </FieldRow>
             <div className="flex gap-2 justify-end">
-              <button onClick={() => setRefundTarget(null)} className="btn-secondary text-xs h-8">Cancel</button>
+              <button onClick={() => setRefundTarget(null)} className="btn-secondary text-xs h-8">{t('common.cancel')}</button>
               <button onClick={handleRefund} disabled={refundLoading || !refundAmt}
                 className="text-xs h-8 px-3 rounded-xl font-medium disabled:opacity-50"
                 style={{ background: '#EF4444', color: '#fff' }}>
-                {refundLoading ? 'Processing…' : 'Confirm Refund'}
+                {refundLoading ? t('invoiceDetail.processing') : t('invoiceDetail.confirmRefund')}
               </button>
             </div>
           </div>
@@ -682,11 +689,11 @@ export default function InvoiceDetail() {
       {/* ── Send confirm ──────────────────────────────────────── */}
       <ConfirmDialog
         open={confirmSend}
-        title="Send Invoice"
-        message={`This will send the invoice to ${invoice.client?.email || 'the client'} and generate a PDF. Continue?`}
+        title={t('invoiceDetail.sendInvoiceTitle')}
+        message={t('invoiceDetail.sendInvoiceMessage', { email: invoice.client?.email || t('invoiceDetail.theClient') })}
         onConfirm={() => { setConfirmSend(false); handleTransition('sent') }}
         onCancel={() => setConfirmSend(false)}
-        confirmLabel="Send Invoice"
+        confirmLabel={t('invoiceDetail.sendInvoiceConfirm')}
       />
     </>
   )
