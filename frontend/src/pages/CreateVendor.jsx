@@ -33,10 +33,10 @@ export default function CreateVendor() {
   const [error,   setError]   = useState('')
   const [success, setSuccess] = useState(false)
 
+  const VENDOR_COUNTRIES = buildVendorCountries(t)
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
 
   const submit = async () => {
-    const VENDOR_COUNTRIES = buildVendorCountries(t)
     setError('')
     if (!form.name.trim())   { setError(t('createVendor.nameRequired')); return }
     if (!form.tax_id.trim()) { setError(t('createVendor.taxIdRequired')); return }
