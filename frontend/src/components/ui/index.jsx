@@ -1,9 +1,11 @@
 import { AlertTriangle, Inbox, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { statusConfig, confidenceColor, confidenceLabel } from '../../lib/utils'
 
 // ── Existing components ───────────────────────────────────────────────────────
 
 export function StatusBadge({ status, invoice }) {
+  const { t } = useTranslation()
   // Composite: overdue invoice that has received a partial payment.
   // Does NOT introduce a new DB status — purely a display-layer derivation.
   if (invoice?.status === 'overdue' && Number(invoice?.amount_paid_so_far) > 0) {
@@ -13,7 +15,7 @@ export function StatusBadge({ status, invoice }) {
         style={{ background: '#FEF2F2', color: '#F87171', border: '1px solid #FECACA' }}
       >
         <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#F87171' }} />
-        Partial / Overdue
+        {t('ui.partialOverdue')}
       </span>
     )
   }
@@ -69,14 +71,16 @@ export function PageLoader() {
   )
 }
 
-export function EmptyState({ icon: Icon = Inbox, title = 'Nothing here', description = '' }) {
+export function EmptyState({ icon: Icon = Inbox, title, description = '' }) {
+  const { t } = useTranslation()
+  const resolvedTitle = title ?? t('ui.nothingHere')
   return (
     <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
       <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
         style={{ background: 'var(--bg-secondary)' }}>
         <Icon size={22} style={{ color: 'var(--text-muted)' }} strokeWidth={1.5} />
       </div>
-      <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{title}</p>
+      <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>{resolvedTitle}</p>
       {description && (
         <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>{description}</p>
       )}
@@ -85,6 +89,7 @@ export function EmptyState({ icon: Icon = Inbox, title = 'Nothing here', descrip
 }
 
 export function ErrorState({ message, onRetry }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
       <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
@@ -94,7 +99,7 @@ export function ErrorState({ message, onRetry }) {
       <p className="text-sm font-medium text-red-600">{message}</p>
       {onRetry && (
         <button onClick={onRetry} className="btn-secondary mt-4 text-xs">
-          Try again
+          {t('ui.tryAgain')}
         </button>
       )}
     </div>
@@ -102,6 +107,7 @@ export function ErrorState({ message, onRetry }) {
 }
 
 export function MetricCard({ label, value, sub, icon: Icon, trend, accentColor }) {
+  const { t } = useTranslation()
   return (
     <div className="card p-5 flex flex-col gap-3">
       <div className="flex items-start justify-between">
@@ -130,7 +136,7 @@ export function MetricCard({ label, value, sub, icon: Icon, trend, accentColor }
           <span className={`text-xs font-medium ${trend >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
             {trend >= 0 ? '+' : ''}{trend}%
           </span>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>vs last month</span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('ui.vsLastMonth')}</span>
         </div>
       )}
     </div>
@@ -149,6 +155,7 @@ export function SectionHeader({ title, action }) {
 // ── New components ────────────────────────────────────────────────────────────
 
 export function InvoiceTypeBadge({ type }) {
+  const { t } = useTranslation()
   const isPayable = type === 'payable'
   return (
     <span
@@ -159,7 +166,7 @@ export function InvoiceTypeBadge({ type }) {
         border: `1px solid ${isPayable ? '#BFDBFE' : '#BBF7D0'}`,
       }}
     >
-      {isPayable ? 'AP' : 'AR'}
+      {isPayable ? t('ui.apAbbrev') : t('ui.arAbbrev')}
     </span>
   )
 }
@@ -177,10 +184,11 @@ export function ProgressBar({ value, max, color = '#22C55E', height = 6 }) {
 }
 
 export function ComplianceFlagBadge({ severity }) {
+  const { t } = useTranslation()
   const cfg = {
-    high:   { label: 'High',   bg: '#FEF2F2', color: '#EF4444', border: '#FECACA' },
-    medium: { label: 'Medium', bg: '#FFFBEB', color: '#F59E0B', border: '#FDE68A' },
-    low:    { label: 'Low',    bg: 'var(--bg-secondary)', color: 'var(--text-muted)', border: 'var(--border)' },
+    high:   { label: t('ui.severityHigh'),   bg: '#FEF2F2', color: '#EF4444', border: '#FECACA' },
+    medium: { label: t('ui.severityMedium'), bg: '#FFFBEB', color: '#F59E0B', border: '#FDE68A' },
+    low:    { label: t('ui.severityLow'),    bg: 'var(--bg-secondary)', color: 'var(--text-muted)', border: 'var(--border)' },
   }[severity] || { label: severity, bg: 'var(--bg-secondary)', color: 'var(--text-muted)', border: 'var(--border)' }
 
   return (
@@ -193,7 +201,9 @@ export function ComplianceFlagBadge({ severity }) {
   )
 }
 
-export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confirmLabel = 'Confirm', danger = false }) {
+export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confirmLabel, danger = false }) {
+  const { t } = useTranslation()
+  const resolvedConfirmLabel = confirmLabel ?? t('ui.confirm')
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
@@ -209,7 +219,7 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confi
         <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{title}</h3>
         <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>{message}</p>
         <div className="flex gap-2 justify-end">
-          <button onClick={onCancel} className="btn-secondary text-sm">Cancel</button>
+          <button onClick={onCancel} className="btn-secondary text-sm">{t('ui.cancel')}</button>
           <button
             onClick={onConfirm}
             className="text-sm px-4 py-2 rounded-xl font-medium transition-all"
@@ -218,7 +228,7 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confi
               color: danger ? '#fff' : '#131310',
             }}
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>
@@ -245,7 +255,7 @@ export function ToastProvider({ children }) {
   return (
     <>
       {children}
-      <div className="fixed bottom-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none">
+      <div className="fixed bottom-4 end-4 z-[200] flex flex-col gap-2 pointer-events-none">
         {toasts.map(t => (
           <div
             key={t.id}
