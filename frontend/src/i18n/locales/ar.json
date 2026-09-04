@@ -169,6 +169,17 @@
     "sourceFallback": "مصدر {{number}}",
     "sources": "{{count}} مصدر",
     "sources_other": "{{count}} مصادر",
-    "hideSources": "إخفاء"
+    "hideSources": "إخفاء",
+    "pageIntro": "اسأل عن فواتيرك وموردينك ومدفوعاتك وبياناتك المالية.",
+    "startPrompt": "ابدأ بطرح سؤال عن بياناتك المالية.",
+    "thinking": "جارٍ التفكير…",
+    "inputPlaceholder": "اسأل عن الفواتير أو الموردين أو المدفوعات أو التحليلات…",
+    "suggestion1": "ما هي أكثر الموردين الذين لديهم أرصدة مستحقة؟",
+    "suggestion2": "أرني جميع الفواتير المتأخرة من الشهر الماضي",
+    "suggestion3": "ما هو إجمالي المبلغ المدفوع هذا الربع؟",
+    "suggestion4": "هل هناك أي مشاكل امتثال يجب أن أعرفها؟",
+    "hideSourcesLong": "إخفاء المصادر",
+    "matchPercent": "{{pct}}٪ تطابق",
+    "invoiceFallback": "فاتورة {{id}}"
   }
 }

@@ -169,6 +169,17 @@
     "sourceFallback": "Source {{number}}",
     "sources": "{{count}} source",
     "sources_other": "{{count}} sources",
-    "hideSources": "Hide"
+    "hideSources": "Hide",
+    "pageIntro": "Ask questions about your invoices, vendors, payments, and financial data.",
+    "startPrompt": "Start by asking a question about your financial data.",
+    "thinking": "Thinking…",
+    "inputPlaceholder": "Ask about invoices, vendors, payments, or analytics…",
+    "suggestion1": "Which vendors have the highest outstanding balances?",
+    "suggestion2": "Show me all overdue invoices from last month",
+    "suggestion3": "What is the total amount paid this quarter?",
+    "suggestion4": "Are there any compliance issues I should know about?",
+    "hideSourcesLong": "Hide sources",
+    "matchPercent": "{{pct}}% match",
+    "invoiceFallback": "Invoice {{id}}"
   }
 }
