@@ -157,5 +157,16 @@
     "paidLegend": "Paid",
     "recentActivity": "Recent Activity",
     "noRecentInvoices": "No recent invoices"
+  },
+  "chat": {
+    "jarvis": "Jarvis",
+    "clear": "Clear",
+    "placeholder": "Ask anything…",
+    "emptyState": "Ask about invoices, vendors, payments, or analytics.",
+    "defaultModel": "Default (.env)",
+    "modelLabel": "Model used to answer — switch anytime, no restart needed",
+    "sources": "{{count}} source",
+    "sources_other": "{{count}} sources",
+    "hideSources": "Hide"
   }
 }

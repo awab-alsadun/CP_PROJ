@@ -157,5 +157,16 @@
     "paidLegend": "مدفوع",
     "recentActivity": "النشاط الأخير",
     "noRecentInvoices": "لا توجد فواتير حديثة"
+  },
+  "chat": {
+    "jarvis": "جارفيس",
+    "clear": "مسح",
+    "placeholder": "اسأل أي شيء…",
+    "emptyState": "اسأل عن الفواتير أو الموردين أو المدفوعات أو التحليلات.",
+    "defaultModel": "افتراضي (.env)",
+    "modelLabel": "النموذج المستخدم للإجابة — بدّله في أي وقت دون إعادة تشغيل",
+    "sources": "{{count}} مصدر",
+    "sources_other": "{{count}} مصادر",
+    "hideSources": "إخفاء"
   }
 }
