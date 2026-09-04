@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Upload, FileText, CheckCircle, AlertCircle, X, Loader2, FolderOpen } from 'lucide-react'
 import { uploadApi, invoicesApi } from '../lib/api'
 
 export default function UploadExtract() {
+  const { t }     = useTranslation()
   const navigate  = useNavigate()
   const fileRef   = useRef(null)
   const folderRef = useRef(null)
@@ -33,7 +35,7 @@ export default function UploadExtract() {
     if (!f) return
     const ext = f.name.split('.').pop().toLowerCase()
     if (!['pdf', 'png', 'jpg', 'jpeg', 'tiff'].includes(ext)) {
-      setError('Only PDF and image files are supported.')
+      setError(t('upload.unsupportedFile'))
       return
     }
     setFile(f)
@@ -90,7 +92,7 @@ export default function UploadExtract() {
     const pdfs = allFiles.filter(f => f.name.toLowerCase().endsWith('.pdf'))
 
     if (pdfs.length === 0) {
-      setBatchToast({ message: 'No PDF files found in selected folder', type: 'error' })
+      setBatchToast({ message: t('upload.noPdfsFound'), type: 'error' })
       setTimeout(() => setBatchToast(null), 4000)
       return
     }
@@ -110,7 +112,7 @@ export default function UploadExtract() {
     for (const pdf of pdfs) {
       if (cancelRef.current) {
         setBatchToast({
-          message: `Cancelled at ${doneCount}/${pdfs.length} — ${successCount} ingested`,
+          message: t('upload.cancelledAt', { done: doneCount, total: pdfs.length, success: successCount }),
           type: 'warning',
         })
         setTimeout(() => setBatchToast(null), 5000)
@@ -132,7 +134,7 @@ export default function UploadExtract() {
 
     if (!cancelRef.current) {
       setBatchToast({
-        message: `${successCount}/${pdfs.length} invoices ingested successfully`,
+        message: t('upload.ingestedSuccess', { success: successCount, total: pdfs.length }),
         type: failures.length === 0 ? 'success' : 'warning',
       })
       setTimeout(() => setBatchToast(null), 5000)
@@ -146,10 +148,10 @@ export default function UploadExtract() {
     <div className="p-6 max-w-3xl space-y-5 animate-fade-up">
       <div>
         <h1 className="font-display text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-          Upload & Extract
+          {t('upload.title')}
         </h1>
         <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
-          Upload a PDF or invoice image. The AI pipeline will extract structured data automatically.
+          {t('upload.subtitle')}
         </p>
       </div>
 
@@ -191,7 +193,7 @@ export default function UploadExtract() {
                   className="text-xs flex items-center gap-1"
                   style={{ color: 'var(--text-muted)' }}
                 >
-                  <X size={12} /> Remove
+                  <X size={12} /> {t('upload.remove')}
                 </button>
               )}
             </div>
@@ -203,10 +205,10 @@ export default function UploadExtract() {
               </div>
               <div>
                 <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
-                  Drop a file here or click to browse
+                  {t('upload.dropHint')}
                 </p>
                 <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
-                  Supports PDF, PNG, JPG, TIFF
+                  {t('upload.supportsFormats')}
                 </p>
               </div>
             </div>
@@ -218,7 +220,7 @@ export default function UploadExtract() {
       {uploading && (
         <div className="card p-4 flex items-center gap-3">
           <Loader2 size={16} className="animate-spin" style={{ color: 'var(--accent)' }} />
-          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Processing invoice…</p>
+          <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('upload.processingInvoice')}</p>
         </div>
       )}
 
@@ -240,10 +242,10 @@ export default function UploadExtract() {
               <AlertCircle size={16} color="#F59E0B" />
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Duplicate invoice detected
+                  {t('upload.duplicateDetected')}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  {result.data?.invoice_number} already exists in the system
+                  {t('upload.duplicateExists', { number: result.data?.invoice_number })}
                 </p>
               </div>
             </div>
@@ -252,10 +254,10 @@ export default function UploadExtract() {
               <CheckCircle size={16} color="#22C55E" />
               <div className="flex-1">
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Invoice extracted successfully
+                  {t('upload.extractedSuccess')}
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
-                  Stored as {result.data?.invoice_number || 'new invoice'}
+                  {t('upload.storedAs', { number: result.data?.invoice_number || t('upload.newInvoice') })}
                 </p>
               </div>
             </div>
@@ -266,7 +268,7 @@ export default function UploadExtract() {
             <div className="card overflow-hidden">
               <div className="px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
                 <p className="text-xs font-semibold tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                  COMPLIANCE FLAGS
+                  {t('upload.complianceFlags')}
                 </p>
               </div>
               <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
@@ -300,13 +302,13 @@ export default function UploadExtract() {
 
           {/* Actions */}
           <div className="flex gap-3">
-            <button onClick={reset} className="btn-secondary">Upload Another</button>
+            <button onClick={reset} className="btn-secondary">{t('upload.uploadAnother')}</button>
             {result.data?.invoice_id && result.data?.status !== 'duplicate' && (
               <button
                 onClick={() => navigate(`/payables/${result.data.invoice_id}`)}
                 className="btn-primary"
               >
-                View Invoice
+                {t('upload.viewInvoice')}
               </button>
             )}
           </div>
@@ -318,7 +320,7 @@ export default function UploadExtract() {
         <div className="flex items-center gap-3 flex-wrap">
           {file && !uploading && (
             <button onClick={handleUpload} disabled={busy} className="btn-primary disabled:opacity-50">
-              <Upload size={15} /> Extract Invoice
+              <Upload size={15} /> {t('upload.extractInvoice')}
             </button>
           )}
 
@@ -328,8 +330,8 @@ export default function UploadExtract() {
             className="btn-secondary disabled:opacity-50"
           >
             {batchActive
-              ? <><Loader2 size={14} className="animate-spin" /> Ingesting…</>
-              : <><FolderOpen size={14} /> Ingest Folder</>
+              ? <><Loader2 size={14} className="animate-spin" /> {t('upload.ingesting')}</>
+              : <><FolderOpen size={14} /> {t('upload.ingestFolder')}</>
             }
           </button>
 
@@ -339,7 +341,7 @@ export default function UploadExtract() {
               className="btn-ghost text-xs h-8 px-3"
               style={{ color: '#EF4444' }}
             >
-              <X size={13} /> Cancel
+              <X size={13} /> {t('upload.cancel')}
             </button>
           )}
 
@@ -360,7 +362,7 @@ export default function UploadExtract() {
         <div className="card p-5 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-              Ingesting folder
+              {t('upload.ingestingFolder')}
             </h2>
             <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
               {batchDone} / {batchTotal}
@@ -373,9 +375,9 @@ export default function UploadExtract() {
             />
           </div>
           <div className="flex gap-4 text-xs">
-            <span style={{ color: '#22C55E' }}>✓ {batchSuccess} succeeded</span>
+            <span style={{ color: '#22C55E' }}>✓ {batchSuccess} {t('upload.succeeded')}</span>
             {batchFailures.length > 0 && (
-              <span style={{ color: '#EF4444' }}>✗ {batchFailures.length} failed</span>
+              <span style={{ color: '#EF4444' }}>✗ {batchFailures.length} {t('upload.failed')}</span>
             )}
             <span style={{ color: 'var(--text-muted)' }}>{batchPct}%</span>
           </div>
@@ -416,14 +418,14 @@ export default function UploadExtract() {
           <div className="px-5 py-3.5 border-b flex items-center justify-between"
             style={{ borderColor: 'var(--border)' }}>
             <h2 className="text-sm font-semibold" style={{ color: '#EF4444' }}>
-              Failed ({batchFailures.length})
+              {t('upload.failedCount', { count: batchFailures.length })}
             </h2>
             <button
               onClick={() => setBatchFailures([])}
               className="btn-ghost p-1.5 rounded-lg flex items-center gap-1 text-xs"
               style={{ color: 'var(--text-muted)' }}
             >
-              <X size={13} /> Dismiss
+              <X size={13} /> {t('upload.dismiss')}
             </button>
           </div>
           <div className="divide-y" style={{ borderColor: 'var(--border-subtle)' }}>
