@@ -9,7 +9,7 @@ const PAGE_SIZE = 50
 
 export default function Vendors() {
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [page,    setPage]    = useState(1)
   const [search,  setSearch]  = useState('')
   const [data,    setData]    = useState([])
@@ -81,7 +81,7 @@ export default function Vendors() {
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     {[t('common.table.name'), t('common.table.email'), t('common.table.phone'), t('common.table.taxId'), t('common.table.creditBalance'), t('common.table.invoiceCount')].map((h, i) => (
                       <th key={i} style={{
-                        padding: '10px 16px', textAlign: 'left', fontSize: 11,
+                        padding: '10px 16px', textAlign: i18n.language === 'ar' ? 'right' : 'left', fontSize: 11,
                         fontWeight: 600, textTransform: 'uppercase',
                         letterSpacing: '0.06em', color: 'var(--text-muted)',
                       }}>{h}</th>
