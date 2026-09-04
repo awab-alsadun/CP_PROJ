@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { invoicesApi } from '../lib/api'
 import { formatCurrency, formatDate, truncate } from '../lib/utils'
@@ -19,6 +20,7 @@ function useDebounce(value, delay = 400) {
 
 export default function Invoices() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [invoices,  setInvoices]  = useState([])
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(null)
@@ -66,8 +68,8 @@ export default function Invoices() {
     <div className="p-6 space-y-4 animate-fade-up">
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-          <input className="input pl-9 h-9 text-sm" placeholder="Search invoice #, vendor, client…"
+          <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+          <input className="input ps-9 h-9 text-sm" placeholder={t('invoicesLegacy.searchPlaceholder')}
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="flex gap-1 p-1 rounded-xl border"
@@ -78,11 +80,11 @@ export default function Invoices() {
               style={status === s
                 ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
                 : { color: 'var(--text-muted)' }}>
-              {s}
+              {s === 'all' ? t('common.status.all') : t(`common.status.${s}`)}
             </button>
           ))}
         </div>
-        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{total ? `${total} total` : ''}</span>
+        <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{total ? t('common.total', { count: total }) : ''}</span>
       </div>
 
       <div className="card overflow-hidden">
@@ -90,8 +92,8 @@ export default function Invoices() {
           : error ? <ErrorState message={error} onRetry={load} />
           : invoices.length === 0 ? (
             <EmptyState
-              title={status !== 'all' ? `No ${status} invoices` : 'No invoices found'}
-              description={status !== 'all' ? `No invoices with status "${status}".` : 'Upload an invoice to get started.'}
+              title={status !== 'all' ? t('invoicesLegacy.noStatusInvoices', { status: t(`common.status.${status}`) }) : t('invoicesLegacy.noInvoices')}
+              description={status !== 'all' ? t('invoicesLegacy.noStatusDescription', { status }) : t('invoicesLegacy.uploadHint')}
             />
           ) : (
             <>
@@ -100,21 +102,21 @@ export default function Invoices() {
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
                       {[
-                        { label: 'Invoice #',  field: 'invoice_number' },
-                        { label: 'Vendor',     field: null },
-                        { label: 'Client',     field: null },
-                        { label: 'Issue Date', field: 'issue_date' },
-                        { label: 'Due Date',   field: 'due_date' },
-                        { label: 'Amount',     field: 'grand_total' },
-                        { label: 'Status',     field: 'status' },
-                        { label: 'Confidence', field: 'confidence_score' },
-                      ].map(({ label, field }) => (
-                        <th key={label}
+                        { labelKey: 'common.table.invoiceNumber',  field: 'invoice_number' },
+                        { labelKey: 'common.table.vendor',     field: null },
+                        { labelKey: 'common.table.client',     field: null },
+                        { labelKey: 'common.table.issueDate', field: 'issue_date' },
+                        { labelKey: 'common.table.dueDate',   field: 'due_date' },
+                        { labelKey: 'common.table.amount',     field: 'grand_total' },
+                        { labelKey: 'common.table.status',     field: 'status' },
+                        { labelKey: 'invoicesLegacy.confidence', field: 'confidence_score' },
+                      ].map(({ labelKey, field }) => (
+                        <th key={labelKey}
                           className={`text-left px-5 py-3 text-xs font-medium uppercase tracking-wide ${field ? 'cursor-pointer select-none' : ''}`}
                           style={{ color: 'var(--text-muted)' }}
                           onClick={() => field && toggleSort(field)}>
                           <span className="flex items-center gap-1">
-                            {label}
+                            {t(labelKey)}
                             {field && <SortIcon field={field} />}
                           </span>
                         </th>
@@ -157,7 +159,7 @@ export default function Invoices() {
               </div>
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: 'var(--border)' }}>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('common.pageOf', { page, total: totalPages })}</span>
                   <div className="flex items-center gap-1">
                     <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                       className="btn-ghost p-1.5 disabled:opacity-40"><ChevronLeft size={14} /></button>

@@ -203,5 +203,13 @@
     "noReceivables": "لا توجد مقبوضات",
     "createHint": "أنشئ فاتورة لعميل للبدء.",
     "daysOverdue": "({{days}} يوم)"
+  },
+  "invoicesLegacy": {
+    "searchPlaceholder": "ابحث برقم الفاتورة أو المورد أو العميل…",
+    "noStatusInvoices": "لا توجد فواتير {{status}}",
+    "noInvoices": "لا توجد فواتير",
+    "noStatusDescription": "لا توجد فواتير بالحالة \"{{status}}\".",
+    "uploadHint": "ارفع فاتورة للبدء.",
+    "confidence": "الثقة"
   }
 }

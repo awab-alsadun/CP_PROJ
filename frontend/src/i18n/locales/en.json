@@ -203,5 +203,13 @@
     "noReceivables": "No receivables found",
     "createHint": "Create an invoice for a client to get started.",
     "daysOverdue": "({{days}}d)"
+  },
+  "invoicesLegacy": {
+    "searchPlaceholder": "Search invoice #, vendor, client…",
+    "noStatusInvoices": "No {{status}} invoices",
+    "noInvoices": "No invoices found",
+    "noStatusDescription": "No invoices with status \"{{status}}\".",
+    "uploadHint": "Upload an invoice to get started.",
+    "confidence": "Confidence"
   }
 }
