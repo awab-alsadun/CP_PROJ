@@ -133,5 +133,12 @@
     "severityHigh": "عالية",
     "severityMedium": "متوسطة",
     "severityLow": "منخفضة"
+  },
+  "login": {
+    "tagline": "ذكاء اصطناعي لإدارة الفواتير",
+    "uuidPlaceholder": "معرّف الشركة (UUID)",
+    "invalidUuid": "أدخل معرّف شركة صالحًا",
+    "enterDashboard": "الدخول إلى لوحة التحكم",
+    "useDemoUuid": "استخدام معرّف تجريبي"
   }
 }

@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Zap } from 'lucide-react';
 
 export default function Login() {
   const [uuid, setUuid] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
   function handleEnter() {
-    if (!UUID_RE.test(uuid.trim())) { setError('Enter a valid company UUID'); return; }
+    if (!UUID_RE.test(uuid.trim())) { setError(t('login.invalidUuid')); return; }
     localStorage.setItem('company_id', uuid.trim());
     navigate('/');
   }
@@ -25,11 +27,11 @@ export default function Login() {
           <Zap size={24} color="#131310" fill="#131310" />
         </div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 800, margin: '0 0 6px', color: 'var(--text-primary)' }}>InVox</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 28px' }}>AI Invoice Intelligence</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 28px' }}>{t('login.tagline')}</p>
 
         <input
           className="input"
-          placeholder="Company UUID"
+          placeholder={t('login.uuidPlaceholder')}
           value={uuid}
           onChange={e => { setUuid(e.target.value); setError(''); }}
           onKeyDown={e => e.key === 'Enter' && handleEnter()}
@@ -37,13 +39,13 @@ export default function Login() {
         />
         {error && <div style={{ color: '#EF4444', fontSize: 12, marginBottom: 12 }}>{error}</div>}
         <button className="btn-primary" onClick={handleEnter} style={{ width: '100%', padding: '10px' }}>
-          Enter Dashboard
+          {t('login.enterDashboard')}
         </button>
         <button
           className="btn-ghost"
           onClick={() => { setUuid('7bf697fc-7220-40c7-9678-542d624d22ad'); setError(''); }}
           style={{ marginTop: 10, fontSize: 11, color: 'var(--text-muted)' }}>
-          Use demo UUID
+          {t('login.useDemoUuid')}
         </button>
       </div>
     </div>

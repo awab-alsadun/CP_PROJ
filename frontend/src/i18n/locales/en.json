@@ -133,5 +133,12 @@
     "severityHigh": "High",
     "severityMedium": "Medium",
     "severityLow": "Low"
+  },
+  "login": {
+    "tagline": "AI Invoice Intelligence",
+    "uuidPlaceholder": "Company UUID",
+    "invalidUuid": "Enter a valid company UUID",
+    "enterDashboard": "Enter Dashboard",
+    "useDemoUuid": "Use demo UUID"
   }
 }
