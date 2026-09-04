@@ -127,16 +127,11 @@
     "daysAgo": "قبل {{count}} يوم"
   },
   "ui": {
-    "nothingHere": "لا يوجد شيء هنا",
-    "tryAgain": "حاول مرة أخرى",
     "vsLastMonth": "مقارنة بالشهر الماضي",
     "apAbbrev": "دائن",
     "arAbbrev": "مدين",
-    "cancel": "إلغاء",
-    "confirm": "تأكيد",
     "severityHigh": "عالية",
     "severityMedium": "متوسطة",
-    "severityLow": "منخفضة",
-    "partialOverdue": "جزئية / متأخرة"
+    "severityLow": "منخفضة"
   }
 }

@@ -15,7 +15,7 @@ export function StatusBadge({ status, invoice }) {
         style={{ background: '#FEF2F2', color: '#F87171', border: '1px solid #FECACA' }}
       >
         <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: '#F87171' }} />
-        {t('ui.partialOverdue')}
+        {t('common.status.partialOverdue')}
       </span>
     )
   }
@@ -73,7 +73,7 @@ export function PageLoader() {
 
 export function EmptyState({ icon: Icon = Inbox, title, description = '' }) {
   const { t } = useTranslation()
-  const resolvedTitle = title ?? t('ui.nothingHere')
+  const resolvedTitle = title ?? t('common.noneFound')
   return (
     <div className="flex flex-col items-center justify-center py-16 px-8 text-center">
       <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4"
@@ -99,7 +99,7 @@ export function ErrorState({ message, onRetry }) {
       <p className="text-sm font-medium text-red-600">{message}</p>
       {onRetry && (
         <button onClick={onRetry} className="btn-secondary mt-4 text-xs">
-          {t('ui.tryAgain')}
+          {t('common.tryAgain')}
         </button>
       )}
     </div>
@@ -203,7 +203,7 @@ export function ComplianceFlagBadge({ severity }) {
 
 export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confirmLabel, danger = false }) {
   const { t } = useTranslation()
-  const resolvedConfirmLabel = confirmLabel ?? t('ui.confirm')
+  const resolvedConfirmLabel = confirmLabel ?? t('common.confirm')
   if (!open) return null
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
@@ -219,7 +219,7 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, confi
         <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{title}</h3>
         <p className="text-sm mb-5" style={{ color: 'var(--text-secondary)' }}>{message}</p>
         <div className="flex gap-2 justify-end">
-          <button onClick={onCancel} className="btn-secondary text-sm">{t('ui.cancel')}</button>
+          <button onClick={onCancel} className="btn-secondary text-sm">{t('common.cancel')}</button>
           <button
             onClick={onConfirm}
             className="text-sm px-4 py-2 rounded-xl font-medium transition-all"

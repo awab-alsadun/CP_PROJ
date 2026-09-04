@@ -127,16 +127,11 @@
     "daysAgo": "{{count}}d ago"
   },
   "ui": {
-    "nothingHere": "Nothing here",
-    "tryAgain": "Try again",
     "vsLastMonth": "vs last month",
     "apAbbrev": "AP",
     "arAbbrev": "AR",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
     "severityHigh": "High",
     "severityMedium": "Medium",
-    "severityLow": "Low",
-    "partialOverdue": "Partial / Overdue"
+    "severityLow": "Low"
   }
 }
