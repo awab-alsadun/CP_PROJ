@@ -476,7 +476,7 @@ export default function InvoiceDetail() {
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     {[t('common.table.description'), t('common.table.qty'), t('common.table.unitPrice'), t('common.table.discount'), t('common.table.subtotal')].map(h => (
-                      <th key={h} className="text-left px-5 py-3 text-xs font-medium uppercase tracking-wide"
+                      <th key={h} className="text-start px-5 py-3 text-xs font-medium uppercase tracking-wide"
                         style={{ color: 'var(--text-muted)' }}>{h}</th>
                     ))}
                   </tr>
@@ -542,7 +542,7 @@ export default function InvoiceDetail() {
         <div className="card overflow-hidden">
           <button
             onClick={toggleFlags}
-            className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-[var(--bg-secondary)] transition-colors"
+            className="w-full flex items-center justify-between px-5 py-3.5 text-start hover:bg-[var(--bg-secondary)] transition-colors"
           >
             <div className="flex items-center gap-2">
               <ShieldCheck size={15} style={{ color: 'var(--text-muted)' }} />
