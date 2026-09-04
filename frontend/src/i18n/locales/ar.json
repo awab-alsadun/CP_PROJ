@@ -165,6 +165,8 @@
     "emptyState": "اسأل عن الفواتير أو الموردين أو المدفوعات أو التحليلات.",
     "defaultModel": "افتراضي (.env)",
     "modelLabel": "النموذج المستخدم للإجابة — بدّله في أي وقت دون إعادة تشغيل",
+    "local": "(محلي)",
+    "sourceFallback": "مصدر {{number}}",
     "sources": "{{count}} مصدر",
     "sources_other": "{{count}} مصادر",
     "hideSources": "إخفاء"

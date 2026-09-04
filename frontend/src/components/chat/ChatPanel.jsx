@@ -11,6 +11,8 @@ const QUERY_BADGE = {
   hybrid:         { label: 'Hybrid', color: '#D4A847' },
 };
 
+// Provider/product names — left untranslated like "InVox" in Login.jsx and the
+// "SQL"/"RAG" labels in QUERY_BADGE above; these are brand names, not UI copy.
 const PROVIDER_LABEL = {
   gemini:     'Gemini',
   openrouter: 'OpenRouter',
@@ -69,7 +71,7 @@ export default function ChatPanel({ open, onClose }) {
             <option value="">{t('chat.defaultModel')}</option>
             <option value="gemini">Gemini</option>
             <option value="openrouter">OpenRouter</option>
-            <option value="ollama">Ollama (local)</option>
+            <option value="ollama">Ollama {t('chat.local')}</option>
           </select>
           <button className="btn-ghost" onClick={clearMessages} title={t('chat.clear')} style={{ padding: 6, borderRadius: 6 }}><Trash2 size={14} /></button>
           <button className="btn-ghost" onClick={onClose} style={{ padding: 6, borderRadius: 6 }}><X size={14} /></button>
@@ -160,7 +162,7 @@ function Message({ msg, dir }) {
           <div key={i} style={{ width: '90%', padding: '8px 10px', borderRadius: 8, background: 'var(--bg-secondary)', border: '1px solid var(--border)', fontSize: 11 }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
               <Icon size={11} color="var(--text-muted)" />
-              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{s.citation || `Source ${i + 1}`}</span>
+              <span style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{s.citation || t('chat.sourceFallback', { number: i + 1 })}</span>
               {s.similarity != null && <span style={{ color: 'var(--text-muted)', [dir === 'rtl' ? 'marginRight' : 'marginLeft']: 'auto' }}>{Math.round(s.similarity * 100)}%</span>}
             </div>
             {s.chunk_text && <div style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>{s.chunk_text.slice(0, 120)}…</div>}

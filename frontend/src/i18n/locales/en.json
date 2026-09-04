@@ -165,6 +165,8 @@
     "emptyState": "Ask about invoices, vendors, payments, or analytics.",
     "defaultModel": "Default (.env)",
     "modelLabel": "Model used to answer — switch anytime, no restart needed",
+    "local": "(local)",
+    "sourceFallback": "Source {{number}}",
     "sources": "{{count}} source",
     "sources_other": "{{count}} sources",
     "hideSources": "Hide"
