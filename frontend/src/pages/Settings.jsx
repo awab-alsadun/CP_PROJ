@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Save, LogOut, Upload, Trash2, Loader2, ChevronDown, Image as ImageIcon } from 'lucide-react'
 import { settingsApi, adminApi, documentsApi } from '../lib/api'
+import i18n from '../i18n'
 
 function useToast() {
   const [toasts, setToasts] = useState([])
@@ -16,7 +17,7 @@ function useToast() {
 
 function Toasts({ toasts }) {
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <div className="fixed bottom-4 end-4 z-50 flex flex-col gap-2 pointer-events-none">
       {toasts.map(t => (
         <div key={t.id}
           className="px-4 py-3 rounded-xl shadow-lg text-sm font-medium animate-fade-up pointer-events-auto"
@@ -41,9 +42,9 @@ class ErrorBoundary extends Component {
     if (this.state.error) {
       return (
         <div className="card p-6">
-          <h2 className="text-sm font-semibold mb-2" style={{ color: '#EF4444' }}>This section failed to render</h2>
+          <h2 className="text-sm font-semibold mb-2" style={{ color: '#EF4444' }}>{i18n.t('settingsPage.sectionRenderError')}</h2>
           <p className="text-xs mb-3 font-mono" style={{ color: 'var(--text-secondary)' }}>{this.state.error?.message}</p>
-          <button onClick={this.reset} className="btn-secondary text-xs">Try again</button>
+          <button onClick={this.reset} className="btn-secondary text-xs">{i18n.t('common.tryAgain')}</button>
         </div>
       )
     }
@@ -63,32 +64,6 @@ function Field({ label, hint, required, children }) {
   )
 }
 
-// Tabs: Company Profile | Invoice Branding | Tax & Compliance | Documents
-const TABS = ['Company Profile', 'Invoice Branding', 'Tax & Compliance', 'Documents']
-
-const DOC_TYPES = [
-  { value: 'tax_regulation',   label: 'Tax Regulation'   },
-  { value: 'compliance_guide', label: 'Compliance Guide'  },
-  { value: 'vat_rules',        label: 'VAT Rules'         },
-  { value: 'customs',          label: 'Customs & Tariff'  },
-  { value: 'company_policy',   label: 'Company Policy'    },
-  { value: 'general',          label: 'General'           },
-]
-
-const COUNTRIES = [
-  { value: '',   label: 'No country'      },
-  { value: 'US', label: 'United States'   },
-  { value: 'TR', label: 'Turkey'          },
-  { value: 'SA', label: 'Saudi Arabia'    },
-  { value: 'AE', label: 'UAE'             },
-  { value: 'GB', label: 'United Kingdom'  },
-  { value: 'DE', label: 'Germany'         },
-  { value: 'EG', label: 'Egypt'           },
-  { value: 'DK', label: 'Denmark'         },
-  { value: 'BH', label: 'Bahrain'         },
-  { value: 'FI', label: 'Finland'         },
-]
-
 const BRANDING_DEFAULTS = {
   invoice_primary_color: '#1F2937',
   invoice_accent_color:  '#6B7280',
@@ -106,6 +81,32 @@ export default function Settings() {
   const { t, i18n } = useTranslation()
   const { toasts, add: toast } = useToast()
   const [tab, setTab] = useState(0)
+
+  // Tabs: Company Profile | Invoice Branding | Tax & Compliance | Documents
+  const TABS = [t('settingsPage.tabProfile'), t('settingsPage.tabBranding'), t('settingsPage.tabTax'), t('settingsPage.tabDocuments')]
+
+  const DOC_TYPES = [
+    { value: 'tax_regulation',   label: t('settingsPage.docTaxRegulation')   },
+    { value: 'compliance_guide', label: t('settingsPage.docComplianceGuide') },
+    { value: 'vat_rules',        label: t('settingsPage.docVatRules')        },
+    { value: 'customs',          label: t('settingsPage.docCustoms')         },
+    { value: 'company_policy',   label: t('settingsPage.docCompanyPolicy')   },
+    { value: 'general',          label: t('settingsPage.docGeneral')         },
+  ]
+
+  const COUNTRIES = [
+    { value: '',   label: t('common.noCountry') },
+    { value: 'US', label: t('common.countries.US') },
+    { value: 'TR', label: t('common.countries.TR') },
+    { value: 'SA', label: t('common.countries.SA') },
+    { value: 'AE', label: t('common.countries.AE') },
+    { value: 'GB', label: t('common.countries.GB') },
+    { value: 'DE', label: t('common.countries.DE') },
+    { value: 'EG', label: t('common.countries.EG') },
+    { value: 'DK', label: t('common.countries.DK') },
+    { value: 'BH', label: t('common.countries.BH') },
+    { value: 'FI', label: t('common.countries.FI') },
+  ]
 
   // Company Profile
   const [profile,      setProfile]      = useState({ name: '', country: '', address: '', phone: '', email: '', tax_id: '' })
@@ -170,7 +171,7 @@ export default function Settings() {
     setProfileSaving(true)
     try {
       await settingsApi.update({ ...profile, default_tax_rate: defaultTaxRate })
-      toast('Settings saved')
+      toast(t('settingsPage.settingsSaved'))
     } catch (e) { toast(e.message, 'error') }
     finally { setProfileSaving(false) }
   }
@@ -181,7 +182,7 @@ export default function Settings() {
       const res = await (action === 'overdue' ? adminApi.runOverdueCheck() : adminApi.runComplianceCheck())
       if (action === 'overdue') setOverdueResult(res)
       else setComplianceResult(res)
-      toast('Check completed')
+      toast(t('settingsPage.checkCompleted'))
     } catch (e) { toast(e.message, 'error') }
     finally { setAdminLoading('') }
   }
@@ -191,7 +192,7 @@ export default function Settings() {
     setDocUploading(true)
     try {
       await documentsApi.upload(docFile, docType, docCountry || null)
-      toast('Document uploaded')
+      toast(t('settingsPage.documentUploaded'))
       setDocFile(null)
       loadDocs()
     } catch (e) { toast(e.message, 'error') }
@@ -201,7 +202,7 @@ export default function Settings() {
   const deleteDoc = async (id) => {
     try {
       await documentsApi.delete(id)
-      toast('Document deleted')
+      toast(t('settingsPage.documentDeleted'))
       loadDocs()
     } catch (e) { toast(e.message, 'error') }
   }
@@ -217,11 +218,11 @@ export default function Settings() {
     const f = e.target.files?.[0]
     if (!f) { setLogoFile(null); return }
     if (!LOGO_ACCEPTED_TYPES.includes(f.type)) {
-      toast('Unsupported file type. Allowed: PNG, JPEG, WebP', 'error')
+      toast(t('settingsPage.unsupportedFileType'), 'error')
       e.target.value = ''; setLogoFile(null); return
     }
     if (f.size > LOGO_MAX_BYTES) {
-      toast('Logo exceeds 2 MB limit.', 'error')
+      toast(t('settingsPage.logoExceedsLimit'), 'error')
       e.target.value = ''; setLogoFile(null); return
     }
     setLogoFile(f)
@@ -234,9 +235,9 @@ export default function Settings() {
       const res = await settingsApi.uploadLogo(logoFile)
       setBranding(b => ({ ...b, logo_url: res?.logo_url || b.logo_url }))
       setLogoFile(null)
-      toast('Logo uploaded')
+      toast(t('settingsPage.logoUploaded'))
     } catch (e) {
-      toast(e.message || 'Logo upload failed', 'error')
+      toast(e.message || t('settingsPage.logoUploadFailed'), 'error')
     } finally { setLogoUploading(false) }
   }
 
@@ -244,7 +245,7 @@ export default function Settings() {
     const colorKeys = ['invoice_primary_color', 'invoice_accent_color', 'invoice_text_color']
     for (const k of colorKeys) {
       if (!HEX_RE.test(branding[k] || '')) {
-        toast(`Invalid hex color in ${k.replace(/_/g, ' ')}. Expected #RRGGBB.`, 'error')
+        toast(t('settingsPage.invalidHexColor', { field: k.replace(/_/g, ' ') }), 'error')
         return
       }
     }
@@ -267,9 +268,9 @@ export default function Settings() {
           logo_url:              res.logo_url ?? b.logo_url,
         }))
       }
-      toast('Branding saved')
+      toast(t('settingsPage.brandingSaved'))
     } catch (e) {
-      toast(e.message || 'Failed to save branding', 'error')
+      toast(e.message || t('settingsPage.brandingFailed'), 'error')
     } finally { setBrandingSaving(false) }
   }
 
@@ -295,12 +296,12 @@ export default function Settings() {
       {tab === 0 && (
         <div className="card p-6 space-y-4">
           <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>
-            Company Profile
+            {t('settingsPage.tabProfile')}
           </h2>
           <div className="flex items-center justify-between pb-4 mb-1 border-b" style={{ borderColor: 'var(--border)' }}>
             <div>
-              <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Language</p>
-              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Switch the interface language</p>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{t('settingsPage.languageLabel')}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t('settingsPage.languageHint')}</p>
             </div>
             <div className="flex gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
               {[{ code: 'en', label: 'English' }, { code: 'ar', label: 'العربية' }].map(({ code, label }) => (
@@ -318,51 +319,51 @@ export default function Settings() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Company Name">
+            <Field label={t('settingsPage.companyName')}>
               <input className="input h-9 text-sm" value={profile.name}
                 onChange={e => setProfile(p => ({ ...p, name: e.target.value }))} />
             </Field>
-            <Field label="Country">
+            <Field label={t('settingsPage.country')}>
               <div className="relative">
-                <select className="input h-9 text-sm appearance-none pr-8" value={profile.country}
+                <select className="input h-9 text-sm appearance-none pe-8" value={profile.country}
                   onChange={e => setProfile(p => ({ ...p, country: e.target.value }))}>
                   {COUNTRIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
-                <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                <ChevronDown size={13} className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none"
                   style={{ color: 'var(--text-muted)' }} />
               </div>
             </Field>
-            <Field label="Email">
+            <Field label={t('settingsPage.email')}>
               <input className="input h-9 text-sm" type="email" value={profile.email}
                 onChange={e => setProfile(p => ({ ...p, email: e.target.value }))} />
             </Field>
-            <Field label="Phone">
+            <Field label={t('settingsPage.phone')}>
               <input className="input h-9 text-sm" value={profile.phone}
                 onChange={e => setProfile(p => ({ ...p, phone: e.target.value }))} />
             </Field>
-            <Field label="Tax ID">
+            <Field label={t('settingsPage.taxId')}>
               <input className="input h-9 text-sm font-mono" value={profile.tax_id}
                 onChange={e => setProfile(p => ({ ...p, tax_id: e.target.value }))} />
             </Field>
-            <Field label="Address">
+            <Field label={t('settingsPage.address')}>
               <input className="input h-9 text-sm" value={profile.address}
                 onChange={e => setProfile(p => ({ ...p, address: e.target.value }))} />
             </Field>
           </div>
           <div className="flex justify-end pt-2">
             <button onClick={saveProfile} disabled={profileSaving} className="btn-primary disabled:opacity-50">
-              <Save size={14} /> {profileSaving ? 'Saving…' : 'Save Changes'}
+              <Save size={14} /> {profileSaving ? t('settingsPage.saving') : t('settingsPage.saveChanges')}
             </button>
           </div>
 
           <div className="pt-6 mt-4" style={{ borderTop: '1px solid var(--border)' }}>
-            <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Session</h2>
+            <h2 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>{t('settingsPage.session')}</h2>
             <div className="space-y-3">
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Company ID: <span className="font-mono">{localStorage.getItem('company_id') || '—'}</span>
+                {t('settingsPage.companyIdLabel')} <span className="font-mono">{localStorage.getItem('company_id') || '—'}</span>
               </div>
               <button onClick={logout} className="btn-secondary text-sm" style={{ color: '#EF4444', borderColor: '#FECACA' }}>
-                <LogOut size={14} /> Log Out
+                <LogOut size={14} /> {t('settingsPage.logOut')}
               </button>
             </div>
           </div>
@@ -374,12 +375,12 @@ export default function Settings() {
         <ErrorBoundary>
           <div className="space-y-4">
             <div className="card p-6 space-y-4">
-              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>Logo</h2>
+              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>{t('settingsPage.logo')}</h2>
               <div className="flex items-start gap-5">
                 <div className="rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0"
                   style={{ width: 140, height: 60, background: 'var(--bg-secondary)', border: '1px solid var(--border)' }}>
                   {branding.logo_url
-                    ? <img src={branding.logo_url} alt="Company logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+                    ? <img src={branding.logo_url} alt={t('settingsPage.companyLogoAlt')} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                     : <ImageIcon size={20} style={{ color: 'var(--text-muted)' }} />}
                 </div>
                 <div className="flex-1 space-y-2">
@@ -387,42 +388,42 @@ export default function Settings() {
                     <button onClick={() => document.getElementById('settings-logo-input').click()}
                       disabled={logoUploading} className="btn-secondary text-sm">
                       <Upload size={13} />
-                      {logoFile ? logoFile.name.slice(0, 28) : 'Choose Image'}
+                      {logoFile ? logoFile.name.slice(0, 28) : t('settingsPage.chooseImage')}
                     </button>
                     <input id="settings-logo-input" type="file" accept="image/png,image/jpeg,image/webp"
                       className="hidden" onChange={onLogoPick} />
                     {logoFile && (
                       <button onClick={uploadLogo} disabled={logoUploading} className="btn-primary text-sm disabled:opacity-50">
-                        {logoUploading ? <><Loader2 size={13} className="animate-spin" /> Uploading…</> : 'Upload'}
+                        {logoUploading ? <><Loader2 size={13} className="animate-spin" /> {t('settingsPage.uploading')}</> : t('settingsPage.upload')}
                       </button>
                     )}
                   </div>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>PNG, JPEG, or WebP. Max 2 MB.</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('settingsPage.logoHint')}</p>
                 </div>
               </div>
             </div>
 
             <div className="card p-6 space-y-4">
-              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>Colors</h2>
-              <ColorRow label="Primary color"  hint="Total Due bar background"                        value={branding.invoice_primary_color} onChange={v => setColor('invoice_primary_color', v)} />
-              <ColorRow label="Accent color"   hint="Line items table header background"              value={branding.invoice_accent_color}  onChange={v => setColor('invoice_accent_color', v)} />
-              <ColorRow label="Text color"     hint="Text on Primary and Accent bars"                 value={branding.invoice_text_color}    onChange={v => setColor('invoice_text_color', v)} />
+              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>{t('settingsPage.colors')}</h2>
+              <ColorRow label={t('settingsPage.primaryColor')} hint={t('settingsPage.primaryColorHint')} value={branding.invoice_primary_color} onChange={v => setColor('invoice_primary_color', v)} />
+              <ColorRow label={t('settingsPage.accentColor')}  hint={t('settingsPage.accentColorHint')}  value={branding.invoice_accent_color}  onChange={v => setColor('invoice_accent_color', v)} />
+              <ColorRow label={t('settingsPage.textColor')}    hint={t('settingsPage.textColorHint')}    value={branding.invoice_text_color}    onChange={v => setColor('invoice_text_color', v)} />
             </div>
 
             <div className="card p-6 space-y-4">
-              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>Invoice Footer Text</h2>
-              <Field label="Footer" hint="Payment instructions, IBAN, thank-you note.">
+              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>{t('settingsPage.invoiceFooterText')}</h2>
+              <Field label={t('settingsPage.footer')} hint={t('settingsPage.footerHint')}>
                 <textarea className="input text-sm" rows={4}
                   style={{ height: 'auto', resize: 'vertical', padding: '8px 12px' }}
                   value={branding.invoice_footer_text}
                   onChange={e => setBranding(b => ({ ...b, invoice_footer_text: e.target.value }))}
-                  placeholder="Payment due within 30 days. Thank you." />
+                  placeholder={t('settingsPage.footerPlaceholder')} />
               </Field>
             </div>
 
             <div className="flex justify-end">
               <button onClick={saveBranding} disabled={brandingSaving || !brandingLoaded} className="btn-primary disabled:opacity-50">
-                {brandingSaving ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : <><Save size={14} /> Save Branding</>}
+                {brandingSaving ? <><Loader2 size={14} className="animate-spin" /> {t('settingsPage.saving')}</> : <><Save size={14} /> {t('settingsPage.saveBranding')}</>}
               </button>
             </div>
           </div>
@@ -434,38 +435,38 @@ export default function Settings() {
         <ErrorBoundary>
           <div className="space-y-4">
             <div className="card p-6 space-y-4">
-              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>Tax Settings</h2>
-              <Field label="Default Tax Rate (%)" hint="Applied when creating new invoices">
+              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>{t('settingsPage.taxSettings')}</h2>
+              <Field label={t('settingsPage.defaultTaxRate')} hint={t('settingsPage.defaultTaxRateHint')}>
                 <input className="input h-9 text-sm font-mono w-32" type="number" min="0" max="100" step="0.1"
                   value={defaultTaxRate} onChange={e => setDefaultTaxRate(parseFloat(e.target.value) || 0)} />
               </Field>
               <div className="flex justify-end">
                 <button onClick={saveProfile} disabled={profileSaving} className="btn-primary text-sm disabled:opacity-50">
-                  <Save size={13} /> Save
+                  <Save size={13} /> {t('settingsPage.save')}
                 </button>
               </div>
             </div>
 
             <div className="card p-6 space-y-4">
-              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>Admin Actions</h2>
+              <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>{t('settingsPage.adminActions')}</h2>
               <div className="flex gap-3 flex-wrap">
                 <div>
                   <button onClick={() => runAdmin('overdue')} disabled={!!adminLoading} className="btn-secondary text-sm disabled:opacity-50">
-                    {adminLoading === 'overdue' ? <><Loader2 size={13} className="animate-spin" /> Running…</> : 'Run Overdue Check'}
+                    {adminLoading === 'overdue' ? <><Loader2 size={13} className="animate-spin" /> {t('settingsPage.running')}</> : t('settingsPage.runOverdueCheck')}
                   </button>
                   {overdueResult && (
                     <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                      {overdueResult.marked_overdue ?? 0} invoices marked overdue
+                      {t('settingsPage.markedOverdue', { count: overdueResult.marked_overdue ?? 0 })}
                     </p>
                   )}
                 </div>
                 <div>
                   <button onClick={() => runAdmin('compliance')} disabled={!!adminLoading} className="btn-secondary text-sm disabled:opacity-50">
-                    {adminLoading === 'compliance' ? <><Loader2 size={13} className="animate-spin" /> Running…</> : 'Run Compliance Check'}
+                    {adminLoading === 'compliance' ? <><Loader2 size={13} className="animate-spin" /> {t('settingsPage.running')}</> : t('settingsPage.runComplianceCheck')}
                   </button>
                   {complianceResult && (
                     <p className="text-xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                      {complianceResult.invoices_checked ?? 0} checked · {complianceResult.flags_created ?? 0} new flags
+                      {t('settingsPage.invoicesChecked', { checked: complianceResult.invoices_checked ?? 0, flags: complianceResult.flags_created ?? 0 })}
                     </p>
                   )}
                 </div>
@@ -480,26 +481,26 @@ export default function Settings() {
         <div className="space-y-4">
           <div className="card overflow-hidden">
             <div className="px-5 py-3.5 border-b" style={{ borderColor: 'var(--border)' }}>
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Upload Regulation Document</h2>
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('settingsPage.uploadRegulationDoc')}</h2>
             </div>
             <div className="p-5 space-y-3">
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Document Type">
+                <Field label={t('settingsPage.documentType')}>
                   <div className="relative">
-                    <select className="input h-9 text-sm appearance-none pr-8" value={docType}
+                    <select className="input h-9 text-sm appearance-none pe-8" value={docType}
                       onChange={e => setDocType(e.target.value)} disabled={docUploading}>
                       {DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                     </select>
-                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+                    <ChevronDown size={13} className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </Field>
-                <Field label="Country">
+                <Field label={t('settingsPage.country')}>
                   <div className="relative">
-                    <select className="input h-9 text-sm appearance-none pr-8" value={docCountry}
+                    <select className="input h-9 text-sm appearance-none pe-8" value={docCountry}
                       onChange={e => setDocCountry(e.target.value)} disabled={docUploading}>
                       {COUNTRIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
-                    <ChevronDown size={13} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
+                    <ChevronDown size={13} className="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </Field>
               </div>
@@ -507,13 +508,13 @@ export default function Settings() {
                 <button onClick={() => document.getElementById('settings-doc-input').click()}
                   disabled={docUploading} className="btn-secondary text-sm">
                   <Upload size={13} />
-                  {docFile ? docFile.name.slice(0, 30) : 'Choose PDF'}
+                  {docFile ? docFile.name.slice(0, 30) : t('settingsPage.choosePdf')}
                 </button>
                 <input id="settings-doc-input" type="file" accept=".pdf" className="hidden"
                   onChange={e => setDocFile(e.target.files[0] || null)} />
                 {docFile && (
                   <button onClick={uploadDoc} disabled={docUploading} className="btn-primary text-sm disabled:opacity-50">
-                    {docUploading ? <><Loader2 size={13} className="animate-spin" /> Uploading…</> : 'Upload & Embed'}
+                    {docUploading ? <><Loader2 size={13} className="animate-spin" /> {t('settingsPage.uploading')}</> : t('settingsPage.uploadAndEmbed')}
                   </button>
                 )}
               </div>
@@ -522,7 +523,7 @@ export default function Settings() {
 
           <div className="card overflow-hidden">
             <div className="px-5 py-3.5 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
-              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Uploaded Documents</h2>
+              <h2 className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{t('settingsPage.uploadedDocuments')}</h2>
               <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>
                 {docs.length}
               </span>
@@ -530,13 +531,13 @@ export default function Settings() {
             {docsLoading ? (
               <div className="flex justify-center py-8"><Loader2 size={18} className="animate-spin" style={{ color: 'var(--text-muted)' }} /></div>
             ) : docs.length === 0 ? (
-              <div className="py-10 text-center text-sm" style={{ color: 'var(--text-muted)' }}>No documents uploaded</div>
+              <div className="py-10 text-center text-sm" style={{ color: 'var(--text-muted)' }}>{t('settingsPage.noDocumentsUploaded')}</div>
             ) : (
               <table className="w-full">
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['Name', 'Type', 'Country', 'Chunks', 'Date', ''].map(h => (
-                      <th key={h} className="text-left px-5 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{h}</th>
+                    {[t('settingsPage.docName'), t('settingsPage.docType'), t('settingsPage.docCountry'), t('settingsPage.docChunks'), t('settingsPage.docDate'), ''].map(h => (
+                      <th key={h} className="text-start px-5 py-3 text-xs font-medium uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
