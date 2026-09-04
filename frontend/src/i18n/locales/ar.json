@@ -181,5 +181,15 @@
     "hideSourcesLong": "إخفاء المصادر",
     "matchPercent": "{{pct}}٪ تطابق",
     "invoiceFallback": "فاتورة {{id}}"
+  },
+  "payables": {
+    "totalPayables": "إجمالي المدفوعات",
+    "totalUnpaid": "إجمالي غير المدفوع",
+    "overdue": "المتأخرة",
+    "searchPlaceholder": "ابحث برقم الفاتورة أو المورد…",
+    "noStatusPayables": "لا توجد مدفوعات {{status}}",
+    "noPayables": "لا توجد مدفوعات",
+    "uploadHint": "ارفع فواتير الموردين للبدء.",
+    "daysOverdue": "({{days}} يوم)"
   }
 }

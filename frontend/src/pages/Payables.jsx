@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronLeft, ChevronRight, FileDown, AlertCircle, DollarSign, Files } from 'lucide-react'
 import { invoicesApi, analyticsApi } from '../lib/api'
 import { formatCurrency, formatDate, daysOverdue, truncate } from '../lib/utils'
 import { StatusBadge, MetricCard, PageLoader, ErrorState, EmptyState } from '../components/ui'
 
 const STATUSES = ['all', 'unpaid', 'partially_paid', 'paid', 'overdue']
-const STATUS_LABELS = { all: 'All', unpaid: 'Unpaid', partially_paid: 'Partial', paid: 'Paid', overdue: 'Overdue' }
 const PAGE_SIZE = 20
 
 function useDebounce(value, delay = 400) {
@@ -20,6 +20,15 @@ function useDebounce(value, delay = 400) {
 
 export default function Payables() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  const STATUS_LABELS = {
+    all: t('common.status.all'),
+    unpaid: t('common.status.unpaid'),
+    partially_paid: t('common.status.partially_paid'),
+    paid: t('common.status.paid'),
+    overdue: t('common.status.overdue'),
+  }
 
   // Table state
   const [invoices, setInvoices] = useState([])
@@ -64,15 +73,15 @@ export default function Payables() {
     <div className="p-6 space-y-4 animate-fade-up">
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        <MetricCard label="Total Payables" value={metrics ? String(metrics.total_count)        : '—'} icon={Files}       accentColor="#3B82F6" />
-        <MetricCard label="Total Unpaid"   value={metrics ? formatCurrency(metrics.unpaid_amt) : '—'} icon={DollarSign}  accentColor="#D4A847" />
-        <MetricCard label="Overdue"        value={metrics ? String(metrics.overdue_count)      : '—'} icon={AlertCircle} accentColor="#EF4444" />
+        <MetricCard label={t('payables.totalPayables')} value={metrics ? String(metrics.total_count)        : '—'} icon={Files}       accentColor="#3B82F6" />
+        <MetricCard label={t('payables.totalUnpaid')}   value={metrics ? formatCurrency(metrics.unpaid_amt) : '—'} icon={DollarSign}  accentColor="#D4A847" />
+        <MetricCard label={t('payables.overdue')}        value={metrics ? String(metrics.overdue_count)      : '—'} icon={AlertCircle} accentColor="#EF4444" />
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
-          <input className="input pl-9 h-9 text-sm" placeholder="Search invoice #, vendor…"
+          <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }} />
+          <input className="input ps-9 h-9 text-sm" placeholder={t('payables.searchPlaceholder')}
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
         <div className="flex gap-1 p-1 rounded-xl border"
@@ -94,16 +103,16 @@ export default function Payables() {
           : error ? <ErrorState message={error} onRetry={load} />
           : invoices.length === 0 ? (
             <EmptyState icon={FileDown}
-              title={status !== 'all' ? `No ${STATUS_LABELS[status].toLowerCase()} payables` : 'No payables found'}
-              description="Upload vendor invoices to get started." />
+              title={status !== 'all' ? t('payables.noStatusPayables', { status: STATUS_LABELS[status] }) : t('payables.noPayables')}
+              description={t('payables.uploadHint')} />
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      {['Invoice #', 'Vendor', 'Total', 'Paid', 'Remaining', 'Status', 'Due Date'].map(h => (
-                        <th key={h} className="text-left px-5 py-3 text-xs font-medium uppercase tracking-wide"
+                      {[t('common.table.invoiceNumber'), t('common.table.vendor'), t('common.table.total'), t('common.table.paid'), t('common.table.remaining'), t('common.table.status'), t('common.table.dueDate')].map(h => (
+                        <th key={h} className="text-start px-5 py-3 text-xs font-medium uppercase tracking-wide"
                           style={{ color: 'var(--text-muted)' }}>{h}</th>
                       ))}
                     </tr>
@@ -146,7 +155,7 @@ export default function Payables() {
                           <td className="px-5 py-3.5 text-sm"
                             style={{ color: od > 0 ? '#EF4444' : 'var(--text-muted)' }}>
                             {formatDate(inv.due_date)}
-                            {od > 0 && <span className="ml-1 text-xs">({od}d)</span>}
+                            {od > 0 && <span className="ms-1 text-xs">{t('payables.daysOverdue', { days: od })}</span>}
                           </td>
                         </tr>
                       )
@@ -156,7 +165,7 @@ export default function Payables() {
               </div>
               {totalPages > 1 && (
                 <div className="flex items-center justify-between px-5 py-3 border-t" style={{ borderColor: 'var(--border)' }}>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('common.pageOf', { page, total: totalPages })}</span>
                   <div className="flex items-center gap-1">
                     <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="btn-ghost p-1.5 disabled:opacity-40"><ChevronLeft size={14} /></button>
                     {Array.from({ length: totalPages }, (_, i) => i + 1).filter(p => p >= page - 2 && p <= page + 2).map(p => (

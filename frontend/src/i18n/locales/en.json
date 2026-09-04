@@ -181,5 +181,15 @@
     "hideSourcesLong": "Hide sources",
     "matchPercent": "{{pct}}% match",
     "invoiceFallback": "Invoice {{id}}"
+  },
+  "payables": {
+    "totalPayables": "Total Payables",
+    "totalUnpaid": "Total Unpaid",
+    "overdue": "Overdue",
+    "searchPlaceholder": "Search invoice #, vendor…",
+    "noStatusPayables": "No {{status}} payables",
+    "noPayables": "No payables found",
+    "uploadHint": "Upload vendor invoices to get started.",
+    "daysOverdue": "({{days}}d)"
   }
 }
