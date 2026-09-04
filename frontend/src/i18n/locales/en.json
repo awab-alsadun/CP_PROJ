@@ -399,5 +399,10 @@
     "searchPlaceholder": "Search vendors…",
     "createVendor": "Create Vendor",
     "noVendorsFound": "No vendors found"
+  },
+  "clientsPage": {
+    "searchPlaceholder": "Search clients…",
+    "createClient": "Create Client",
+    "noClientsFound": "No clients found"
   }
 }

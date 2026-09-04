@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Users, UserPlus } from 'lucide-react'
 import { clientsApi } from '../lib/api'
 import { EmptyState, ErrorState, PageLoader } from '../components/ui'
@@ -8,6 +9,7 @@ const PAGE_SIZE = 50
 
 export default function Clients() {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
   const [page,    setPage]    = useState(1)
   const [search,  setSearch]  = useState('')
   const [data,    setData]    = useState([])
@@ -48,14 +50,14 @@ export default function Clients() {
         }}>
           <input
             className="input"
-            placeholder="Search clients…"
+            placeholder={t('clientsPage.searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{ flex: 1, fontSize: 13, padding: '6px 12px' }}
           />
           {total > 0 && (
             <span style={{ fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-              {total} total
+              {t('common.total', { count: total })}
             </span>
           )}
           <button
@@ -64,22 +66,29 @@ export default function Clients() {
             style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, padding: '6px 14px', whiteSpace: 'nowrap' }}
           >
             <UserPlus size={14} />
-            Create Client
+            {t('clientsPage.createClient')}
           </button>
         </div>
 
         {loading ? <PageLoader />
           : error ? <ErrorState message={error} onRetry={load} />
           : filtered.length === 0 ? (
-            <EmptyState icon={Users} title="No clients found" />
+            <EmptyState icon={Users} title={t('clientsPage.noClientsFound')} />
           ) : (
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                    {['Name', 'Email', 'Phone', 'Tax ID', 'Credit Balance', 'Invoice Count'].map(h => (
+                    {[
+                      t('common.table.name'),
+                      t('common.table.email'),
+                      t('common.table.phone'),
+                      t('common.table.taxId'),
+                      t('common.table.creditBalance'),
+                      t('common.table.invoiceCount'),
+                    ].map(h => (
                       <th key={h} style={{
-                        padding: '10px 16px', textAlign: 'left', fontSize: 11,
+                        padding: '10px 16px', textAlign: i18n.language === 'ar' ? 'right' : 'left', fontSize: 11,
                         fontWeight: 600, textTransform: 'uppercase',
                         letterSpacing: '0.06em', color: 'var(--text-muted)',
                       }}>{h}</th>
@@ -108,10 +117,10 @@ export default function Clients() {
 
         {!loading && !error && total > PAGE_SIZE && (
           <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.pageOf', { page, total: totalPages })}</span>
             <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(p => p - 1)} style={{ padding: '5px 12px', fontSize: 12 }}>Previous</button>
-              <button className="btn-secondary" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} style={{ padding: '5px 12px', fontSize: 12 }}>Next</button>
+              <button className="btn-secondary" disabled={page === 1} onClick={() => setPage(p => p - 1)} style={{ padding: '5px 12px', fontSize: 12 }}>{t('common.previous')}</button>
+              <button className="btn-secondary" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)} style={{ padding: '5px 12px', fontSize: 12 }}>{t('common.next')}</button>
             </div>
           </div>
         )}

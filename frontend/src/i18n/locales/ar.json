@@ -399,5 +399,10 @@
     "searchPlaceholder": "ابحث عن الموردين…",
     "createVendor": "إضافة مورد",
     "noVendorsFound": "لا يوجد موردون"
+  },
+  "clientsPage": {
+    "searchPlaceholder": "ابحث عن العملاء…",
+    "createClient": "إضافة عميل",
+    "noClientsFound": "لا يوجد عملاء"
   }
 }
