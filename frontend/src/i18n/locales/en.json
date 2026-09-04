@@ -140,5 +140,22 @@
     "invalidUuid": "Enter a valid company UUID",
     "enterDashboard": "Enter Dashboard",
     "useDemoUuid": "Use demo UUID"
+  },
+  "dashboard": {
+    "payablesOutstanding": "Payables Outstanding",
+    "receivablesOutstanding": "Receivables Outstanding",
+    "overdueBoth": "Overdue (Both)",
+    "netIncome": "Net Income",
+    "totalRevenue": "Total Revenue",
+    "totalExpenses": "Total Expenses",
+    "vendors": "Vendors",
+    "clients": "Clients",
+    "topClient": "Top Client",
+    "statusBreakdown": "Invoice Status Breakdown",
+    "monthlyCashFlow": "Monthly Cash Flow",
+    "received": "Received",
+    "paidLegend": "Paid",
+    "recentActivity": "Recent Activity",
+    "noRecentInvoices": "No recent invoices"
   }
 }

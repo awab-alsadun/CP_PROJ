@@ -140,5 +140,22 @@
     "invalidUuid": "أدخل معرّف شركة صالحًا",
     "enterDashboard": "الدخول إلى لوحة التحكم",
     "useDemoUuid": "استخدام معرّف تجريبي"
+  },
+  "dashboard": {
+    "payablesOutstanding": "المدفوعات المستحقة",
+    "receivablesOutstanding": "المقبوضات المستحقة",
+    "overdueBoth": "المتأخرة (كلاهما)",
+    "netIncome": "صافي الدخل",
+    "totalRevenue": "إجمالي الإيرادات",
+    "totalExpenses": "إجمالي المصروفات",
+    "vendors": "الموردون",
+    "clients": "العملاء",
+    "topClient": "أفضل عميل",
+    "statusBreakdown": "توزيع حالة الفواتير",
+    "monthlyCashFlow": "التدفق النقدي الشهري",
+    "received": "مُستلَم",
+    "paidLegend": "مدفوع",
+    "recentActivity": "النشاط الأخير",
+    "noRecentInvoices": "لا توجد فواتير حديثة"
   }
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FileDown, FileUp, AlertCircle, TrendingUp, TrendingDown, Users, Building2 } from 'lucide-react';
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { analyticsApi } from '../lib/api';
@@ -13,6 +14,7 @@ const PIE_COLORS = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [dash,    setDash]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
@@ -54,19 +56,19 @@ export default function Dashboard() {
       {/* Row 1 — AP/AR outstanding + overdue */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         <MetricCard
-          label="Payables Outstanding"
+          label={t('dashboard.payablesOutstanding')}
           value={formatCurrency(dash?.total_payables_outstanding)}
           icon={FileDown}
           accentColor="#3B82F6"
         />
         <MetricCard
-          label="Receivables Outstanding"
+          label={t('dashboard.receivablesOutstanding')}
           value={formatCurrency(dash?.total_receivables_outstanding)}
           icon={FileUp}
           accentColor="#22C55E"
         />
         <MetricCard
-          label="Overdue (Both)"
+          label={t('dashboard.overdueBoth')}
           value={dash?.overdue_count ?? '—'}
           icon={AlertCircle}
           accentColor="#EF4444"
@@ -77,19 +79,19 @@ export default function Dashboard() {
       {/* Row 2 — Financial KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         <MetricCard
-          label="Net Income"
+          label={t('dashboard.netIncome')}
           value={formatCurrency(netIncome)}
           icon={netIncome >= 0 ? TrendingUp : TrendingDown}
           accentColor={netIncome >= 0 ? '#22C55E' : '#EF4444'}
         />
         <MetricCard
-          label="Total Revenue"
+          label={t('dashboard.totalRevenue')}
           value={formatCurrency(totalIncome)}
           icon={FileUp}
           accentColor="#22C55E"
         />
         <MetricCard
-          label="Total Expenses"
+          label={t('dashboard.totalExpenses')}
           value={formatCurrency(totalSpending)}
           icon={FileDown}
           accentColor="#6B7280"
@@ -99,14 +101,14 @@ export default function Dashboard() {
       {/* Row 3 — Vendors / Clients / Top Client */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         <MetricCard
-          label="Vendors"
+          label={t('dashboard.vendors')}
           value={vendorCount}
           icon={Building2}
           accentColor="#8B5CF6"
           onClick={() => navigate('/vendors')}
         />
         <MetricCard
-          label="Clients"
+          label={t('dashboard.clients')}
           value={clientCount}
           icon={Users}
           accentColor="#F59E0B"
@@ -122,7 +124,7 @@ export default function Dashboard() {
           }}
         >
           <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
-            Top Client
+            {t('dashboard.topClient')}
           </div>
           {topClient ? (
             <>
@@ -142,7 +144,7 @@ export default function Dashboard() {
       {/* Row 4 — Charts */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <div className="card" style={{ padding: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>Invoice Status Breakdown</div>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>{t('dashboard.statusBreakdown')}</div>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -165,14 +167,14 @@ export default function Dashboard() {
         </div>
 
         <div className="card" style={{ padding: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>Monthly Cash Flow</div>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 16 }}>{t('dashboard.monthlyCashFlow')}</div>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={monthlyRevenue} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
               <Tooltip formatter={v => formatCurrency(v)} />
-              <Bar dataKey="receivable_amount" fill="#22C55E" radius={[3,3,0,0]} name="Received" />
-              <Bar dataKey="payable_amount" fill="#3B82F6" radius={[3,3,0,0]} name="Paid" />
+              <Bar dataKey="receivable_amount" fill="#22C55E" radius={[3,3,0,0]} name={t('dashboard.received')} />
+              <Bar dataKey="payable_amount" fill="#3B82F6" radius={[3,3,0,0]} name={t('dashboard.paidLegend')} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
             </BarChart>
           </ResponsiveContainer>
@@ -182,17 +184,17 @@ export default function Dashboard() {
       {/* Row 5 — Recent Activity */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', fontSize: 13, fontWeight: 600 }}>
-          Recent Activity
+          {t('dashboard.recentActivity')}
         </div>
         {recent.length === 0 ? (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            No recent invoices
+            {t('dashboard.noRecentInvoices')}
           </div>
         ) : (
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Type', 'Invoice #', 'Entity', 'Amount', 'Status', 'Date'].map(h => (
+                {[t('common.table.type'), t('common.table.invoiceNumber'), t('common.table.entity'), t('common.table.amount'), t('common.table.status'), t('common.table.date')].map(h => (
                   <th key={h} style={{
                     padding: '9px 16px', textAlign: 'left', fontSize: 11,
                     fontWeight: 600, textTransform: 'uppercase',
