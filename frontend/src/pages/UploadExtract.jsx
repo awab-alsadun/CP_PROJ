@@ -123,7 +123,7 @@ export default function UploadExtract() {
         await uploadApi.upload(pdf, 'payable')
         successCount++
       } catch (err) {
-        failures.push({ filename: pdf.name, error: err.message || 'Unknown error' })
+        failures.push({ filename: pdf.name, error: err.message || t('upload.unknownError') })
       }
 
       doneCount++

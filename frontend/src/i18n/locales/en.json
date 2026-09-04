@@ -451,6 +451,7 @@
     "succeeded": "succeeded",
     "failed": "failed",
     "failedCount": "Failed ({{count}})",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "unknownError": "Unknown error"
   }
 }

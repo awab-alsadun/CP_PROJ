@@ -451,6 +451,7 @@
     "succeeded": "نجحت",
     "failed": "فشلت",
     "failedCount": "فشل ({{count}})",
-    "dismiss": "إغلاق"
+    "dismiss": "إغلاق",
+    "unknownError": "خطأ غير معروف"
   }
 }
