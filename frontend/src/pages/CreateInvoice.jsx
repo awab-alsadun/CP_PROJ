@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Plus, Trash2, Save, Send, FileDown } from 'lucide-react'
 import { invoicesApi, clientsApi, vendorsApi, settingsApi, getCompanyId } from '../lib/api'
 import { cn, formatCurrency } from '../lib/utils'
@@ -84,6 +85,7 @@ const EMPTY_LINE = {
 
 export default function CreateInvoice() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   // -------- invoice type toggle --------
   const [invoiceType, setInvoiceType] = useState('receivable')
@@ -259,15 +261,15 @@ export default function CreateInvoice() {
   // -------- validation --------
   const validate = () => {
     const errs = {}
-    if (invoiceType === 'receivable' && !form.clientId) errs.entity_id = 'Select a client'
-    if (invoiceType === 'payable'    && !form.vendorId) errs.entity_id = 'Select a vendor'
-    if (!form.currency) errs.currency = 'Required'
+    if (invoiceType === 'receivable' && !form.clientId) errs.entity_id = t('createInvoice.selectClientError')
+    if (invoiceType === 'payable'    && !form.vendorId) errs.entity_id = t('createInvoice.selectVendorError')
+    if (!form.currency) errs.currency = t('createInvoice.requiredError')
     form.lineItems.forEach((li, i) => {
-      if (!li.description.trim()) errs[`line_items.${i}.description`] = 'Required'
+      if (!li.description.trim()) errs[`line_items.${i}.description`] = t('createInvoice.requiredError')
       const q = parseFloat(li.quantity)
-      if (!Number.isFinite(q) || q <= 0) errs[`line_items.${i}.quantity`] = '> 0'
+      if (!Number.isFinite(q) || q <= 0) errs[`line_items.${i}.quantity`] = t('createInvoice.quantityError')
       const p = parseFloat(li.unitPrice)
-      if (!Number.isFinite(p) || p < 0) errs[`line_items.${i}.unit_price`] = '>= 0'
+      if (!Number.isFinite(p) || p < 0) errs[`line_items.${i}.unit_price`] = t('createInvoice.priceError')
     })
     return errs
   }
@@ -278,7 +280,7 @@ export default function CreateInvoice() {
     const errs = validate()
     if (Object.keys(errs).length) {
       setFieldErrors(errs)
-      toast('Fix the highlighted fields', 'error')
+      toast(t('createInvoice.fixHighlighted'), 'error')
       return
     }
     setSubmitting(status)
@@ -290,8 +292,8 @@ export default function CreateInvoice() {
       )
       const res = await invoicesApi.create(payload)
       const successMsg = invoiceType === 'receivable'
-        ? (status === 'sent' ? 'Invoice created and marked sent' : 'Invoice saved as draft')
-        : 'Payable invoice created'
+        ? (status === 'sent' ? t('createInvoice.createdAndSent') : t('createInvoice.savedAsDraft'))
+        : t('createInvoice.payableCreated')
       toast(successMsg, 'success')
       navigate(invoiceType === 'receivable' ? `/receivables/${res.id}` : `/payables/${res.id}`)
     } catch (err) {
@@ -311,11 +313,11 @@ export default function CreateInvoice() {
         if (path) next[path] = d.msg || 'Invalid'
       })
       setFieldErrors(next)
-      toast('Validation failed — see fields below', 'error')
+      toast(t('createInvoice.validationFailed'), 'error')
       return
     }
-    if (status === 400) { toast(err?.message || 'Request rejected', 'error'); return }
-    toast(err?.message || 'Failed to create invoice', 'error')
+    if (status === 400) { toast(err?.message || t('createInvoice.requestRejected'), 'error'); return }
+    toast(err?.message || t('createInvoice.createFailed'), 'error')
   }
 
   const errFor   = (key) => fieldErrors[key]
@@ -332,9 +334,9 @@ export default function CreateInvoice() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-display text-3xl text-[var(--text-primary)]">Create Invoice</h1>
+            <h1 className="font-display text-3xl text-[var(--text-primary)]">{t('createInvoice.title')}</h1>
             <p className="text-sm text-[var(--text-secondary)] mt-1">
-              {isReceivable ? 'Receivable · billed to a client' : 'Payable · from a vendor'}
+              {isReceivable ? t('createInvoice.receivableSubtitle') : t('createInvoice.payableSubtitle')}
             </p>
           </div>
         </div>
@@ -342,12 +344,12 @@ export default function CreateInvoice() {
         <div className="flex items-center gap-2">
           {/* type toggle */}
           <div
-            className="flex gap-1 p-1 rounded-xl border mr-2"
+            className="flex gap-1 p-1 rounded-xl border me-2"
             style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}
           >
             {[
-              { value: 'receivable', label: 'Receivable' },
-              { value: 'payable',    label: 'Payable' },
+              { value: 'receivable', label: t('createInvoice.receivable') },
+              { value: 'payable',    label: t('createInvoice.payable') },
             ].map(({ value, label }) => (
               <button
                 key={value}
@@ -370,7 +372,7 @@ export default function CreateInvoice() {
                 className="btn-secondary flex items-center gap-2"
               >
                 {submitting === 'draft' ? <Spinner size={16} /> : <Save className="w-4 h-4" />}
-                Save Draft
+                {t('createInvoice.saveDraft')}
               </button>
               <button
                 onClick={() => submit('sent')}
@@ -378,7 +380,7 @@ export default function CreateInvoice() {
                 className="btn-primary flex items-center gap-2"
               >
                 {submitting === 'sent' ? <Spinner size={16} /> : <Send className="w-4 h-4" />}
-                Save & Send
+                {t('createInvoice.saveAndSend')}
               </button>
             </>
           ) : (
@@ -388,7 +390,7 @@ export default function CreateInvoice() {
               className="btn-primary flex items-center gap-2"
             >
               {submitting === 'unpaid' ? <Spinner size={16} /> : <FileDown className="w-4 h-4" />}
-              Save Payable
+              {t('createInvoice.savePayable')}
             </button>
           )}
         </div>
@@ -399,11 +401,11 @@ export default function CreateInvoice() {
 
           {/* ── Invoice details ── */}
           <section className="card p-6">
-            <SectionHeader title="Invoice details" />
+            <SectionHeader title={t('createInvoice.invoiceDetailsSection')} />
             <div className="grid grid-cols-2 gap-4 mt-4">
               <Field
-                label="Invoice number"
-                hint={isReceivable ? 'Auto-generated by the system' : 'Optional — leave blank to auto-generate'}
+                label={t('createInvoice.invoiceNumber')}
+                hint={isReceivable ? t('createInvoice.autoGeneratedHint') : t('createInvoice.optionalHint')}
               >
                 {isReceivable ? (
                   <div
@@ -411,18 +413,18 @@ export default function CreateInvoice() {
                     style={{ color: 'var(--text-muted)' }}
                     aria-readonly="true"
                   >
-                    Auto-generated on save
+                    {t('createInvoice.autoGeneratedOnSave')}
                   </div>
                 ) : (
                   <input
                     className="input"
                     value={form.invoiceNumber}
                     onChange={(e) => set('invoiceNumber', e.target.value)}
-                    placeholder="e.g. INV-2026-001 (optional)"
+                    placeholder={t('createInvoice.invoiceNumberPlaceholder')}
                   />
                 )}
               </Field>
-              <Field label="Currency" error={errFor('currency')}>
+              <Field label={t('createInvoice.currency')} error={errFor('currency')}>
                 <select
                   className={inputCls('currency')}
                   value={form.currency}
@@ -433,7 +435,7 @@ export default function CreateInvoice() {
                   ))}
                 </select>
               </Field>
-              <Field label="Issue date" hint={isReceivable ? 'Today' : undefined} error={errFor('issue_date')}>
+              <Field label={t('createInvoice.issueDate')} hint={isReceivable ? t('createInvoice.today') : undefined} error={errFor('issue_date')}>
                 {isReceivable ? (
                   <div
                     className="input h-9 text-sm flex items-center"
@@ -451,7 +453,7 @@ export default function CreateInvoice() {
                   />
                 )}
               </Field>
-              <Field label="Due date" error={errFor('due_date')}>
+              <Field label={t('createInvoice.dueDate')} error={errFor('due_date')}>
                 <input
                   type="date"
                   className={inputCls('due_date')}
@@ -459,26 +461,26 @@ export default function CreateInvoice() {
                   onChange={(e) => set('dueDate', e.target.value)}
                 />
               </Field>
-              <Field label="Payment method" error={errFor('payment_method')}>
+              <Field label={t('createInvoice.paymentMethod')} error={errFor('payment_method')}>
                 <select
                   className={inputCls('payment_method')}
                   value={form.paymentMethod}
                   onChange={(e) => set('paymentMethod', e.target.value)}
                 >
                   <option value="">—</option>
-                  <option value="bank_transfer">Bank transfer</option>
-                  <option value="credit_card">Credit card</option>
-                  <option value="cash">Cash</option>
-                  <option value="cheque">Cheque</option>
-                  <option value="wire">Wire</option>
+                  <option value="bank_transfer">{t('common.paymentMethods.bank_transfer')}</option>
+                  <option value="credit_card">{t('common.paymentMethods.credit_card')}</option>
+                  <option value="cash">{t('common.paymentMethods.cash')}</option>
+                  <option value="cheque">{t('common.paymentMethods.cheque')}</option>
+                  <option value="wire">{t('common.paymentMethods.wire')}</option>
                 </select>
               </Field>
-              <Field label="Description" error={errFor('description')}>
+              <Field label={t('createInvoice.description')} error={errFor('description')}>
                 <input
                   className={inputCls('description')}
                   value={form.description}
                   onChange={(e) => set('description', e.target.value)}
-                  placeholder="Optional note"
+                  placeholder={t('createInvoice.descriptionPlaceholder')}
                 />
               </Field>
             </div>
@@ -486,27 +488,27 @@ export default function CreateInvoice() {
 
           {/* ── Bill to / Bill from ── */}
           <section className="card p-6">
-            <SectionHeader title={isReceivable ? 'Bill to' : 'Bill from'} />
+            <SectionHeader title={isReceivable ? t('createInvoice.billTo') : t('createInvoice.billFrom')} />
             <div className="grid grid-cols-2 gap-4 mt-4">
 
               {isReceivable ? (
                 /* CLIENT selector */
-                <Field label="Client" error={errFor('entity_id')}>
+                <Field label={t('createInvoice.client')} error={errFor('entity_id')}>
                   {clientsLoading ? (
                     <div className="input flex items-center gap-2">
-                      <Spinner size={14} /><span className="text-[var(--text-muted)]">Loading…</span>
+                      <Spinner size={14} /><span className="text-[var(--text-muted)]">{t('createInvoice.loading')}</span>
                     </div>
                   ) : clientsError ? (
                     <div className="text-sm text-red-500">{clientsError}</div>
                   ) : clients.length === 0 ? (
-                    <EmptyState title="No clients" description="Create a client first." />
+                    <EmptyState title={t('createInvoice.noClients')} description={t('createInvoice.createClientFirst')} />
                   ) : (
                     <select
                       className={inputCls('entity_id')}
                       value={form.clientId}
                       onChange={(e) => set('clientId', e.target.value)}
                     >
-                      <option value="">Select a client…</option>
+                      <option value="">{t('createInvoice.selectClient')}</option>
                       {clients.map((c) => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
@@ -515,22 +517,22 @@ export default function CreateInvoice() {
                 </Field>
               ) : (
                 /* VENDOR selector */
-                <Field label="Vendor" error={errFor('entity_id')}>
+                <Field label={t('createInvoice.vendor')} error={errFor('entity_id')}>
                   {vendorsLoading ? (
                     <div className="input flex items-center gap-2">
-                      <Spinner size={14} /><span className="text-[var(--text-muted)]">Loading…</span>
+                      <Spinner size={14} /><span className="text-[var(--text-muted)]">{t('createInvoice.loading')}</span>
                     </div>
                   ) : vendorsError ? (
                     <div className="text-sm text-red-500">{vendorsError}</div>
                   ) : vendors.length === 0 ? (
-                    <EmptyState title="No vendors" description="Create a vendor first." />
+                    <EmptyState title={t('createInvoice.noVendors')} description={t('createInvoice.createVendorFirst')} />
                   ) : (
                     <select
                       className={inputCls('entity_id')}
                       value={form.vendorId}
                       onChange={(e) => set('vendorId', e.target.value)}
                     >
-                      <option value="">Select a vendor…</option>
+                      <option value="">{t('createInvoice.selectVendor')}</option>
                       {vendors.map((v) => (
                         <option key={v.id} value={v.id}>{v.name}</option>
                       ))}
@@ -540,17 +542,17 @@ export default function CreateInvoice() {
               )}
 
               {/* ADDRESS display */}
-              <Field label={isReceivable ? 'Client address' : 'Vendor address'}>
+              <Field label={isReceivable ? t('createInvoice.clientAddress') : t('createInvoice.vendorAddress')}>
                 {addressLoading ? (
                   <div className="input flex items-center gap-2">
-                    <Spinner size={14} /><span className="text-[var(--text-muted)]">Loading…</span>
+                    <Spinner size={14} /><span className="text-[var(--text-muted)]">{t('createInvoice.loading')}</span>
                   </div>
                 ) : !(isReceivable ? form.clientId : form.vendorId) ? (
                   <div className="input text-[var(--text-muted)]">
-                    Select {isReceivable ? 'client' : 'vendor'} first
+                    {isReceivable ? t('createInvoice.selectClientFirst') : t('createInvoice.selectVendorFirst')}
                   </div>
                 ) : !entityAddress ? (
-                  <div className="input text-[var(--text-muted)]">No address on file</div>
+                  <div className="input text-[var(--text-muted)]">{t('createInvoice.noAddressOnFile')}</div>
                 ) : (
                   <div className="input cursor-default" aria-readonly="true">
                     {formatAddress(entityAddress)}
@@ -563,19 +565,19 @@ export default function CreateInvoice() {
           {/* ── Line items ── */}
           <section className="card p-6">
             <div className="flex items-center justify-between mb-4">
-              <SectionHeader title="Line items" />
+              <SectionHeader title={t('createInvoice.lineItemsSection')} />
               <button onClick={addLine} className="btn-ghost flex items-center gap-2 text-sm">
-                <Plus className="w-4 h-4" />Add line
+                <Plus className="w-4 h-4" />{t('createInvoice.addLine')}
               </button>
             </div>
 
             <div className="space-y-3">
               <div className="grid grid-cols-12 gap-2 text-xs font-mono uppercase tracking-wider text-[var(--text-muted)] px-2">
-                <div className="col-span-5">Description</div>
-                <div className="col-span-2">Qty</div>
-                <div className="col-span-2">Unit price</div>
-                <div className="col-span-2">Discount</div>
-                <div className="col-span-1 text-right">Subtotal</div>
+                <div className="col-span-5">{t('common.table.description')}</div>
+                <div className="col-span-2">{t('common.table.qty')}</div>
+                <div className="col-span-2">{t('common.table.unitPrice')}</div>
+                <div className="col-span-2">{t('common.table.discount')}</div>
+                <div className="col-span-1 text-end">{t('common.table.subtotal')}</div>
               </div>
 
               {form.lineItems.map((li, i) => (
@@ -585,7 +587,7 @@ export default function CreateInvoice() {
                       className={inputCls(`line_items.${i}.description`)}
                       value={li.description}
                       onChange={(e) => updateLine(i, 'description', e.target.value)}
-                      placeholder="Item or service"
+                      placeholder={t('createInvoice.itemPlaceholder')}
                     />
                     {errFor(`line_items.${i}.description`) && (
                       <p className="text-xs text-red-500 mt-1">{errFor(`line_items.${i}.description`)}</p>
@@ -636,9 +638,9 @@ export default function CreateInvoice() {
         {/* ── Totals sidebar ── */}
         <aside className="lg:col-span-1">
           <section className="card p-6 sticky top-6">
-            <SectionHeader title="Totals" />
+            <SectionHeader title={t('createInvoice.totalsSection')} />
             <div className="space-y-4 mt-4">
-              <Field label="Tax %" error={errFor('tax_percent')}>
+              <Field label={t('createInvoice.taxPercent')} error={errFor('tax_percent')}>
                 <input
                   type="number" min="0" step="0.01"
                   className={inputCls('tax_percent')}
@@ -646,7 +648,7 @@ export default function CreateInvoice() {
                   onChange={(e) => set('taxPercent', e.target.value)}
                 />
               </Field>
-              <Field label="Invoice discount" error={errFor('discount')}>
+              <Field label={t('createInvoice.invoiceDiscount')} error={errFor('discount')}>
                 <input
                   type="number" min="0" step="0.01"
                   className={inputCls('discount')}
@@ -656,11 +658,11 @@ export default function CreateInvoice() {
               </Field>
 
               <div className="border-t border-[var(--border-subtle)] pt-4 space-y-2 font-mono text-sm">
-                <Row label="Subtotal" value={formatCurrency(totals.subtotal, form.currency)} />
-                <Row label="Tax"      value={formatCurrency(totals.totalTax, form.currency)} />
-                <Row label="Discount" value={`- ${formatCurrency(form.discount || '0', form.currency)}`} />
+                <Row label={t('createInvoice.subtotal')} value={formatCurrency(totals.subtotal, form.currency)} />
+                <Row label={t('createInvoice.tax')}      value={formatCurrency(totals.totalTax, form.currency)} />
+                <Row label={t('createInvoice.discount')} value={`- ${formatCurrency(form.discount || '0', form.currency)}`} />
                 <div className="border-t border-[var(--border)] pt-3 flex items-center justify-between">
-                  <span className="font-display text-base text-[var(--text-primary)]">Grand total</span>
+                  <span className="font-display text-base text-[var(--text-primary)]">{t('createInvoice.grandTotal')}</span>
                   <span className="font-display text-xl text-[var(--accent)]">
                     {formatCurrency(totals.grandTotal, form.currency)}
                   </span>
@@ -676,7 +678,7 @@ export default function CreateInvoice() {
                   border:     `1px solid ${isReceivable ? 'rgba(34,197,94,0.2)' : 'rgba(59,130,246,0.2)'}`,
                 }}
               >
-                {isReceivable ? '↑ RECEIVABLE — money in' : '↓ PAYABLE — money out'}
+                {isReceivable ? t('createInvoice.receivableIndicator') : t('createInvoice.payableIndicator')}
               </div>
             </div>
           </section>
