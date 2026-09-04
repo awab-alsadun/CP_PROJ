@@ -330,7 +330,7 @@ export default function CreateInvoice() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="btn-ghost p-2" aria-label="Back">
+          <button onClick={() => navigate(-1)} className="btn-ghost p-2" aria-label={t('common.back')}>
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
@@ -623,7 +623,7 @@ export default function CreateInvoice() {
                       <button
                         onClick={() => removeLine(i)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-[var(--text-muted)] hover:text-red-500"
-                        aria-label="Remove line"
+                        aria-label={t('createInvoice.removeLine')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

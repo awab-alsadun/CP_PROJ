@@ -321,6 +321,7 @@
     "noAddressOnFile": "لا يوجد عنوان مسجل",
     "lineItemsSection": "بنود الفاتورة",
     "addLine": "إضافة بند",
+    "removeLine": "إزالة السطر",
     "itemPlaceholder": "سلعة أو خدمة",
     "totalsSection": "الإجمالي",
     "taxPercent": "نسبة الضريبة %",

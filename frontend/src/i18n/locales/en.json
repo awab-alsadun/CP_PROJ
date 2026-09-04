@@ -321,6 +321,7 @@
     "noAddressOnFile": "No address on file",
     "lineItemsSection": "Line items",
     "addLine": "Add line",
+    "removeLine": "Remove line",
     "itemPlaceholder": "Item or service",
     "totalsSection": "Totals",
     "taxPercent": "Tax %",
