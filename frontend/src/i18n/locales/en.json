@@ -404,5 +404,24 @@
     "searchPlaceholder": "Search clients…",
     "createClient": "Create Client",
     "noClientsFound": "No clients found"
+  },
+  "analyticsPage": {
+    "noData": "No data",
+    "spendingByVendor": "Spending by Vendor",
+    "spendingByVendorSub": "Top vendors by invoice amount (AP)",
+    "revenueByClient": "Revenue by Client",
+    "revenueByClientSub": "Top clients by billed amount (AR)",
+    "amountTooltip": "Amount",
+    "monthlyVolume": "Monthly Invoice Volume",
+    "monthlyVolumeSub": "Payables vs Receivables over time",
+    "payablesLegend": "Payables",
+    "receivablesLegend": "Receivables",
+    "payablesAP": "Payables (AP)",
+    "receivablesAR": "Receivables (AR)",
+    "paymentTiming": "Payment Timing Distribution",
+    "paymentTimingSub": "Days from issue to payment (AR)",
+    "invoicesTooltip": "Invoices",
+    "overdueAging": "Overdue Aging",
+    "overdueAgingSub": "Outstanding amounts by days past due"
   }
 }

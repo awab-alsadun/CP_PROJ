@@ -404,5 +404,24 @@
     "searchPlaceholder": "ابحث عن العملاء…",
     "createClient": "إضافة عميل",
     "noClientsFound": "لا يوجد عملاء"
+  },
+  "analyticsPage": {
+    "noData": "لا توجد بيانات",
+    "spendingByVendor": "الإنفاق حسب المورد",
+    "spendingByVendorSub": "أكبر الموردين حسب مبلغ الفاتورة (مدفوعات)",
+    "revenueByClient": "الإيرادات حسب العميل",
+    "revenueByClientSub": "أكبر العملاء حسب المبلغ المفوتر (مقبوضات)",
+    "amountTooltip": "المبلغ",
+    "monthlyVolume": "حجم الفواتير الشهري",
+    "monthlyVolumeSub": "المدفوعات مقابل المقبوضات عبر الزمن",
+    "payablesLegend": "المدفوعات",
+    "receivablesLegend": "المقبوضات",
+    "payablesAP": "المدفوعات (دائن)",
+    "receivablesAR": "المقبوضات (مدين)",
+    "paymentTiming": "توزيع توقيت السداد",
+    "paymentTimingSub": "الأيام من الإصدار إلى السداد (مقبوضات)",
+    "invoicesTooltip": "الفواتير",
+    "overdueAging": "تقادم المتأخرات",
+    "overdueAgingSub": "المبالغ المستحقة حسب أيام التأخير"
   }
 }

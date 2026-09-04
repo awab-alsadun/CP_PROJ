@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, Legend
@@ -19,9 +20,9 @@ const ChartCard = ({ title, subtitle, children, height = 220 }) => (
   </div>
 )
 
-const Empty = () => (
+const Empty = ({ text }) => (
   <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
-    No data
+    {text}
   </div>
 )
 
@@ -37,6 +38,7 @@ const axisTickStyle = { fontSize: 11, fill: 'var(--text-muted)' }
 const TIMING_COLORS = ['#22C55E', '#86EFAC', '#FDE68A', '#FCA5A5', '#EF4444']
 
 export default function Analytics() {
+  const { t } = useTranslation()
   const [spending, setSpending] = useState(null)
   const [revenue,  setRevenue]  = useState(null)
   const [trends,   setTrends]   = useState(null)
@@ -88,29 +90,29 @@ export default function Analytics() {
 
       {/* Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Spending by Vendor" subtitle="Top vendors by invoice amount (AP)">
-          {vendorData.length === 0 ? <Empty /> :
+        <ChartCard title={t('analyticsPage.spendingByVendor')} subtitle={t('analyticsPage.spendingByVendorSub')}>
+          {vendorData.length === 0 ? <Empty text={t('analyticsPage.noData')} /> :
             <BarChart data={vendorData} layout="vertical" barSize={18}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
               <XAxis type="number" axisLine={false} tickLine={false} tick={axisTickStyle}
                 tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="vendor_name" axisLine={false} tickLine={false}
                 tick={axisTickStyle} width={90} />
-              <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), 'Amount']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), t('analyticsPage.amountTooltip')]} />
               <Bar dataKey="total_spent" fill="var(--accent)" radius={[0, 4, 4, 0]} />
             </BarChart>
           }
         </ChartCard>
 
-        <ChartCard title="Revenue by Client" subtitle="Top clients by billed amount (AR)">
-          {clientData.length === 0 ? <Empty /> :
+        <ChartCard title={t('analyticsPage.revenueByClient')} subtitle={t('analyticsPage.revenueByClientSub')}>
+          {clientData.length === 0 ? <Empty text={t('analyticsPage.noData')} /> :
             <BarChart data={clientData} layout="vertical" barSize={18}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
               <XAxis type="number" axisLine={false} tickLine={false} tick={axisTickStyle}
                 tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="client_name" axisLine={false} tickLine={false}
                 tick={axisTickStyle} width={90} />
-              <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), 'Amount']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), t('analyticsPage.amountTooltip')]} />
               <Bar dataKey="total_invoiced" fill="#22C55E" radius={[0, 4, 4, 0]} />
             </BarChart>
           }
@@ -118,8 +120,8 @@ export default function Analytics() {
       </div>
 
       {/* Row 2 — Monthly volume: payables vs receivables on one chart */}
-      <ChartCard title="Monthly Invoice Volume" subtitle="Payables vs Receivables over time" height={240}>
-        {mergedTrends.length === 0 ? <Empty /> :
+      <ChartCard title={t('analyticsPage.monthlyVolume')} subtitle={t('analyticsPage.monthlyVolumeSub')} height={240}>
+        {mergedTrends.length === 0 ? <Empty text={t('analyticsPage.noData')} /> :
           <LineChart data={mergedTrends}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={axisTickStyle} />
@@ -128,10 +130,10 @@ export default function Analytics() {
             <Tooltip contentStyle={tooltipStyle}
               formatter={(v, name) => [
                 formatCurrency(v),
-                name === 'payable_amount' ? 'Payables' : 'Receivables',
+                name === 'payable_amount' ? t('analyticsPage.payablesLegend') : t('analyticsPage.receivablesLegend'),
               ]} />
             <Legend
-              formatter={name => name === 'payable_amount' ? 'Payables (AP)' : 'Receivables (AR)'}
+              formatter={name => name === 'payable_amount' ? t('analyticsPage.payablesAP') : t('analyticsPage.receivablesAR')}
               wrapperStyle={{ fontSize: 11 }}
             />
             <Line type="monotone" dataKey="payable_amount" stroke="#3B82F6"
@@ -144,13 +146,13 @@ export default function Analytics() {
 
       {/* Row 3 — Payment timing + Overdue aging */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <ChartCard title="Payment Timing Distribution" subtitle="Days from issue to payment (AR)">
-          {timingData.length === 0 ? <Empty /> :
+        <ChartCard title={t('analyticsPage.paymentTiming')} subtitle={t('analyticsPage.paymentTimingSub')}>
+          {timingData.length === 0 ? <Empty text={t('analyticsPage.noData')} /> :
             <BarChart data={timingData} barSize={32}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="range" axisLine={false} tickLine={false} tick={axisTickStyle} />
               <YAxis axisLine={false} tickLine={false} tick={axisTickStyle} />
-              <Tooltip contentStyle={tooltipStyle} formatter={v => [v, 'Invoices']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={v => [v, t('analyticsPage.invoicesTooltip')]} />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {timingData.map((_, i) => (
                   <Cell key={i} fill={TIMING_COLORS[Math.min(i, TIMING_COLORS.length - 1)]} />
@@ -160,14 +162,14 @@ export default function Analytics() {
           }
         </ChartCard>
 
-        <ChartCard title="Overdue Aging" subtitle="Outstanding amounts by days past due">
-          {overdueData.length === 0 ? <Empty /> :
+        <ChartCard title={t('analyticsPage.overdueAging')} subtitle={t('analyticsPage.overdueAgingSub')}>
+          {overdueData.length === 0 ? <Empty text={t('analyticsPage.noData')} /> :
             <BarChart data={overdueData} barSize={36}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis dataKey="range" axisLine={false} tickLine={false} tick={axisTickStyle} />
               <YAxis axisLine={false} tickLine={false} tick={axisTickStyle}
                 tickFormatter={v => `$${(v / 1000).toFixed(0)}k`} />
-              <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), 'Amount']} />
+              <Tooltip contentStyle={tooltipStyle} formatter={v => [formatCurrency(v), t('analyticsPage.amountTooltip')]} />
               <Bar dataKey="amount" fill="#EF4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           }
