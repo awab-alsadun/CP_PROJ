@@ -545,7 +545,7 @@ export default function Settings() {
                   {docs.map(d => (
                     <tr key={d.document_id || d.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                       <td className="px-5 py-3 text-sm font-medium truncate max-w-[180px]" style={{ color: 'var(--text-primary)' }}>{d.document_name || d.name || '—'}</td>
-                      <td className="px-5 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>{d.document_type}</td>
+                      <td className="px-5 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>{DOC_TYPES.find(x => x.value === d.document_type)?.label ?? d.document_type}</td>
                       <td className="px-5 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>{d.country || '—'}</td>
                       <td className="px-5 py-3 text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{d.chunk_count ?? '—'}</td>
                       <td className="px-5 py-3 text-xs" style={{ color: 'var(--text-muted)' }}>{d.uploaded_at?.slice(0, 10) || '—'}</td>
