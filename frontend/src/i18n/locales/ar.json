@@ -191,5 +191,17 @@
     "noPayables": "لا توجد مدفوعات",
     "uploadHint": "ارفع فواتير الموردين للبدء.",
     "daysOverdue": "({{days}} يوم)"
+  },
+  "receivables": {
+    "totalReceivables": "إجمالي المقبوضات",
+    "outstanding": "المستحق",
+    "overdue": "المتأخرة",
+    "drafts": "المسودات",
+    "sentAwaiting": "مُرسلة بانتظار السداد",
+    "searchPlaceholder": "ابحث برقم الفاتورة أو العميل…",
+    "noStatusReceivables": "لا توجد مقبوضات {{status}}",
+    "noReceivables": "لا توجد مقبوضات",
+    "createHint": "أنشئ فاتورة لعميل للبدء.",
+    "daysOverdue": "({{days}} يوم)"
   }
 }

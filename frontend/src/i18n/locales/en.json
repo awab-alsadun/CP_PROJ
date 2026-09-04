@@ -191,5 +191,17 @@
     "noPayables": "No payables found",
     "uploadHint": "Upload vendor invoices to get started.",
     "daysOverdue": "({{days}}d)"
+  },
+  "receivables": {
+    "totalReceivables": "Total Receivables",
+    "outstanding": "Outstanding",
+    "overdue": "Overdue",
+    "drafts": "Drafts",
+    "sentAwaiting": "Sent Awaiting",
+    "searchPlaceholder": "Search invoice #, client…",
+    "noStatusReceivables": "No {{status}} receivables",
+    "noReceivables": "No receivables found",
+    "createHint": "Create an invoice for a client to get started.",
+    "daysOverdue": "({{days}}d)"
   }
 }
