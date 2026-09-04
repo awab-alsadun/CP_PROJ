@@ -529,5 +529,6 @@
     "documentDeleted": "تم حذف المستند",
     "settingsSaved": "تم حفظ الإعدادات",
     "sectionRenderError": "تعذّر عرض هذا القسم"
-  }
+  },
+  "companyDocumentsStub": "مستندات الشركة — قريبًا."
 }

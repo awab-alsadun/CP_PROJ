@@ -1,6 +1,6 @@
-// Original file unchanged — preserved from project
-// This is a placeholder; the real file lives in your project at src/pages/CompanyDocuments.jsx
-// Copy it over as-is from your repo.
+import { useTranslation } from 'react-i18next'
+
 export default function CompanyDocuments() {
-  return <div className="p-6">CompanyDocuments — copy original file from your repo</div>
+  const { t } = useTranslation()
+  return <div className="p-6">{t('companyDocumentsStub')}</div>
 }

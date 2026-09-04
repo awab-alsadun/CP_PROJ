@@ -529,5 +529,6 @@
     "documentDeleted": "Document deleted",
     "settingsSaved": "Settings saved",
     "sectionRenderError": "This section failed to render"
-  }
+  },
+  "companyDocumentsStub": "Company documents — coming soon."
 }
