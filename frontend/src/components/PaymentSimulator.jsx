@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { vendorsApi, clientsApi, paymentsApi } from '../lib/api';
 import { formatCurrency } from '../lib/utils';
 import { StatusBadge, ConfirmDialog, toast } from './ui';
@@ -7,6 +8,7 @@ const CURRENCIES = ['USD','EUR','GBP','TRY','SAR','AED','EGP','BHD','DKK'];
 const METHODS = ['bank_transfer', 'check', 'credit_card', 'cash', 'other'];
 
 export default function PaymentSimulator() {
+  const { t } = useTranslation();
   const [entityType, setEntityType] = useState('vendor');
   const [entities, setEntities] = useState([]);
   const [entityId, setEntityId] = useState('');
@@ -43,7 +45,7 @@ export default function PaymentSimulator() {
       });
       setResult(res);
       const count = res.allocations?.length ?? 0;
-      toast(`Payment processed — ${count} invoice${count !== 1 ? 's' : ''} updated`);
+      toast(t('paymentSimulator.processedInvoicesUpdated', { count }));
     } catch (e) {
       toast(e.message, 'error');
     } finally {
@@ -53,60 +55,60 @@ export default function PaymentSimulator() {
 
   return (
     <div>
-      <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>Simulate Payment Arrival</div>
+      <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{t('paymentSimulator.title')}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
-        Allocates a payment across the entity's open invoices using FIFO (earliest due date first).
+        {t('paymentSimulator.subtitle')}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
         {/* Entity type toggle */}
         <div style={{ gridColumn: '1 / -1' }}>
-          <Label>Entity Type</Label>
+          <Label>{t('paymentSimulator.entityType')}</Label>
           <div style={{ display: 'flex', gap: 0, background: 'var(--bg-secondary)', borderRadius: 8, padding: 3, width: 'fit-content' }}>
-            {['vendor', 'client'].map(t => (
-              <button key={t} onClick={() => setEntityType(t)} style={{
+            {['vendor', 'client'].map(entityTypeOption => (
+              <button key={entityTypeOption} onClick={() => setEntityType(entityTypeOption)} style={{
                 padding: '6px 18px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500, textTransform: 'capitalize',
-                background: entityType === t ? 'var(--bg-card)' : 'transparent',
-                color: entityType === t ? 'var(--text-primary)' : 'var(--text-muted)',
+                background: entityType === entityTypeOption ? 'var(--bg-card)' : 'transparent',
+                color: entityType === entityTypeOption ? 'var(--text-primary)' : 'var(--text-muted)',
                 transition: 'all 0.15s',
-              }}>{t === 'vendor' ? 'Vendor (AP)' : 'Client (AR)'}</button>
+              }}>{entityTypeOption === 'vendor' ? t('paymentSimulator.vendorAP') : t('paymentSimulator.clientAR')}</button>
             ))}
           </div>
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <Label>Entity</Label>
+          <Label>{t('paymentSimulator.entity')}</Label>
           <select className="input" value={entityId} onChange={e => setEntityId(e.target.value)} style={{ width: '100%' }}>
-            <option value="">Select {entityType}…</option>
+            <option value="">{t('paymentSimulator.selectEntity', { type: entityType === 'vendor' ? t('paymentSimulator.vendor') : t('paymentSimulator.client') })}</option>
             {entities.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
           </select>
         </div>
 
         <div>
-          <Label>Amount</Label>
+          <Label>{t('paymentSimulator.amount')}</Label>
           <input className="input" type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" style={{ width: '100%' }} />
         </div>
         <div>
-          <Label>Currency</Label>
+          <Label>{t('paymentSimulator.currency')}</Label>
           <select className="input" value={currency} onChange={e => setCurrency(e.target.value)} style={{ width: '100%' }}>
             {CURRENCIES.map(c => <option key={c}>{c}</option>)}
           </select>
         </div>
 
         <div>
-          <Label>Method</Label>
+          <Label>{t('paymentSimulator.method')}</Label>
           <select className="input" value={method} onChange={e => setMethod(e.target.value)} style={{ width: '100%' }}>
             {METHODS.map(m => <option key={m} value={m}>{m.replace(/_/g, ' ')}</option>)}
           </select>
         </div>
         <div>
-          <Label>Date</Label>
+          <Label>{t('paymentSimulator.date')}</Label>
           <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%' }} />
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <Label>Reference</Label>
-          <input className="input" value={reference} onChange={e => setReference(e.target.value)} placeholder="TXN-001, wire ref, check no." style={{ width: '100%' }} />
+          <Label>{t('paymentSimulator.reference')}</Label>
+          <input className="input" value={reference} onChange={e => setReference(e.target.value)} placeholder={t('paymentSimulator.referencePlaceholder')} style={{ width: '100%' }} />
         </div>
       </div>
 
@@ -115,14 +117,14 @@ export default function PaymentSimulator() {
         disabled={!entityId || !amount || parseFloat(amount) <= 0 || processing}
         onClick={() => setConfirm(true)}
         style={{ marginTop: 20, padding: '9px 20px' }}>
-        {processing ? 'Processing…' : 'Process Payment'}
+        {processing ? t('paymentSimulator.processing') : t('paymentSimulator.processPayment')}
       </button>
 
       {/* Result */}
       {result && (
         <div style={{ marginTop: 20, padding: '16px 18px', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 10 }}>
           <div style={{ fontWeight: 600, fontSize: 13, color: '#22C55E', marginBottom: 12 }}>
-            Payment Allocated — {result.allocations?.length ?? 0} invoice{result.allocations?.length !== 1 ? 's' : ''} updated
+            {t('paymentSimulator.paymentAllocated', { count: result.allocations?.length ?? 0 })}
           </div>
           {result.allocations?.map((a, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 0', borderBottom: '1px solid var(--border-subtle)', fontSize: 13 }}>
@@ -133,12 +135,12 @@ export default function PaymentSimulator() {
           ))}
           {result.overpayment > 0 && (
             <div style={{ marginTop: 10, fontSize: 12, color: '#F59E0B', padding: '6px 10px', background: '#F59E0B15', borderRadius: 6 }}>
-              Overpayment of {formatCurrency(result.overpayment, currency)} credited to {selectedEntity?.name || 'entity'}.
+              {t('paymentSimulator.overpaymentCredited', { amount: formatCurrency(result.overpayment, currency), entity: selectedEntity?.name || t('paymentSimulator.entityFallback') })}
             </div>
           )}
           {result.total_applied != null && (
             <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-muted)' }}>
-              Total applied: {formatCurrency(result.total_applied, currency)} of {formatCurrency(parseFloat(amount), currency)}
+              {t('paymentSimulator.totalApplied', { applied: formatCurrency(result.total_applied, currency), total: formatCurrency(parseFloat(amount), currency) })}
             </div>
           )}
         </div>
@@ -146,11 +148,11 @@ export default function PaymentSimulator() {
 
       <ConfirmDialog
         open={confirm}
-        title="Confirm Payment"
-        message={`Allocate ${formatCurrency(parseFloat(amount) || 0, currency)} across ${selectedEntity?.name || 'selected entity'}'s open invoices using FIFO (earliest first)? This cannot be undone.`}
+        title={t('paymentSimulator.confirmPaymentTitle')}
+        message={t('paymentSimulator.confirmPaymentMessage', { amount: formatCurrency(parseFloat(amount) || 0, currency), entity: selectedEntity?.name || t('paymentSimulator.selectedEntityFallback') })}
         onConfirm={process}
         onCancel={() => setConfirm(false)}
-        confirmLabel="Process Payment"
+        confirmLabel={t('paymentSimulator.processPayment')}
       />
     </div>
   );
