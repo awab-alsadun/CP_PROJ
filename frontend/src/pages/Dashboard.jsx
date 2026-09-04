@@ -153,7 +153,7 @@ export default function Dashboard() {
                 nameKey="name"
                 cx="50%" cy="50%"
                 outerRadius={70}
-                label={({ name, percent }) => `${name} ${Math.round(percent * 100)}%`}
+                label={({ name, percent }) => `${t('common.status.' + name, { defaultValue: name })} ${Math.round(percent * 100)}%`}
                 labelLine={false}
                 fontSize={11}
               >

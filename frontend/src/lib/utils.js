@@ -7,11 +7,15 @@ export function cn(...args) {
 
 export function formatCurrency(amount, currency = 'USD') {
   if (amount === null || amount === undefined) return '—'
-  return new Intl.NumberFormat('en-US', {
+  const formatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 2,
   }).format(amount)
+  // Wrap in Unicode directional isolate marks so the LTR currency string
+  // (symbol + digits) renders as one atomic unit inside RTL (Arabic) contexts,
+  // preventing the bidi algorithm from visually reordering the currency symbol.
+  return `⁦${formatted}⁩`
 }
 
 export function formatDate(dateStr) {
