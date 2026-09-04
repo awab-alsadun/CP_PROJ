@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, Component } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Save, LogOut, Upload, Trash2, Loader2, ChevronDown, Image as ImageIcon } from 'lucide-react'
 import { settingsApi, adminApi, documentsApi } from '../lib/api'
 
@@ -102,6 +103,7 @@ const LOGO_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 
 export default function Settings() {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
   const { toasts, add: toast } = useToast()
   const [tab, setTab] = useState(0)
 
@@ -295,6 +297,26 @@ export default function Settings() {
           <h2 className="text-sm font-semibold pb-3 border-b" style={{ color: 'var(--text-primary)', borderColor: 'var(--border)' }}>
             Company Profile
           </h2>
+          <div className="flex items-center justify-between pb-4 mb-1 border-b" style={{ borderColor: 'var(--border)' }}>
+            <div>
+              <p className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>Language</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Switch the interface language</p>
+            </div>
+            <div className="flex gap-1 p-1 rounded-xl border" style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
+              {[{ code: 'en', label: 'English' }, { code: 'ar', label: 'العربية' }].map(({ code, label }) => (
+                <button
+                  key={code}
+                  onClick={() => i18n.changeLanguage(code)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150"
+                  style={i18n.language === code
+                    ? { background: 'var(--bg-card)', color: 'var(--text-primary)', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }
+                    : { color: 'var(--text-muted)' }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Company Name">
               <input className="input h-9 text-sm" value={profile.name}
