@@ -344,5 +344,30 @@
     "validationFailed": "فشل التحقق — راجع الحقول أدناه",
     "requestRejected": "تم رفض الطلب",
     "createFailed": "فشل إنشاء الفاتورة"
+  },
+  "createVendor": {
+    "title": "إضافة مورد",
+    "subtitle": "إضافة مورد جديد للفواتير المستحقة الدفع",
+    "name": "الاسم",
+    "namePlaceholder": "شركة أكمي للتوريدات",
+    "taxId": "الرقم الضريبي",
+    "taxIdPlaceholder": "12-3456789",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "accounts@vendor.com",
+    "phone": "الهاتف",
+    "phonePlaceholder": "+1 555 000 0000",
+    "addressOptional": "العنوان (اختياري)",
+    "street": "الشارع",
+    "city": "المدينة",
+    "state": "المنطقة",
+    "postalCode": "الرمز البريدي",
+    "country": "الدولة",
+    "nameRequired": "الاسم مطلوب.",
+    "taxIdRequired": "الرقم الضريبي مطلوب.",
+    "taxIdExists": "يوجد مورد بهذا الرقم الضريبي بالفعل.",
+    "createFailed": "فشل إنشاء المورد.",
+    "createdRedirecting": "تم إنشاء المورد — جارٍ إعادة التوجيه…",
+    "creating": "جارٍ الإنشاء…",
+    "createButton": "إنشاء مورد"
   }
 }
