@@ -113,5 +113,17 @@
     "analytics": { "title": "Analytics", "subtitle": "Spending trends and financial metrics" },
     "chat": { "title": "Jarvis", "subtitle": "Hybrid SQL + RAG invoice assistant" },
     "settings": { "title": "Settings", "subtitle": "Company configuration and preferences" }
+  },
+  "topbar": {
+    "toggleTheme": "Toggle theme",
+    "notifications": "Notifications",
+    "openJarvis": "Open Jarvis",
+    "markAllRead": "Mark all read",
+    "unread": "{{count}} unread",
+    "noNotifications": "No notifications yet",
+    "justNow": "just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago"
   }
 }

@@ -113,5 +113,17 @@
     "analytics": { "title": "التحليلات", "subtitle": "اتجاهات الإنفاق والمقاييس المالية" },
     "chat": { "title": "جارفيس", "subtitle": "مساعد الفواتير الهجين (SQL + RAG)" },
     "settings": { "title": "الإعدادات", "subtitle": "إعدادات الشركة وتفضيلاتها" }
+  },
+  "topbar": {
+    "toggleTheme": "تبديل السمة",
+    "notifications": "الإشعارات",
+    "openJarvis": "فتح جارفيس",
+    "markAllRead": "تحديد الكل كمقروء",
+    "unread": "{{count}} غير مقروءة",
+    "noNotifications": "لا توجد إشعارات بعد",
+    "justNow": "الآن",
+    "minutesAgo": "قبل {{count}} د",
+    "hoursAgo": "قبل {{count}} س",
+    "daysAgo": "قبل {{count}} يوم"
   }
 }

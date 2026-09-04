@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   Sun, Moon, MessageSquare, Bell, X, CheckCheck,
   Upload, RefreshCw, CreditCard, AlertCircle, Info, ShieldAlert
@@ -68,6 +69,7 @@ export default function Topbar({ title, subtitle }) {
   const { theme, toggle } = useTheme()
   const { setIsOpen } = useChat()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   const [open,        setOpen]        = useState(false)
   const [notifs,      setNotifs]      = useState([])
@@ -142,7 +144,7 @@ export default function Topbar({ title, subtitle }) {
       </div>
 
       <div className="flex items-center gap-1">
-        <button onClick={toggle} className="btn-ghost p-2 rounded-xl" aria-label="Toggle theme">
+        <button onClick={toggle} className="btn-ghost p-2 rounded-xl" aria-label={t('topbar.toggleTheme')}>
           {theme === 'dark' ? <Sun size={16} strokeWidth={1.8} /> : <Moon size={16} strokeWidth={1.8} />}
         </button>
 
@@ -151,11 +153,11 @@ export default function Topbar({ title, subtitle }) {
             ref={bellRef}
             onClick={() => setOpen(v => !v)}
             className="btn-ghost p-2 rounded-xl relative"
-            aria-label="Notifications"
+            aria-label={t('topbar.notifications')}
           >
             <Bell size={16} strokeWidth={1.8} />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 min-w-[16px] h-4 rounded-full text-[10px] font-semibold flex items-center justify-center px-0.5"
+              <span className="absolute top-1 end-1 min-w-[16px] h-4 rounded-full text-[10px] font-semibold flex items-center justify-center px-0.5"
                 style={{ background: '#EF4444', color: '#fff' }}>
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
@@ -165,7 +167,7 @@ export default function Topbar({ title, subtitle }) {
           {open && (
             <div
               ref={panelRef}
-              className="absolute right-0 top-full mt-2 z-50 rounded-2xl border overflow-hidden"
+              className="absolute end-0 top-full mt-2 z-50 rounded-2xl border overflow-hidden"
               style={{
                 width: 360,
                 background: 'var(--bg-card)',
@@ -176,11 +178,11 @@ export default function Topbar({ title, subtitle }) {
               <div className="flex items-center justify-between px-4 py-3 border-b"
                 style={{ borderColor: 'var(--border)' }}>
                 <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Notifications
+                  {t('topbar.notifications')}
                   {unreadCount > 0 && (
-                    <span className="ml-2 text-xs font-normal px-1.5 py-0.5 rounded-full"
+                    <span className="me-2 text-xs font-normal px-1.5 py-0.5 rounded-full"
                       style={{ background: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>
-                      {unreadCount} unread
+                      {t('topbar.unread', { count: unreadCount })}
                     </span>
                   )}
                 </p>
@@ -191,7 +193,7 @@ export default function Topbar({ title, subtitle }) {
                       disabled={loadingN}
                       className="btn-ghost text-xs h-7 px-2 disabled:opacity-50"
                     >
-                      <CheckCheck size={12} /> Mark all read
+                      <CheckCheck size={12} /> {t('topbar.markAllRead')}
                     </button>
                   )}
                   <button onClick={() => setOpen(false)} className="btn-ghost p-1.5 rounded-lg">
@@ -204,7 +206,7 @@ export default function Topbar({ title, subtitle }) {
                 {notifs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 gap-2">
                     <Bell size={20} style={{ color: 'var(--text-muted)' }} strokeWidth={1.5} />
-                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No notifications yet</p>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{t('topbar.noNotifications')}</p>
                   </div>
                 ) : (
                   notifs.map(n => (
@@ -223,11 +225,11 @@ export default function Topbar({ title, subtitle }) {
 
         <button
           onClick={() => setIsOpen(true)}
-          className="btn-primary ml-2 h-8 text-xs"
-          aria-label="Open AI Chat"
+          className="btn-primary ms-2 h-8 text-xs"
+          aria-label={t('topbar.openJarvis')}
         >
           <MessageSquare size={14} strokeWidth={2} />
-          Ask AI
+          {t('common.askJarvis')}
         </button>
       </div>
     </header>

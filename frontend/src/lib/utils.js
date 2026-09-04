@@ -31,10 +31,10 @@ export function formatRelative(dateStr) {
   const d = new Date(dateStr)
   const now = new Date()
   const diff = Math.floor((now - d) / 1000)
-  if (diff < 60) return 'just now'
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`
+  if (diff < 60) return i18n.t('topbar.justNow')
+  if (diff < 3600) return i18n.t('topbar.minutesAgo', { count: Math.floor(diff / 60) })
+  if (diff < 86400) return i18n.t('topbar.hoursAgo', { count: Math.floor(diff / 3600) })
+  if (diff < 2592000) return i18n.t('topbar.daysAgo', { count: Math.floor(diff / 86400) })
   return formatDate(dateStr)
 }
 
