@@ -20,6 +20,8 @@ const TYPE_CONFIG = {
 }
 
 function NotificationItem({ n, onRead, navigate }) {
+  const { i18n } = useTranslation()
+  const dir = i18n.language === 'ar' ? 'rtl' : 'ltr'
   const cfg = TYPE_CONFIG[n.type] || TYPE_CONFIG.system
   const Icon = cfg.icon
 
@@ -37,7 +39,7 @@ function NotificationItem({ n, onRead, navigate }) {
       className="flex gap-3 px-4 py-3 cursor-pointer transition-colors"
       style={{
         background: n.is_read ? 'transparent' : 'var(--accent-light)',
-        borderLeft: n.is_read ? '3px solid transparent' : `3px solid ${cfg.color}`,
+        [dir === 'rtl' ? 'borderRight' : 'borderLeft']: n.is_read ? '3px solid transparent' : `3px solid ${cfg.color}`,
       }}
       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-secondary)'}
       onMouseLeave={e => e.currentTarget.style.background = n.is_read ? 'transparent' : 'var(--accent-light)'}

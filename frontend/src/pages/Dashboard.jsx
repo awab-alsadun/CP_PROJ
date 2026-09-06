@@ -14,7 +14,7 @@ const PIE_COLORS = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [dash,    setDash]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
@@ -196,7 +196,7 @@ export default function Dashboard() {
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 {[t('common.table.type'), t('common.table.invoiceNumber'), t('common.table.entity'), t('common.table.amount'), t('common.table.status'), t('common.table.date')].map(h => (
                   <th key={h} style={{
-                    padding: '9px 16px', textAlign: 'left', fontSize: 11,
+                    padding: '9px 16px', textAlign: i18n.language === 'ar' ? 'right' : 'left', fontSize: 11,
                     fontWeight: 600, textTransform: 'uppercase',
                     letterSpacing: '0.06em', color: 'var(--text-muted)',
                   }}>{h}</th>

@@ -112,7 +112,7 @@ export default function Invoices() {
                         { labelKey: 'invoicesLegacy.confidence', field: 'confidence_score' },
                       ].map(({ labelKey, field }) => (
                         <th key={labelKey}
-                          className={`text-left px-5 py-3 text-xs font-medium uppercase tracking-wide ${field ? 'cursor-pointer select-none' : ''}`}
+                          className={`text-start px-5 py-3 text-xs font-medium uppercase tracking-wide ${field ? 'cursor-pointer select-none' : ''}`}
                           style={{ color: 'var(--text-muted)' }}
                           onClick={() => field && toggleSort(field)}>
                           <span className="flex items-center gap-1">

@@ -11,6 +11,9 @@
 [dir="rtl"] .font-mono {
   font-family: 'Cairo', sans-serif;
 }
+[dir="rtl"] .input {
+  unicode-bidi: plaintext;
+}
 
 @layer base {
   :root {
